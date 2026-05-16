@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PediatriPLUS Genetik — WES Yeniden Analiz Hizmeti</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #FAF8F4;
+    --surface:      #FFFFFF;
+    --surface-2:    #F2EFE9;
+    --ink:          #1C1B17;
+    --ink-2:        #4A4843;
+    --ink-3:        #8B8983;
+    --line:         #E5E1D8;
+    --accent:       #2D5F4E;
+    --accent-bg:    #E3EFE8;
+    --warn:         #B45309;
+    --warn-bg:      #FBEFD9;
+    --danger:       #991B1B;
+    --danger-bg:    #FBE5E5;
+    --success:      #2D5F4E;
+    --success-bg:   #E3EFE8;
+    --info:         #1E40AF;
+    --info-bg:      #E1E8F5;
+    --shadow-sm:    0 1px 2px rgba(28, 27, 23, 0.04);
+    --shadow:       0 2px 6px rgba(28, 27, 23, 0.06);
+    --radius:       6px;
+    --radius-lg:    10px;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body:    'Inter Tight', system-ui, sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.5; }
+  body { min-height: 100vh; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0; min-height: 100vh; background: var(--bg); }
+
+  h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.01em; margin: 0; }
+  h2 { font-size: 28px; line-height: 1.15; }
+  h3 { font-size: 20px; line-height: 1.2; }
+  h4 { font-size: 15px; font-weight: 600; font-family: var(--font-body); letter-spacing: 0.02em; text-transform: uppercase; color: var(--ink-2); }
+
+  code { font-family: var(--font-mono); font-size: 0.85em; background: var(--surface-2); padding: 1px 6px; border-radius: 4px; }
+
+  button {
+    font-family: var(--font-body); font-size: 13px; padding: 7px 14px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  button:hover:not(:disabled) { border-color: var(--ink-3); background: var(--surface-2); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  button.primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+  button.accent { background: var(--accent); color: white; border-color: var(--accent); }
+  button.danger { background: var(--surface); color: var(--danger); border-color: var(--danger); }
+  button.danger:hover:not(:disabled) { background: var(--danger-bg); }
+  button.warn { background: var(--surface); color: var(--warn); border-color: var(--warn); }
+  button.warn:hover:not(:disabled) { background: var(--warn-bg); }
+  button.success { background: var(--success); color: white; border-color: var(--success); }
+  button.ghost { background: transparent; border-color: transparent; color: var(--ink-2); padding: 4px 8px; }
+  button.ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+  button.icon-btn { padding: 6px 8px; min-width: 0; }
+
+  input, textarea, select {
+    font-family: var(--font-body); font-size: 14px;
+    border: 1px solid var(--line); padding: 8px 10px;
+    background: var(--surface); color: var(--ink);
+    border-radius: var(--radius); width: 100%; transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--ink); }
+  textarea { resize: vertical; font-family: var(--font-body); line-height: 1.5; }
+  input[type="checkbox"] { width: auto; }
+  label { font-size: 12px; font-weight: 500; color: var(--ink-2); margin-bottom: 6px; display: block; letter-spacing: 0.01em; }
+
+  .pill {
+    display: inline-flex; align-items: center; padding: 3px 10px; gap: 5px;
+    border-radius: 100px; font-size: 11px; font-weight: 500; letter-spacing: 0.02em;
+  }
+  .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .pill.payment_pending { background: var(--surface-2); color: var(--ink-3); }
+  .pill.paid          { background: var(--info-bg);    color: var(--info); }
+  .pill.in_review     { background: var(--warn-bg);    color: var(--warn); }
+  .pill.awaiting_info { background: var(--warn-bg);    color: var(--warn); }
+  .pill.completed     { background: var(--success-bg); color: var(--success); }
+  .pill.cancelled     { background: var(--danger-bg);  color: var(--danger); }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 1px solid var(--line);
+    background: var(--surface); position: sticky; top: 0; z-index: 10;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 36px; height: 36px; border-radius: 8px; background: var(--ink); color: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 19px; font-weight: 500; letter-spacing: -0.02em;
+  }
+  .brand-text { line-height: 1.1; }
+  .brand-name { font-family: var(--font-display); font-size: 19px; font-weight: 500; letter-spacing: -0.02em; }
+  .brand-tag { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+  .nav-actions { display: flex; gap: 8px; align-items: center; }
+
+  .content { padding: 32px; }
+  .content-narrow { max-width: 800px; margin: 0 auto; }
+
+  .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
+  .page-title-block { flex: 1; }
+  .page-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .metric {
+    background: var(--surface); border: 1px solid var(--line); padding: 18px 20px; border-radius: var(--radius-lg);
+  }
+  .metric.warn { background: var(--warn-bg); border-color: var(--warn-bg); }
+  .metric.warn .metric-label { color: var(--warn); }
+  .metric.warn .metric-value { color: var(--warn); }
+  .metric-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; font-weight: 500; }
+  .metric-value { font-family: var(--font-display); font-size: 36px; font-weight: 400; line-height: 1; letter-spacing: -0.02em; color: var(--ink); }
+  .metric-unit { font-size: 14px; color: var(--ink-3); margin-left: 4px; font-family: var(--font-body); }
+
+  .filter-row { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .filter-chip {
+    padding: 6px 14px; border: 1px solid var(--line); background: var(--surface);
+    border-radius: 100px; font-size: 12px; cursor: pointer; color: var(--ink-2);
+    transition: all 0.15s; display: inline-flex; gap: 6px; align-items: center;
+  }
+  .filter-chip:hover { border-color: var(--ink-3); }
+  .filter-chip.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .filter-chip .count { opacity: 0.6; font-family: var(--font-mono); font-size: 11px; }
+  .filter-chip.active .count { opacity: 0.8; }
+
+  .case-list { display: flex; flex-direction: column; gap: 8px; }
+  .case-row {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .case-row:hover { border-color: var(--ink-3); box-shadow: var(--shadow); }
+  .case-row.warn { border-left: 3px solid var(--warn); padding-left: 17px; }
+  .case-meta { display: flex; gap: 10px; align-items: center; font-size: 11px; color: var(--ink-3); margin-top: 6px; flex-wrap: wrap; }
+  .case-meta-item { display: flex; gap: 4px; align-items: center; }
+  .case-title { font-family: var(--font-display); font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
+  .case-title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .empty-state {
+    text-align: center; padding: 64px 32px; background: var(--surface);
+    border: 1px dashed var(--line); border-radius: var(--radius-lg);
+  }
+  .empty-state-icon { font-family: var(--font-display); font-size: 48px; color: var(--line); line-height: 1; margin-bottom: 12px; }
+  .empty-state-text { color: var(--ink-3); font-size: 14px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 14px;
+  }
+  .card-header {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--line);
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); font-weight: 600;
+  }
+  .card-header::before {
+    content: ""; width: 14px; height: 1px; background: var(--ink-3);
+  }
+
+  .field { margin-bottom: 16px; }
+  .field-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .detail-row { display: flex; padding: 10px 0; border-bottom: 1px solid var(--line); gap: 16px; font-size: 13px; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row.multi { display: block; }
+  .detail-label { min-width: 180px; color: var(--ink-3); font-size: 12px; font-weight: 500; }
+  .detail-value { flex: 1; white-space: pre-wrap; color: var(--ink); }
+  .detail-row.multi .detail-value { margin-top: 4px; }
+
+  .action-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .action-bar-full { width: 100%; }
+  .action-bar-full button { flex: 1; min-width: 0; justify-content: center; padding: 10px; font-weight: 500; }
+
+  .case-detail-header {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    padding: 24px 26px; margin-bottom: 14px;
+  }
+  .case-detail-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; gap: 16px; }
+  .case-detail-title { font-family: var(--font-display); font-size: 24px; font-weight: 500; letter-spacing: -0.015em; line-height: 1.2; }
+  .case-detail-meta { display: flex; gap: 12px; margin-top: 6px; font-size: 12px; color: var(--ink-3); flex-wrap: wrap; align-items: center; }
+  .case-detail-meta-sep { color: var(--line); }
+
+  .nav-arrows { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-3); }
+  .nav-arrows .nav-counter { font-family: var(--font-mono); padding: 0 8px; }
+
+  .notice {
+    background: var(--warn-bg); color: var(--warn);
+    padding: 10px 14px; border-radius: var(--radius); font-size: 12px;
+    margin-bottom: 10px; border-left: 3px solid var(--warn);
+  }
+  .notice-success { background: var(--success-bg); color: var(--success); border-left-color: var(--success); }
+  .notice-danger { background: var(--danger-bg); color: var(--danger); border-left-color: var(--danger); }
+
+  .file-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    background: var(--surface-2); border-radius: var(--radius); font-size: 13px; margin-bottom: 6px;
+  }
+  .file-row .file-name { font-family: var(--font-mono); font-size: 12px; flex: 1; }
+  .file-row .file-meta { font-size: 11px; color: var(--ink-3); padding: 2px 8px; background: var(--surface); border-radius: 4px; }
+
+  .file-picker {
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+    border: 1px dashed var(--line); border-radius: var(--radius); cursor: pointer;
+    background: var(--surface-2); transition: all 0.15s;
+  }
+  .file-picker:hover { border-color: var(--ink-3); }
+  .file-picker.has-file { background: var(--success-bg); border-color: transparent; border-style: solid; }
+  .file-picker-icon { font-family: var(--font-display); font-size: 22px; color: var(--ink-3); }
+  .file-picker.has-file .file-picker-icon { color: var(--success); }
+  .file-picker-main { flex: 1; }
+  .file-picker-title { font-size: 13px; font-weight: 500; }
+  .file-picker.has-file .file-picker-title { color: var(--success); }
+  .file-picker-hint { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+  .file-picker.has-file .file-picker-hint { color: var(--success); }
+
+  .notes-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .note {
+    padding: 12px 14px; background: var(--surface-2);
+    border-radius: var(--radius); border-left: 2px solid var(--accent);
+  }
+  .note-body { font-size: 13px; line-height: 1.55; white-space: pre-wrap; color: var(--ink); }
+  .note-foot { font-size: 11px; color: var(--ink-3); margin-top: 6px; font-family: var(--font-mono); }
+  .notes-add { display: flex; gap: 8px; align-items: flex-start; }
+  .notes-add textarea { flex: 1; min-height: 60px; }
+
+  .timeline { position: relative; padding-left: 26px; }
+  .timeline::before {
+    content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px;
+    width: 1px; background: var(--line);
+  }
+  .timeline-event { position: relative; padding-bottom: 18px; }
+  .timeline-event:last-child { padding-bottom: 0; }
+  .timeline-dot {
+    position: absolute; left: -23px; top: 2px; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--surface); border: 2px solid var(--ink-3);
+  }
+  .timeline-dot.info { border-color: var(--info); background: var(--info-bg); }
+  .timeline-dot.warn { border-color: var(--warn); background: var(--warn-bg); }
+  .timeline-dot.success { border-color: var(--success); background: var(--success-bg); }
+  .timeline-dot.danger { border-color: var(--danger); background: var(--danger-bg); }
+  .timeline-title { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .timeline-detail { font-size: 12px; color: var(--ink-2); margin-top: 3px; font-style: italic; }
+  .timeline-meta { font-size: 11px; color: var(--ink-3); margin-top: 4px; font-family: var(--font-mono); }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(28, 27, 23, 0.5);
+    display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+    animation: fadeIn 0.15s;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--surface); border-radius: var(--radius-lg); padding: 26px 28px;
+    max-width: 520px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .modal-title { font-family: var(--font-display); font-size: 20px; font-weight: 500; letter-spacing: -0.01em; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  .stepper { display: flex; align-items: center; gap: 6px; margin-bottom: 24px; }
+  .step-item { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+  .step-bullet {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--surface-2);
+    color: var(--ink-3); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500; flex-shrink: 0; border: 1px solid var(--line);
+    font-family: var(--font-mono);
+  }
+  .step-bullet.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .step-bullet.done { background: var(--success); color: white; border-color: var(--success); }
+  .step-label { font-size: 12px; color: var(--ink-3); }
+  .step-label.active { color: var(--ink); font-weight: 500; }
+  .step-divider { flex: 1; height: 1px; background: var(--line); min-width: 12px; }
+
+  .price-table { background: var(--surface-2); padding: 16px 20px; border-radius: var(--radius); margin-bottom: 18px; }
+  .price-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+  .price-row.total {
+    font-size: 16px; font-weight: 500; padding: 10px 0 0; margin-top: 8px;
+    border-top: 1px solid var(--line); font-family: var(--font-display);
+  }
+
+  .success-circle {
+    width: 64px; height: 64px; border-radius: 50%; background: var(--success-bg);
+    color: var(--success); display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 32px; margin-bottom: 18px;
+  }
+  .confirm-screen { text-align: center; padding: 24px; }
+
+  .badge-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; padding: 2px 8px; border-radius: 100px;
+    background: var(--info-bg); color: var(--info); font-weight: 500;
+  }
+  .badge-tag.notes { background: var(--surface-2); color: var(--ink-3); }
+  .badge-tag.warn { background: var(--warn-bg); color: var(--warn); }
+
+  hr { border: none; border-top: 1px solid var(--line); margin: 14px 0; }
+
+  @media (max-width: 720px) {
+    .content { padding: 20px 16px; }
+    .topbar { padding: 14px 16px; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .field-grid-2 { grid-template-columns: 1fr; }
+    .case-detail-meta { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useCallback } = React;
+
+const STRINGS = {
+  tr: {
+    appName: "PediatriPLUS Genetik", appTagline: "WES Yeniden Analiz Hizmeti",
+    rolePatient: "Hasta görünümü", roleAdmin: "Yönetici görünümü", lang: "EN",
+    myDashboard: "Taleplerim", patientEyebrow: "Hasta paneli",
+    adminEyebrow: "Yönetici paneli",
+    newRequest: "Yeni talep oluştur", noRequests: "Henüz talebiniz yok",
+    noResults: "Bu filtreyle eşleşen vaka yok",
+    statusPaid: "Ödeme alındı", statusInReview: "İncelemede",
+    statusAwaitingInfo: "Bilgi bekleniyor", statusCompleted: "Tamamlandı", statusCancelled: "İptal",
+    downloadReport: "Raporu indir", viewDetails: "Detay",
+    next: "Devam et", back: "Geri", payNow: "Ödemeyi tamamla",
+    backToDashboard: "Taleplerime dön", backToQueue: "Kuyruğa dön",
+    consentTitle: "KVKK & GDPR onamı",
+    consentBody: "Yüklediğiniz genetik veri (VCF) ve klinik bilgiler, KVKK 6. madde ve GDPR 9. madde kapsamında özel nitelikli kişisel veri kategorisindedir. Veriler şifrelenmiş olarak saklanır, sadece yetkili klinik uzman tarafından reanaliz amacıyla işlenir.",
+    consent1: "Genetik verilerimin işlenmesine açık rıza veriyorum",
+    consent2: "Aydınlatma metnini okudum, anladım",
+    consent3: "Anonimleştirilmiş verilerin araştırmada kullanımını kabul ediyorum",
+    fullName: "Ad soyad", birthDate: "Doğum tarihi", sex: "Cinsiyet",
+    sexM: "Erkek", sexF: "Kadın", sexO: "Diğer", email: "E-posta", phone: "Telefon",
+    consanguinity: "Akraba evliliği", yes: "Evet", no: "Hayır", unknown: "Bilinmiyor",
+    familyHistory: "Aile öyküsü", clinicalFindings: "Klinik bulgular",
+    clinicalPlaceholder: "HPO terimleri, dismorfik bulgular, gelişimsel durum, nöbet öyküsü...",
+    previousTests: "Önceki testler ve sonuçları",
+    previousTestsPlaceholder: "Yıl — test türü — laboratuvar — sonuç",
+    vcfFile: "VCF dosyası", vcfHint: "Maks 2 GB · şifreli yükleme",
+    vcfReference: "Referans genom",
+    paymentTitle: "Ödeme bilgileri", serviceFee: "WES reanaliz hizmet bedeli",
+    vat: "KDV (%20)", total: "Toplam",
+    cardNumber: "Kart numarası", cardName: "Kart sahibi", expiry: "Son kullanma (AA/YY)", cvv: "CVV",
+    iyzicoNote: "Iyzico üzerinden güvenli ödeme · 3D Secure",
+    confirmTitle: "Talebiniz alındı",
+    confirmBody: "Reanaliz talebiniz yönetici kuyruğuna düştü. Rapor hazırlandığında e-posta ile bildirim alacaksınız. Tahmini süre: 7-14 gün.",
+    step1: "Onam", step2: "Bilgiler", step3: "Dosyalar", step4: "Ödeme", step5: "Onay",
+    adminQueue: "İş kuyruğu", adminSubtitle: "Bekleyen ve aktif vakalar",
+    pending: "Bekleyen", inProgress: "İncelemede",
+    awaitingInfo: "Bilgi bekleniyor", completedFilter: "Tamamlandı",
+    patientInfo: "Hasta bilgileri", clinicalInfo: "Klinik bilgiler", files: "Dosyalar",
+    age: "yaş", selectFile: "Dosya seçin", secureUpload: "Şifreli yüklendi",
+    emailSent: "Rapor e-posta ile gönderildi",
+    actAssign: "Vakayı bana ata", actReassign: "Başka uzmana ata",
+    actHold: "Hastadan bilgi iste", actResume: "İncelemeyi sürdür", actCancel: "Vakayı iptal et",
+    actComplete: "Rapor yükle ve gönder",
+    notes: "Dahili notlar", notesEmpty: "Henüz not eklenmedi",
+    notesAdd: "Bu vaka için bir not yazın...", notesAddBtn: "Not ekle",
+    timeline: "Vaka zaman çizelgesi",
+    timelinePaid: "Ödeme alındı, kuyruğa düştü",
+    timelineAssigned: "Vakayı aldı",
+    timelineNote: "Dahili not eklendi",
+    timelineHold: "Hastadan ek bilgi istendi",
+    timelineResume: "İnceleme yeniden başladı",
+    timelineReportUploaded: "Rapor yüklendi",
+    timelineDelivered: "Rapor hastaya iletildi",
+    timelineReassigned: "Başka uzmana atandı",
+    timelineCancelled: "İptal edildi",
+    requestInfo: "Hastadan ek bilgi talebi",
+    requestInfoMsg: "Hastaya iletilecek mesaj",
+    requestInfoExample: "Örn: VCF dosyanız bozuk görünüyor, lütfen yeniden yükleyin. Ayrıca pedigree dosyası eksik...",
+    send: "Gönder", cancelBtn: "Vazgeç",
+    reportUpload: "Rapor yükleme ve teslim", reportSummary: "Hastaya gidecek özet",
+    reportSummaryPlaceholder: "Örn: ZBTB20 geninde de novo missense varyant saptandı (NM_001164342.2:c.1924C>T, p.Arg642Cys). Primrose sendromu ile uyumlu...",
+    finalReport: "Final rapor (PDF)", markComplete: "Tamamla ve gönder",
+    reassignTo: "Atanacak uzman", reassignReason: "Atama nedeni",
+    reasonExample: "Pediatrik dismorfoloji uzmanlığı gerekli",
+    cancelReason: "İptal nedeni",
+    confirmCancel: "Bu vakayı iptal etmek istediğinize emin misiniz? Iyzico üzerinden iade işlemi başlatılacak.",
+    confirm: "Evet, iptal et ve iade başlat", keepIt: "Vazgeç",
+    hoursWaiting: "saat bekliyor", daysWaiting: "gün bekliyor", sla48: "48 saati aştı",
+    mPending: "Bekleyen", mAvg: "Ort. süre", mSla: "SLA risk", mToday: "Bugün biten",
+    days: "gün", hrs: "saat", none: "—",
+    you: "Siz", drAtik: "Dr. Atik", drYilmaz: "Dr. Yılmaz",
+    awaitingMessage: "İstenen bilgi",
+    requiredField: "*",
+    pageOf: "/",
+    pickOption: "Seçin",
+    waitingFor: "Bekleme süresi",
+    // Ödeme / iade
+    payment: "Ödeme",
+    paymentDetails: "Ödeme detayları",
+    paidAmount: "Ödenen tutar",
+    txnId: "İşlem no",
+    paymentDate: "Ödeme tarihi",
+    netPaid: "Net tahsil edilen",
+    netRefunded: "İade edilen",
+    netCharged: "Ek tahsilat",
+    actRefund: "İade uygula",
+    actExtraCharge: "Ek ücret talep et",
+    refundTitle: "İade işlemi",
+    refundType: "İade türü",
+    refundFull: "Tam iade",
+    refundPartial: "Kısmi iade",
+    refundAmount: "İade tutarı (₺)",
+    refundReason: "İade nedeni",
+    refundReasonExample: "Örn: Klinikle uyumlu varyant saptanamadı, hizmet tam karşılanmadı (%30 iade).",
+    refundApply: "İade işlemini başlat",
+    extraChargeTitle: "Ek ücret talep et",
+    extraChargeAmount: "Ek ücret tutarı (₺)",
+    extraChargeReason: "Gerekçe",
+    extraChargeExample: "Örn: Trio (anne-baba-proband) analizi gerekti, ek 3000 ₺.",
+    extraChargeApply: "Talep gönder",
+    paymentHistory: "Ödeme geçmişi",
+    paymentTypeInitial: "İlk ödeme",
+    paymentTypeRefund: "İade",
+    paymentTypeExtra: "Ek ücret",
+    timelineRefund: "İade uygulandı",
+    timelineExtra: "Ek ücret tahsil edildi",
+    refundConfirm: "İade Iyzico üzerinden başlatılacak. Onaylıyor musunuz?",
+    refundConfirmYes: "Evet, iade başlat",
+    refundOnCancel: "Vakayı iptal et + tam iade",
+    refundAmountInvalid: "Geçerli bir tutar girin",
+    // Sistem ayarları
+    settings: "Ayarlar",
+    settingsTitle: "Sistem ayarları",
+    settingsSubtitle: "Fiyatlandırma ve genel ayarlar",
+    pricingSection: "Fiyatlandırma",
+    standardFee: "Standart hizmet ücreti (₺)",
+    vatRate: "KDV oranı (%)",
+    trioFee: "Trio analizi ek ücreti (₺)",
+    urgentFee: "Acil işlem ek ücreti (₺)",
+    promoSection: "Promosyon kodları",
+    promoCode: "Kod",
+    promoDiscount: "İndirim (%)",
+    promoActive: "Aktif",
+    addPromo: "Yeni promosyon ekle",
+    saveSettings: "Ayarları kaydet",
+    settingsSaved: "Ayarlar kaydedildi",
+    promoApplied: "Promosyon uygulandı",
+    // Landing / public
+    heroEyebrow: "PediatriPLUS Genetik Hizmeti",
+    heroTitle: "WES verinizi yeniden analiz ettirin",
+    heroLead: "Ege Üniversitesi Tıp Fakültesi Teknopark'ta kurulan PediatriPLUS, 20 yılı aşkın klinik genetik tecrübesi ile daha önce sonuçsuz kalmış whole exome sequencing (WES) verilerinizi güncel literatür, yeni keşfedilen genler ve gelişmiş varyant değerlendirme yöntemleri ışığında yeniden inceler.",
+    heroPrimary: "Yeni talep oluştur",
+    heroSecondary: "Mevcut talebimi takip et",
+    benefitTitle: "Reanaliz neden önemli?",
+    benefit1Title: "Yeni gen keşifleri",
+    benefit1Body: "Her yıl ortalama 250+ yeni hastalık geni tanımlanıyor. Önceki analiz tarihinden bu yana keşfedilen genler vakanızı çözebilir.",
+    benefit2Title: "Güncel veri tabanları",
+    benefit2Body: "ClinVar, gnomAD, HGMD ve OMIM güncellemeleri sayesinde önceden 'önemi bilinmeyen' varyantlar artık patojenik olarak yeniden sınıflandırılabilir.",
+    benefit3Title: "Tanı oranı artışı",
+    benefit3Body: "Negatif WES vakalarının %10-15'i reanaliz ile tanı alır. Hastanızın klinik yönetimi için kritik fark yaratabilir.",
+    processTitle: "Süreç nasıl işler?",
+    process1Title: "Verilerinizi yükleyin",
+    process1Body: "VCF dosyanız ve klinik bilgilerinizi şifreli yükleme ile iletin",
+    process2Title: "Ödemeyi tamamlayın",
+    process2Body: "Iyzico üzerinden güvenli ödeme · 3D Secure",
+    process3Title: "Uzman incelemesi",
+    process3Body: "Klinik genetik uzmanı vakanızı detaylı inceler (7-14 iş günü)",
+    process4Title: "Raporunuzu alın",
+    process4Body: "Detaylı reanaliz raporu e-posta ile iletilir",
+    pricingTitle: "Şeffaf fiyatlandırma",
+    pricingDetail: "WES reanaliz hizmet bedeli",
+    pricingNote: "KDV dahil. Trio analizi veya acil işlem gerekirse ek ücret talep edilebilir.",
+    trustTitle: "Veri güvenliği ve gizlilik",
+    trust1: "🔒 KVKK ve GDPR uyumlu altyapı",
+    trust2: "🔐 AES-256 ile şifreli depolama",
+    trust3: "👤 Sadece yetkili klinik uzmanlar erişebilir",
+    trust4: "🇪🇺 EU bölgesi veri merkezi (Frankfurt)",
+    footerNote: "PediatriPLUS ArGe ve Danışmanlık Sanayi Ltd. Şti. · Ege Üniversitesi Tıp Fakültesi Teknopark",
+    // Track existing
+    trackTitle: "Mevcut talebimi takip et",
+    trackBody: "Talep oluştururken size verilen vaka numarasını ve e-postanızı girin.",
+    trackCaseId: "Vaka numarası",
+    trackCaseIdPlaceholder: "CASE-2026-XXXXX",
+    trackEmail: "Kayıtlı e-posta",
+    trackBtn: "Vakamı görüntüle",
+    trackError: "Bu bilgilere ait vaka bulunamadı. Vaka numaranızı ve e-postanızı kontrol edin.",
+    trackBack: "← Ana sayfaya dön",
+    // After submission
+    caseSubmittedTitle: "Talebiniz alındı",
+    caseSubmittedBody: "Vakanız yönetici kuyruğuna düştü. Rapor hazırlandığında e-posta ile bildirim alacaksınız.",
+    yourCaseId: "Vaka numaranız",
+    saveCaseId: "Bu numarayı saklayın — vakanızın durumunu takip etmek için kullanacaksınız.",
+    goToCase: "Vakamı görüntüle",
+    backToHome: "Ana sayfaya dön",
+    // Reset session
+    logout: "Çıkış",
+    // Admin login
+    adminLoginTitle: "Yönetici girişi",
+    adminLoginBody: "Bu alan sadece yetkili PediatriPLUS personeline açıktır.",
+    adminUsername: "Kullanıcı adı",
+    adminPassword: "Şifre",
+    adminLoginBtn: "Giriş yap",
+    adminLoginError: "Kullanıcı adı veya şifre hatalı.",
+    adminLogout: "Yönetici oturumunu kapat",
+    backToHomeBtn: "← Ana sayfaya dön",
+    // Iyzico ödeme akışı
+    paymentRedirectTitle: "Ödeme bilgileri",
+    paymentRedirectIntro: "Aşağıdaki bilgileri kontrol ettikten sonra güvenli ödeme sayfasına yönlendirileceksiniz.",
+    paymentSecureNote: "Ödemeniz Iyzico altyapısı üzerinden, PediatriPLUS resmi sanal POS sayfasında alınacaktır. Kart bilgileriniz bu uygulamaya kaydedilmez.",
+    proceedToPayment: "Ödeme sayfasına geç",
+    paymentPendingTitle: "Ödeme bekleniyor",
+    paymentPendingBody: "Talebiniz oluşturuldu. Açılan yeni sekmede Iyzico ödeme sayfasında işleminizi tamamlayın. Genetik veri dosyanızı (VCF, PDF rapor vb.) vaka numaranızı konu satırına yazarak tahiratik@yahoo.com adresine gönderin.",
+    paymentReturn: "Ödememi yaptım, geri dön",
+    paymentSucceededTitle: "Ödemeniz alındı",
+    paymentSucceededBody: "Reanaliz talebiniz yönetici kuyruğuna düştü. Rapor hazırlandığında e-posta ile bildirim alacaksınız.",
+    paymentPendingStatus: "Ödeme bekleniyor",
+    caseNumberLabel: "Vaka numarası",
+    amountLabel: "Tutar",
+    serviceLabel: "Hizmet",
+    actConfirmPayment: "Ödemeyi manuel onayla",
+    paymentPendingAdminNote: "Hasta Iyzico üzerinden ödeme yapacak. Iyzico bildiriminde ödemeyi gördükten sonra manuel onaylayın.",
+    caseCreated: "Vaka oluşturuldu, ödeme bekleniyor",
+    // Hizmet türleri (3 seçenek)
+    servicesTitle: "Genetik Testinize İkincil Görüş",
+    servicesSubtitle: "Alanında uzman klinik genetik kadromuz, sunduğumuz üç farklı hizmet ile genetik veri ve raporlarınızı değerlendirir.",
+    svc1Title: "Tüm Ekzom Sekanslama Reanalizi",
+    svc1Desc: "Herhangi bir sebeple yaptırdığınız tüm ekzom sekanslama (WES) sonucunuz normal ya da bulgularınızla ilişkisiz bir bulgu gösterdiyse, analiz verilerinizi kapsamlı klinik değerlendirmeniz ışığında yeniden değerlendiriyoruz.",
+    svc1Cta: "Reanaliz talep et",
+    svc2Title: "Genetik Sonucum Ne Anlatıyor?",
+    svc2Desc: "Genetik testiniz sonucu size verilen raporda belirtilen varyantlar/mutasyonlar anlamlı mı? Klinik tabloyla uyumlu mu? Raporunuza ikincil görüş alabilmeniz için bize ulaşın.",
+    svc2Cta: "İkincil görüş al",
+    svc3Title: "Sıradaki Testim Ne Olmalı?",
+    svc3Desc: "Doktorunuz tarafından yaptırılan genetik analiz sonucunuz normal çıktı ama klinik bulgularınız devam ediyor. Sıradaki testiniz ne olmalı? Bu teste nasıl ulaşacaksınız? Uzman yönlendirmesi alın.",
+    svc3Cta: "Yönlendirme al",
+    pickServiceTitle: "Hangi hizmeti istiyorsunuz?",
+    pickServiceLabel: "Seçtiğiniz hizmet",
+    serviceTypeWes: "WES Reanaliz",
+    serviceTypeSecondOpinion: "İkincil Görüş",
+    serviceTypeNextStep: "Sıradaki Test Danışmanlığı",
+    // Hizmete özel dosya/bilgi adımları
+    wesFilesTitle: "VCF dosyanız ve önceki rapor",
+    wesFilesDesc: "Reanaliz için VCF (Variant Call Format) dosyanızı yükleyin. Önceki test raporunuz varsa eklemeniz değerlendirmeyi hızlandırır.",
+    secondOpinionFilesTitle: "Genetik test raporu",
+    secondOpinionFilesDesc: "Yorumlanmasını istediğiniz genetik test raporunu (PDF) yükleyin. Varsa ek bilgiler ekleyebilirsiniz.",
+    nextStepFilesTitle: "Önceki test sonuçları (varsa)",
+    nextStepFilesDesc: "Daha önce yapılmış genetik testlerinizin raporlarını yükleyebilirsiniz. Dosya yüklemek isteğe bağlıdır.",
+    geneticReport: "Genetik test raporu (PDF)",
+    geneticReportHint: "Maks 25 MB · şifreli yükleme",
+    optionalLabel: "(Opsiyonel)",
+    additionalNotes: "Ek notlar",
+    additionalNotesPlaceholder: "Raporu yorumlarken bilmemiz gereken bir şey varsa belirtin..."
+  },
+  en: {
+    appName: "PediatriPLUS Genetics", appTagline: "WES Re-analysis Service",
+    rolePatient: "Patient view", roleAdmin: "Admin view", lang: "TR",
+    myDashboard: "My requests", patientEyebrow: "Patient panel",
+    adminEyebrow: "Admin panel",
+    newRequest: "Submit new request", noRequests: "No requests yet",
+    noResults: "No cases match this filter",
+    statusPaid: "Paid", statusInReview: "In review",
+    statusAwaitingInfo: "Awaiting info", statusCompleted: "Completed", statusCancelled: "Cancelled",
+    downloadReport: "Download report", viewDetails: "Details",
+    next: "Continue", back: "Back", payNow: "Complete payment",
+    backToDashboard: "Back to my requests", backToQueue: "Back to queue",
+    consentTitle: "KVKK & GDPR consent",
+    consentBody: "Your genetic data (VCF) and clinical information fall under special category personal data per KVKK article 6 and GDPR article 9. Data is encrypted at rest and processed only by authorized clinical experts for re-analysis purposes.",
+    consent1: "I give explicit consent for processing of my genetic data",
+    consent2: "I have read and understood the information notice",
+    consent3: "I accept use of anonymized data for research",
+    fullName: "Full name", birthDate: "Date of birth", sex: "Sex",
+    sexM: "Male", sexF: "Female", sexO: "Other", email: "Email", phone: "Phone",
+    consanguinity: "Consanguinity", yes: "Yes", no: "No", unknown: "Unknown",
+    familyHistory: "Family history", clinicalFindings: "Clinical findings",
+    clinicalPlaceholder: "HPO terms, dysmorphic features, developmental status, seizure history...",
+    previousTests: "Prior tests and results",
+    previousTestsPlaceholder: "Year — test type — laboratory — result",
+    vcfFile: "VCF file", vcfHint: "Max 2 GB · encrypted upload",
+    vcfReference: "Reference genome",
+    paymentTitle: "Payment", serviceFee: "WES re-analysis service fee",
+    vat: "VAT (20%)", total: "Total",
+    cardNumber: "Card number", cardName: "Cardholder name", expiry: "Expiry (MM/YY)", cvv: "CVV",
+    iyzicoNote: "Secure payment via Iyzico · 3D Secure",
+    confirmTitle: "Request received",
+    confirmBody: "Your re-analysis request is in the admin queue. You will be notified by email when the report is ready. Estimated time: 7-14 days.",
+    step1: "Consent", step2: "Information", step3: "Files", step4: "Payment", step5: "Confirmation",
+    adminQueue: "Work queue", adminSubtitle: "Pending and active cases",
+    pending: "Pending", inProgress: "In review",
+    awaitingInfo: "Awaiting info", completedFilter: "Completed",
+    patientInfo: "Patient information", clinicalInfo: "Clinical information", files: "Files",
+    age: "yrs", selectFile: "Select a file", secureUpload: "Encrypted",
+    emailSent: "Report emailed",
+    actAssign: "Assign case to me", actReassign: "Reassign to another expert",
+    actHold: "Request info from patient", actResume: "Resume review", actCancel: "Cancel case",
+    actComplete: "Upload report & deliver",
+    notes: "Internal notes", notesEmpty: "No notes yet",
+    notesAdd: "Add a note about this case...", notesAddBtn: "Add note",
+    timeline: "Case timeline",
+    timelinePaid: "Payment received, added to queue",
+    timelineAssigned: "Took the case",
+    timelineNote: "Internal note added",
+    timelineHold: "Requested info from patient",
+    timelineResume: "Resumed review",
+    timelineReportUploaded: "Report uploaded",
+    timelineDelivered: "Report delivered to patient",
+    timelineReassigned: "Reassigned to another expert",
+    timelineCancelled: "Case cancelled",
+    requestInfo: "Request additional info from patient",
+    requestInfoMsg: "Message to send to patient",
+    requestInfoExample: "E.g.: Your VCF file appears corrupted, please re-upload. Pedigree file is also missing...",
+    send: "Send", cancelBtn: "Cancel",
+    reportUpload: "Upload and deliver report", reportSummary: "Summary for patient",
+    reportSummaryPlaceholder: "E.g.: De novo missense variant identified in ZBTB20 (NM_001164342.2:c.1924C>T, p.Arg642Cys). Consistent with Primrose syndrome...",
+    finalReport: "Final report (PDF)", markComplete: "Complete & deliver",
+    reassignTo: "Assign to expert", reassignReason: "Reason for reassignment",
+    reasonExample: "Pediatric dysmorphology expertise required",
+    cancelReason: "Cancellation reason",
+    confirmCancel: "Are you sure? Refund will be initiated via Iyzico.",
+    confirm: "Yes, cancel and refund", keepIt: "Keep it",
+    hoursWaiting: "hrs waiting", daysWaiting: "days waiting", sla48: "Over 48 hours",
+    mPending: "Pending", mAvg: "Avg time", mSla: "SLA risk", mToday: "Today done",
+    days: "d", hrs: "h", none: "—",
+    you: "You", drAtik: "Dr. Atik", drYilmaz: "Dr. Yilmaz",
+    awaitingMessage: "Info requested",
+    requiredField: "*",
+    pageOf: "/",
+    pickOption: "Select",
+    waitingFor: "Waiting",
+    payment: "Payment",
+    paymentDetails: "Payment details",
+    paidAmount: "Paid amount",
+    txnId: "Transaction ID",
+    paymentDate: "Payment date",
+    netPaid: "Net collected",
+    netRefunded: "Refunded",
+    netCharged: "Extra charged",
+    actRefund: "Issue refund",
+    actExtraCharge: "Add extra charge",
+    refundTitle: "Refund",
+    refundType: "Refund type",
+    refundFull: "Full refund",
+    refundPartial: "Partial refund",
+    refundAmount: "Refund amount (₺)",
+    refundReason: "Refund reason",
+    refundReasonExample: "E.g.: No clinically relevant variant identified, partial service (30% refund).",
+    refundApply: "Process refund",
+    extraChargeTitle: "Add extra charge",
+    extraChargeAmount: "Extra charge amount (₺)",
+    extraChargeReason: "Reason",
+    extraChargeExample: "E.g.: Trio analysis required, additional 3000 ₺.",
+    extraChargeApply: "Send charge request",
+    paymentHistory: "Payment history",
+    paymentTypeInitial: "Initial payment",
+    paymentTypeRefund: "Refund",
+    paymentTypeExtra: "Extra charge",
+    timelineRefund: "Refund processed",
+    timelineExtra: "Extra charge collected",
+    refundConfirm: "Refund will be processed via Iyzico. Confirm?",
+    refundConfirmYes: "Yes, process refund",
+    refundOnCancel: "Cancel case + full refund",
+    refundAmountInvalid: "Enter a valid amount",
+    settings: "Settings",
+    settingsTitle: "System settings",
+    settingsSubtitle: "Pricing and general configuration",
+    pricingSection: "Pricing",
+    standardFee: "Standard service fee (₺)",
+    vatRate: "VAT rate (%)",
+    trioFee: "Trio analysis surcharge (₺)",
+    urgentFee: "Urgent processing surcharge (₺)",
+    promoSection: "Promo codes",
+    promoCode: "Code",
+    promoDiscount: "Discount (%)",
+    promoActive: "Active",
+    addPromo: "Add promo code",
+    saveSettings: "Save settings",
+    settingsSaved: "Settings saved",
+    promoApplied: "Promo applied",
+    heroEyebrow: "PediatriPLUS Genetics Service",
+    heroTitle: "Have your WES data re-analyzed",
+    heroLead: "Founded at Ege University Faculty of Medicine Technopark, PediatriPLUS brings over 20 years of clinical genetics experience to re-examine your previously inconclusive whole exome sequencing data using current literature, newly discovered genes, and advanced variant interpretation methods.",
+    heroPrimary: "Submit new request",
+    heroSecondary: "Track existing request",
+    benefitTitle: "Why re-analysis matters",
+    benefit1Title: "New gene discoveries",
+    benefit1Body: "Over 250 new disease genes are identified each year. Genes discovered since your last analysis may solve your case.",
+    benefit2Title: "Updated databases",
+    benefit2Body: "ClinVar, gnomAD, HGMD and OMIM updates mean previously 'variants of unknown significance' may be reclassified as pathogenic.",
+    benefit3Title: "Higher diagnostic yield",
+    benefit3Body: "10-15% of negative WES cases reach a diagnosis after re-analysis. This can be critical for clinical management.",
+    processTitle: "How the process works",
+    process1Title: "Upload your data",
+    process1Body: "Submit your VCF file and clinical information via encrypted upload",
+    process2Title: "Complete payment",
+    process2Body: "Secure payment via Iyzico · 3D Secure",
+    process3Title: "Expert review",
+    process3Body: "A clinical geneticist analyzes your case in detail (7-14 business days)",
+    process4Title: "Receive your report",
+    process4Body: "Detailed re-analysis report delivered by email",
+    pricingTitle: "Transparent pricing",
+    pricingDetail: "WES re-analysis service fee",
+    pricingNote: "VAT included. Additional fees may apply for trio analysis or urgent processing.",
+    trustTitle: "Data security and privacy",
+    trust1: "🔒 KVKK and GDPR compliant infrastructure",
+    trust2: "🔐 AES-256 encrypted storage",
+    trust3: "👤 Access limited to authorized clinical experts",
+    trust4: "🇪🇺 EU region data center (Frankfurt)",
+    footerNote: "PediatriPLUS R&D and Consulting Industry Ltd. · Ege University Faculty of Medicine Technopark",
+    trackTitle: "Track existing request",
+    trackBody: "Enter the case number provided when you submitted your request and your email.",
+    trackCaseId: "Case number",
+    trackCaseIdPlaceholder: "CASE-2026-XXXXX",
+    trackEmail: "Registered email",
+    trackBtn: "View my case",
+    trackError: "No case found matching these details. Please check your case number and email.",
+    trackBack: "← Back to home",
+    caseSubmittedTitle: "Request received",
+    caseSubmittedBody: "Your case is now in the admin queue. You will be notified by email when the report is ready.",
+    yourCaseId: "Your case number",
+    saveCaseId: "Save this number — you'll use it to track your case status.",
+    goToCase: "View my case",
+    backToHome: "Back to home",
+    logout: "Sign out",
+    adminLoginTitle: "Admin sign in",
+    adminLoginBody: "This area is restricted to authorized PediatriPLUS personnel.",
+    adminUsername: "Username",
+    adminPassword: "Password",
+    adminLoginBtn: "Sign in",
+    adminLoginError: "Invalid username or password.",
+    adminLogout: "Sign out of admin",
+    backToHomeBtn: "← Back to home",
+    paymentRedirectTitle: "Payment information",
+    paymentRedirectIntro: "After reviewing the details below, you will be redirected to the secure payment page.",
+    paymentSecureNote: "Your payment will be processed via Iyzico on PediatriPLUS's official secure payment page. Your card details are not stored in this application.",
+    proceedToPayment: "Proceed to payment page",
+    paymentPendingTitle: "Awaiting payment",
+    paymentPendingBody: "Your request has been created. Complete your transaction on the Iyzico payment page that opened in a new tab. Send your genetic data file (VCF, PDF report etc.) to tahiratik@yahoo.com with your case number as the subject line.",
+    paymentReturn: "I have paid, return",
+    paymentSucceededTitle: "Payment received",
+    paymentSucceededBody: "Your re-analysis request is now in the admin queue. You will be notified by email when the report is ready.",
+    paymentPendingStatus: "Awaiting payment",
+    caseNumberLabel: "Case number",
+    amountLabel: "Amount",
+    serviceLabel: "Service",
+    actConfirmPayment: "Manually confirm payment",
+    paymentPendingAdminNote: "Patient will pay via Iyzico. After seeing the payment in Iyzico notifications, manually confirm here.",
+    caseCreated: "Case created, awaiting payment",
+    servicesTitle: "Second Opinion for Your Genetic Test",
+    servicesSubtitle: "Our expert clinical genetics team evaluates your genetic data and reports through three different services.",
+    svc1Title: "Whole Exome Sequencing Re-analysis",
+    svc1Desc: "If your previously performed whole exome sequencing (WES) was normal or showed findings unrelated to your clinical picture, we re-evaluate your analysis data in light of your comprehensive clinical assessment.",
+    svc1Cta: "Request re-analysis",
+    svc2Title: "What Does My Genetic Result Mean?",
+    svc2Desc: "Are the variants/mutations reported in your genetic test result clinically significant? Are they consistent with your clinical picture? Contact us for a second opinion on your report.",
+    svc2Cta: "Get second opinion",
+    svc3Title: "What Should My Next Test Be?",
+    svc3Desc: "Your doctor-ordered genetic analysis came back normal but your clinical findings persist. What should your next test be? How do you access it? Get expert guidance.",
+    svc3Cta: "Get guidance",
+    pickServiceTitle: "Which service do you need?",
+    pickServiceLabel: "Your selected service",
+    serviceTypeWes: "WES Re-analysis",
+    serviceTypeSecondOpinion: "Second Opinion",
+    serviceTypeNextStep: "Next Test Consultation",
+    wesFilesTitle: "Your VCF file and previous report",
+    wesFilesDesc: "Upload your VCF (Variant Call Format) file for re-analysis. Attaching the previous test report speeds up the evaluation.",
+    secondOpinionFilesTitle: "Genetic test report",
+    secondOpinionFilesDesc: "Upload the genetic test report (PDF) you want interpreted. You may add additional information if available.",
+    nextStepFilesTitle: "Previous test results (if any)",
+    nextStepFilesDesc: "You can upload reports of previously performed genetic tests. File upload is optional.",
+    geneticReport: "Genetic test report (PDF)",
+    geneticReportHint: "Max 25 MB · encrypted upload",
+    optionalLabel: "(Optional)",
+    additionalNotes: "Additional notes",
+    additionalNotesPlaceholder: "Mention anything we should know while interpreting the report..."
+  }
+};
+
+const STORAGE_KEY = "wes_cases_v9";
+const SETTINGS_KEY = "wes_settings_v9";
+const SYSTEM_SETTINGS_KEY = "wes_system_settings_v1";
+const ADMIN_SESSION_KEY = "wes_admin_session_v1";
+const ADMIN_CREDENTIALS = { username: "admin", password: "Doktor9359" };
+const IYZICO_PAYMENT_URL = "https://iyzi.link/AKRPQw";
+const FORMSPREE_URL = "https://formspree.io/f/xgodgdaj";
+const CURRENT_USER = "user_admin_atik";
+
+const DEFAULT_SYSTEM_SETTINGS = {
+  standardFee: 7500,
+  vatRate: 20,
+  trioFee: 3000,
+  urgentFee: 2000,
+  promos: [
+    { code: "AKADEMIK20", discount: 20, active: true },
+    { code: "ARGE10", discount: 10, active: true }
+  ]
+};
+
+const loadSystemSettings = () => {
+  try {
+    const v = localStorage.getItem(SYSTEM_SETTINGS_KEY);
+    return v ? { ...DEFAULT_SYSTEM_SETTINGS, ...JSON.parse(v) } : DEFAULT_SYSTEM_SETTINGS;
+  } catch { return DEFAULT_SYSTEM_SETTINGS; }
+};
+const saveSystemSettings = (s) => {
+  try { localStorage.setItem(SYSTEM_SETTINGS_KEY, JSON.stringify(s)); } catch {}
+};
+
+// Pure localStorage persistence (no external API needed)
+const loadCases = () => {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
+};
+const saveCases = (cases) => {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cases)); } catch {}
+};
+const loadSettings = () => {
+  try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{"lang":"tr","role":"patient"}'); }
+  catch { return { lang: "tr", role: "patient" }; }
+};
+const saveSettings = (s) => {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch {}
+};
+
+const fmtDate = (iso) => new Date(iso).toLocaleDateString();
+const fmtDateTime = (iso) => new Date(iso).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+const newId = () => "CASE-" + new Date().getFullYear() + "-" + Math.floor(Math.random() * 90000 + 10000);
+const newEventId = () => "e_" + Math.random().toString(36).slice(2, 10);
+const calcAge = (dob) => {
+  if (!dob) return "-";
+  const d = new Date(dob), now = new Date();
+  let a = now.getFullYear() - d.getFullYear();
+  if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) a--;
+  return a;
+};
+const hoursSince = (iso) => Math.floor((Date.now() - new Date(iso).getTime()) / 36e5);
+
+const STATUS_LABEL = (t) => ({
+  payment_pending: t.paymentPendingStatus,
+  paid: t.statusPaid, in_review: t.statusInReview, awaiting_info: t.statusAwaitingInfo,
+  completed: t.statusCompleted, cancelled: t.statusCancelled
+});
+
+function Pill({ status, t }) {
+  return <span className={"pill " + status}>{STATUS_LABEL(t)[status]}</span>;
+}
+
+function getServiceLabel(serviceType, t) {
+  if (serviceType === "second_opinion") return t.serviceTypeSecondOpinion;
+  if (serviceType === "next_step") return t.serviceTypeNextStep;
+  return t.serviceTypeWes;
+}
+
+function ServiceBadge({ serviceType, t }) {
+  const label = getServiceLabel(serviceType, t);
+  return (
+    <span style={{
+      display:"inline-flex", alignItems:"center", padding:"2px 9px",
+      borderRadius:100, fontSize:11, fontWeight:500,
+      background:"rgba(105,15,86,0.10)", color:"#690f56",
+      letterSpacing:"0.01em"
+    }}>{label}</span>
+  );
+}
+
+function TopBar({ t, lang, setLang, role, setRole, onSettings, adminAuthenticated, onAdminLogout }) {
+  const handleRoleClick = () => {
+    if (role === "patient") {
+      // Going to admin — requires auth via parent
+      setRole("admin");
+    } else {
+      // Going back to patient — keep admin session, just switch view
+      setRole("patient");
+    }
+  };
+
+  return (
+    <div className="topbar">
+      <div className="brand">
+        <img src="https://img1.wsimg.com/isteam/ip/38b481f7-d25a-477a-9dbd-621557f2f3b1/pediatripluslogo.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:200,cg:true"
+          alt="PediatriPLUS"
+          style={{height:40, width:"auto", objectFit:"contain"}} />
+        <div className="brand-text">
+          <div className="brand-name">{t.appName}</div>
+          <div className="brand-tag">{t.appTagline}</div>
+        </div>
+      </div>
+      <div className="nav-actions">
+        {role === "admin" && adminAuthenticated && (
+          <>
+            <button onClick={onSettings} title={t.settings}>⚙ {t.settings}</button>
+            <button onClick={onAdminLogout} className="danger" title={t.adminLogout}>{t.adminLogout}</button>
+          </>
+        )}
+        <button onClick={handleRoleClick}>
+          {role === "patient" ? "🔒 " + t.roleAdmin : t.rolePatient}
+        </button>
+        <button onClick={() => setLang(lang === "tr" ? "en" : "tr")} style={{minWidth: 44, justifyContent:"center"}}>
+          {t.lang}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PatientDashboard({ cases, t, onNew, onView }) {
+  return (
+    <div className="content">
+      <div className="page-header">
+        <div className="page-title-block">
+          <div className="page-eyebrow">{t.patientEyebrow}</div>
+          <h2>{t.myDashboard}</h2>
+        </div>
+        <button className="primary" onClick={onNew}>+ {t.newRequest}</button>
+      </div>
+      {cases.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">∅</div>
+          <div className="empty-state-text">{t.noRequests}</div>
+        </div>
+      ) : (
+        <div className="case-list">
+          {cases.map(c => (
+            <div key={c.id} className="case-row" onClick={() => onView(c.id)}>
+              <div style={{flex: 1, minWidth: 0}}>
+                <div className="case-title-row">
+                  <span className="case-title">{c.patient.fullName || "—"}</span>
+                  <Pill status={c.status} t={t} />
+                </div>
+                <div className="case-meta">
+                  <code>{c.id}</code>
+                  <span className="case-detail-meta-sep">·</span>
+                  <span>{fmtDate(c.createdAt)}</span>
+                </div>
+                {c.status === "awaiting_info" && c.awaitingMessage && (
+                  <div className="notice" style={{marginTop:10, marginBottom:0}}>
+                    {t.awaitingMessage}: {c.awaitingMessage}
+                  </div>
+                )}
+              </div>
+              <div style={{display:"flex", gap:8, marginLeft:14, flexShrink:0}}>
+                {c.status === "completed" && c.reportFileName && (
+                  <button className="accent" onClick={(e) => { e.stopPropagation(); alert("⬇ " + c.reportFileName); }}>
+                    ↓ {t.downloadReport}
+                  </button>
+                )}
+                <button>{t.viewDetails} →</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Field({ label, required, children, hint }) {
+  return (
+    <div className="field">
+      <label>{label} {required && <span style={{color:"var(--danger)"}}>*</span>}</label>
+      {children}
+      {hint && <div style={{fontSize:11, color:"var(--ink-3)", marginTop:4}}>{hint}</div>}
+    </div>
+  );
+}
+
+function FilePicker({ t, label, value, onChange, accept, hint, required }) {
+  return (
+    <Field label={label} required={required} hint={hint}>
+      <label className={"file-picker" + (value ? " has-file" : "")}>
+        <div className="file-picker-icon">{value ? "✓" : "↑"}</div>
+        <div className="file-picker-main">
+          {value ? (
+            <>
+              <div className="file-picker-title">{value}</div>
+              <div className="file-picker-hint">🔒 {t.secureUpload}</div>
+            </>
+          ) : (
+            <div className="file-picker-title" style={{color:"var(--ink-3)"}}>{t.selectFile}</div>
+          )}
+        </div>
+        <input type="file" accept={accept} onChange={e => onChange(e.target.files[0]?.name || "")} style={{display:"none"}} />
+      </label>
+    </Field>
+  );
+}
+
+function AdminLogin({ t, onSuccess, onCancel }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+
+  const submit = () => {
+    if (username.trim() === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+      onSuccess();
+      setError(false);
+    } else {
+      setError(true);
+    }
+  };
+
+  const onKeyDown = (e) => { if (e.key === "Enter") submit(); };
+
+  return (
+    <div className="content content-narrow" style={{paddingTop:48}}>
+      <button className="ghost" onClick={onCancel} style={{marginBottom:24}}>{t.backToHomeBtn}</button>
+      <div className="card" style={{padding:"36px 40px", maxWidth:440, margin:"0 auto"}}>
+        <div style={{textAlign:"center", marginBottom:24}}>
+          <div style={{width:56, height:56, borderRadius:"50%", background:"var(--ink)", color:"var(--bg)",
+            display:"inline-flex", alignItems:"center", justifyContent:"center",
+            fontSize:24, marginBottom:14}}>🔒</div>
+          <h2 style={{marginBottom:8}}>{t.adminLoginTitle}</h2>
+          <p style={{fontSize:13, color:"var(--ink-3)", lineHeight:1.5, margin:0}}>{t.adminLoginBody}</p>
+        </div>
+
+        <Field label={t.adminUsername} required>
+          <input value={username} onChange={e => setUsername(e.target.value)}
+            onKeyDown={onKeyDown} autoFocus autoComplete="username"
+            style={{fontFamily:"var(--font-mono)"}} />
+        </Field>
+
+        <Field label={t.adminPassword} required>
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+            onKeyDown={onKeyDown} autoComplete="current-password" />
+        </Field>
+
+        {error && (
+          <div className="notice notice-danger" style={{marginBottom:14}}>
+            {t.adminLoginError}
+          </div>
+        )}
+
+        <button className="primary" onClick={submit}
+          disabled={!username.trim() || !password}
+          style={{width:"100%", padding:"10px", justifyContent:"center", marginTop:6}}>
+          {t.adminLoginBtn} →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LandingPage({ t, onPickService, onTrack, systemSettings }) {
+  const sys = systemSettings || DEFAULT_SYSTEM_SETTINGS;
+  const total = sys.standardFee + Math.round(sys.standardFee * sys.vatRate / 100);
+
+  const services = [
+    {
+      type: "wes_reanalysis",
+      title: t.svc1Title,
+      desc: t.svc1Desc,
+      cta: t.svc1Cta,
+      icon: (
+        <svg width="100%" height="100%" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <pattern id="dnabg1" x="0" y="0" width="14" height="18" patternUnits="userSpaceOnUse">
+              <text x="0" y="14" fontFamily="var(--font-mono)" fontSize="11" fill="rgba(105,15,86,0.10)">{["AGT","CCG","TAA","GTA","CGA","TTC","ACG","GAT"][Math.floor(Math.random()*8)]}</text>
+            </pattern>
+          </defs>
+          <rect width="200" height="120" fill="#F4EFF2"/>
+          <rect width="200" height="120" fill="url(#dnabg1)"/>
+          {/* Çift sarmal DNA */}
+          {Array.from({length: 7}).map((_, i) => {
+            const x = 30 + i * 22, phase = i * 0.9;
+            const y1 = 60 + Math.sin(phase) * 22, y2 = 60 - Math.sin(phase) * 22;
+            return (
+              <g key={i}>
+                <line x1={x} y1={y1} x2={x} y2={y2} stroke="#690f56" strokeWidth="1.5" opacity="0.45"/>
+                <circle cx={x} cy={y1} r="4.5" fill="#690f56"/>
+                <circle cx={x} cy={y2} r="4.5" fill="#C77BB5"/>
+              </g>
+            );
+          })}
+        </svg>
+      )
+    },
+    {
+      type: "second_opinion",
+      title: t.svc2Title,
+      desc: t.svc2Desc,
+      cta: t.svc2Cta,
+      icon: (
+        <svg width="100%" height="100%" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="200" height="120" fill="#F4EFF2"/>
+          {/* Belge */}
+          <rect x="60" y="20" width="80" height="90" rx="3" fill="#FFFFFF" stroke="#690f56" strokeWidth="1.5"/>
+          <line x1="70" y1="36" x2="120" y2="36" stroke="#690f56" strokeWidth="1.5" opacity="0.6"/>
+          <line x1="70" y1="46" x2="130" y2="46" stroke="#690f56" strokeWidth="1" opacity="0.3"/>
+          <line x1="70" y1="54" x2="125" y2="54" stroke="#690f56" strokeWidth="1" opacity="0.3"/>
+          <line x1="70" y1="62" x2="115" y2="62" stroke="#690f56" strokeWidth="1" opacity="0.3"/>
+          {/* Vurgu işareti */}
+          <rect x="68" y="68" width="55" height="8" fill="#690f56" opacity="0.18"/>
+          <line x1="70" y1="84" x2="125" y2="84" stroke="#690f56" strokeWidth="1" opacity="0.3"/>
+          <line x1="70" y1="92" x2="110" y2="92" stroke="#690f56" strokeWidth="1" opacity="0.3"/>
+          {/* Büyüteç */}
+          <circle cx="125" cy="78" r="22" fill="none" stroke="#690f56" strokeWidth="2.5"/>
+          <circle cx="125" cy="78" r="22" fill="#FFFFFF" opacity="0.35"/>
+          <line x1="141" y1="94" x2="155" y2="108" stroke="#690f56" strokeWidth="3" strokeLinecap="round"/>
+          <text x="118" y="83" fontFamily="var(--font-mono)" fontSize="10" fill="#690f56" fontWeight="bold">?</text>
+        </svg>
+      )
+    },
+    {
+      type: "next_step",
+      title: t.svc3Title,
+      desc: t.svc3Desc,
+      cta: t.svc3Cta,
+      icon: (
+        <svg width="100%" height="100%" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="200" height="120" fill="#F4EFF2"/>
+          {/* Yol haritası: noktalar ve çizgiler */}
+          <line x1="30" y1="60" x2="170" y2="60" stroke="#690f56" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.4"/>
+          {/* 1. nokta - tamamlandı */}
+          <circle cx="40" cy="60" r="11" fill="#690f56"/>
+          <text x="36" y="64" fontFamily="var(--font-mono)" fontSize="11" fill="white" fontWeight="bold">✓</text>
+          <text x="22" y="88" fontFamily="var(--font-body)" fontSize="9" fill="#690f56">WES</text>
+          {/* 2. nokta - tamamlandı */}
+          <circle cx="85" cy="60" r="11" fill="#690f56"/>
+          <text x="81" y="64" fontFamily="var(--font-mono)" fontSize="11" fill="white" fontWeight="bold">✓</text>
+          <text x="68" y="88" fontFamily="var(--font-body)" fontSize="9" fill="#690f56">Panel</text>
+          {/* 3. nokta - şu anki, vurgulu */}
+          <circle cx="130" cy="60" r="14" fill="none" stroke="#690f56" strokeWidth="2.5"/>
+          <circle cx="130" cy="60" r="6" fill="#690f56"/>
+          <text x="118" y="88" fontFamily="var(--font-body)" fontSize="9" fill="#690f56" fontWeight="bold">Şimdi?</text>
+          {/* 4. nokta - sıradaki */}
+          <circle cx="170" cy="60" r="9" fill="none" stroke="#C77BB5" strokeWidth="1.5" strokeDasharray="2 2"/>
+          <text x="165" y="64" fontFamily="var(--font-mono)" fontSize="10" fill="#C77BB5">?</text>
+        </svg>
+      )
+    }
+  ];
+
+  return (
+    <div className="content content-narrow" style={{paddingTop:48, paddingBottom:48}}>
+      {/* Hero */}
+      <div style={{textAlign:"center", marginBottom:56}}>
+        <div className="page-eyebrow" style={{marginBottom:12}}>{t.heroEyebrow}</div>
+        <h1 style={{fontFamily:"var(--font-display)", fontSize:46, fontWeight:500, letterSpacing:"-0.02em", lineHeight:1.1, marginBottom:18, maxWidth:680, marginLeft:"auto", marginRight:"auto"}}>{t.heroTitle}</h1>
+        <p style={{fontSize:16, color:"var(--ink-2)", lineHeight:1.6, maxWidth:600, margin:"0 auto 28px"}}>{t.heroLead}</p>
+        <button onClick={onTrack} style={{padding:"10px 22px", fontSize:14}}>
+          {t.heroSecondary}
+        </button>
+      </div>
+
+      {/* Servisler */}
+      <div style={{marginBottom:56}}>
+        <div style={{textAlign:"center", marginBottom:40}}>
+          <div style={{display:"flex", alignItems:"center", justifyContent:"center", gap:14, marginBottom:14}}>
+            <div style={{width:40, height:1, background:"var(--ink-3)", opacity:0.4}}></div>
+            <h2 style={{margin:0, color:"#690f56"}}>{t.servicesTitle}</h2>
+            <div style={{width:40, height:1, background:"var(--ink-3)", opacity:0.4}}></div>
+          </div>
+          <p style={{fontSize:14, color:"var(--ink-2)", lineHeight:1.6, maxWidth:600, margin:"0 auto"}}>{t.servicesSubtitle}</p>
+        </div>
+        <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(260px, 1fr))", gap:18}}>
+          {services.map(s => (
+            <div key={s.type} className="card" style={{marginBottom:0, padding:0, overflow:"hidden",
+              display:"flex", flexDirection:"column"}}>
+              <div style={{height:140, overflow:"hidden", background:"#F4EFF2"}}>
+                {s.icon}
+              </div>
+              <div style={{padding:"20px 22px 22px", flex:1, display:"flex", flexDirection:"column"}}>
+                <h3 style={{fontSize:17, marginBottom:10, letterSpacing:"-0.01em", lineHeight:1.25}}>{s.title}</h3>
+                <p style={{fontSize:13, color:"var(--ink-2)", lineHeight:1.6, marginBottom:18, flex:1}}>{s.desc}</p>
+                <button className="primary" onClick={() => onPickService(s.type)}
+                  style={{justifyContent:"center", padding:"9px"}}>
+                  {s.cta} →
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Süreç */}
+      <div style={{marginBottom:56}}>
+        <h2 style={{textAlign:"center", marginBottom:32}}>{t.processTitle}</h2>
+        <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14}}>
+          {[
+            { title: t.process1Title, body: t.process1Body },
+            { title: t.process2Title, body: t.process2Body },
+            { title: t.process3Title, body: t.process3Body },
+            { title: t.process4Title, body: t.process4Body }
+          ].map((p, i) => (
+            <div key={i} style={{padding:"18px 20px", background:"var(--surface)", border:"1px solid var(--line)", borderRadius:"var(--radius-lg)"}}>
+              <div style={{display:"inline-flex", width:28, height:28, borderRadius:"50%", background:"var(--ink)", color:"var(--bg)", alignItems:"center", justifyContent:"center", fontFamily:"var(--font-mono)", fontSize:12, fontWeight:500, marginBottom:10}}>{i+1}</div>
+              <div style={{fontSize:14, fontWeight:500, marginBottom:6}}>{p.title}</div>
+              <div style={{fontSize:12, color:"var(--ink-2)", lineHeight:1.5}}>{p.body}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Fiyatlandırma */}
+      <div className="card" style={{textAlign:"center", padding:"28px 32px", marginBottom:32}}>
+        <div className="page-eyebrow" style={{marginBottom:10}}>{t.pricingTitle}</div>
+        <div style={{fontSize:13, color:"var(--ink-2)", marginBottom:6}}>{t.pricingDetail}</div>
+        <div style={{fontFamily:"var(--font-display)", fontSize:48, fontWeight:500, letterSpacing:"-0.02em", lineHeight:1, marginBottom:8}}>
+          {total.toLocaleString()} <span style={{fontSize:24, color:"var(--ink-3)"}}>₺</span>
+        </div>
+        <div style={{fontSize:12, color:"var(--ink-3)"}}>{t.pricingNote}</div>
+      </div>
+
+      {/* Trust */}
+      <div style={{background:"var(--surface-2)", padding:"24px 28px", borderRadius:"var(--radius-lg)", marginBottom:32}}>
+        <div style={{fontSize:11, letterSpacing:"0.12em", textTransform:"uppercase", color:"var(--ink-3)", fontWeight:600, marginBottom:14}}>{t.trustTitle}</div>
+        <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))", gap:12}}>
+          <div style={{fontSize:13, color:"var(--ink-2)"}}>{t.trust1}</div>
+          <div style={{fontSize:13, color:"var(--ink-2)"}}>{t.trust2}</div>
+          <div style={{fontSize:13, color:"var(--ink-2)"}}>{t.trust3}</div>
+          <div style={{fontSize:13, color:"var(--ink-2)"}}>{t.trust4}</div>
+        </div>
+      </div>
+
+      <div style={{textAlign:"center", fontSize:11, color:"var(--ink-3)", marginTop:48}}>{t.footerNote}</div>
+    </div>
+  );
+}
+
+function TrackCase({ t, cases, onFound, onBack }) {
+  const [caseId, setCaseId] = useState("");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState(false);
+
+  const submit = () => {
+    const cleaned = caseId.trim().toUpperCase();
+    const found = cases.find(c =>
+      c.id.toUpperCase() === cleaned &&
+      c.patient.email.toLowerCase() === email.trim().toLowerCase()
+    );
+    if (found) { onFound(found.id); setError(false); }
+    else setError(true);
+  };
+
+  return (
+    <div className="content content-narrow" style={{paddingTop:32}}>
+      <button className="ghost" onClick={onBack} style={{marginBottom:24}}>{t.trackBack}</button>
+      <div className="card" style={{padding:"32px 36px"}}>
+        <h2 style={{marginBottom:12}}>{t.trackTitle}</h2>
+        <p style={{fontSize:14, color:"var(--ink-2)", marginBottom:24, lineHeight:1.6}}>{t.trackBody}</p>
+        <Field label={t.trackCaseId} required>
+          <input value={caseId} onChange={e => setCaseId(e.target.value)} placeholder={t.trackCaseIdPlaceholder}
+            style={{fontFamily:"var(--font-mono)"}} autoFocus />
+        </Field>
+        <Field label={t.trackEmail} required>
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)} />
+        </Field>
+        {error && (
+          <div className="notice notice-danger" style={{marginTop:12, marginBottom:12}}>
+            {t.trackError}
+          </div>
+        )}
+        <button className="primary" onClick={submit} disabled={!caseId.trim() || !email.trim()}
+          style={{width:"100%", padding:"10px", justifyContent:"center", marginTop:8}}>
+          {t.trackBtn} →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Wizard({ t, onComplete, onCancel, systemSettings, serviceType }) {
+  const sys = systemSettings || DEFAULT_SYSTEM_SETTINGS;
+  const [step, setStep] = useState(1);
+  const [submittedCaseId, setSubmittedCaseId] = useState(null);
+  const [data, setData] = useState({
+    consent: { c1: false, c2: false, c3: false },
+    patient: { fullName: "", birthDate: "", sex: "", email: "", phone: "", consanguinity: "" },
+    clinical: { familyHistory: "", findings: "", previousTests: "", additionalNotes: "" },
+    files: { vcfName: "", vcfRef: "GRCh38", reportName: "", prevReportName: "" },
+    payment: { cardNumber: "", cardName: "", expiry: "", cvv: "" }
+  });
+  const update = (section, patch) => setData(d => ({ ...d, [section]: { ...d[section], ...patch } }));
+
+  const canNext = useMemo(() => {
+    if (step === 1) return data.consent.c1 && data.consent.c2;
+    if (step === 2) return data.patient.fullName && data.patient.email && data.patient.birthDate && data.patient.sex && data.clinical.findings;
+    if (step === 3) {
+      if (serviceType === "wes_reanalysis") return !!data.files.vcfName;
+      if (serviceType === "second_opinion") return !!data.files.reportName;
+      if (serviceType === "next_step") return true; // dosya opsiyonel
+      return false;
+    }
+    if (step === 4) return true;
+    return false;
+  }, [step, data, serviceType]);
+
+  const labels = [t.step1, t.step2, t.step3, t.step4, t.step5];
+
+  return (
+    <div className="content content-narrow">
+      <button className="ghost" onClick={onCancel} style={{marginBottom:18}}>← {t.backToHome}</button>
+      <div className="stepper">
+        {labels.map((label, i) => {
+          const n = i + 1, active = n === step, done = n < step;
+          return (
+            <React.Fragment key={n}>
+              <div className="step-item">
+                <div className={"step-bullet" + (done ? " done" : active ? " active" : "")}>{done ? "✓" : n}</div>
+                <div className={"step-label" + (active ? " active" : "")}>{label}</div>
+              </div>
+              {n < labels.length && <div className="step-divider"></div>}
+            </React.Fragment>
+          );
+        })}
+      </div>
+
+      <div className="card" style={{padding:"28px 32px"}}>
+        {step === 1 && (
+          <div>
+            <h3 style={{marginBottom:14}}>{t.consentTitle}</h3>
+            <div style={{background:"var(--surface-2)", padding:"16px 20px", borderRadius:"var(--radius)", fontSize:13, lineHeight:1.7, color:"var(--ink-2)", marginBottom:20}}>{t.consentBody}</div>
+            {[["c1", t.consent1, true], ["c2", t.consent2, true], ["c3", t.consent3, false]].map(([k, lbl, req]) => (
+              <label key={k} style={{display:"flex", gap:12, alignItems:"flex-start", marginBottom:14, cursor:"pointer", fontSize:13, lineHeight:1.5}}>
+                <input type="checkbox" checked={data.consent[k]} onChange={e => update("consent", { [k]: e.target.checked })} style={{marginTop:3, flexShrink:0}} />
+                <span>{lbl} {req && <span style={{color:"var(--danger)"}}>*</span>}</span>
+              </label>
+            ))}
+          </div>
+        )}
+        {step === 2 && (
+          <div>
+            <h3 style={{marginBottom:18}}>{t.patientInfo}</h3>
+            <div className="field-grid-2">
+              <Field label={t.fullName} required><input value={data.patient.fullName} onChange={e => update("patient", { fullName: e.target.value })} /></Field>
+              <Field label={t.email} required><input type="email" value={data.patient.email} onChange={e => update("patient", { email: e.target.value })} /></Field>
+              <Field label={t.birthDate} required><input type="date" value={data.patient.birthDate} onChange={e => update("patient", { birthDate: e.target.value })} /></Field>
+              <Field label={t.sex} required>
+                <select value={data.patient.sex} onChange={e => update("patient", { sex: e.target.value })}>
+                  <option value="">— {t.pickOption} —</option>
+                  <option value="M">{t.sexM}</option>
+                  <option value="F">{t.sexF}</option>
+                  <option value="O">{t.sexO}</option>
+                </select>
+              </Field>
+              <Field label={t.phone}><input value={data.patient.phone} onChange={e => update("patient", { phone: e.target.value })} /></Field>
+              <Field label={t.consanguinity}>
+                <select value={data.patient.consanguinity} onChange={e => update("patient", { consanguinity: e.target.value })}>
+                  <option value="">— {t.pickOption} —</option>
+                  <option value="yes">{t.yes}</option>
+                  <option value="no">{t.no}</option>
+                  <option value="unknown">{t.unknown}</option>
+                </select>
+              </Field>
+            </div>
+            <Field label={t.familyHistory}><textarea value={data.clinical.familyHistory} onChange={e => update("clinical", { familyHistory: e.target.value })} style={{minHeight:70}} /></Field>
+            <Field label={t.clinicalFindings} required>
+              <textarea placeholder={t.clinicalPlaceholder} value={data.clinical.findings} onChange={e => update("clinical", { findings: e.target.value })} style={{minHeight:100}} />
+            </Field>
+            <Field label={t.previousTests}>
+              <textarea placeholder={t.previousTestsPlaceholder} value={data.clinical.previousTests} onChange={e => update("clinical", { previousTests: e.target.value })} style={{minHeight:80}} />
+            </Field>
+          </div>
+        )}
+        {step === 3 && (
+          <div>
+            {serviceType === "wes_reanalysis" && (
+              <>
+                <h3 style={{marginBottom:8}}>{t.wesFilesTitle}</h3>
+                <p style={{fontSize:13, color:"var(--ink-2)", marginTop:0, marginBottom:18, lineHeight:1.6}}>{t.wesFilesDesc}</p>
+                <FilePicker t={t} label={t.vcfFile} required accept=".vcf,.gz" hint={t.vcfHint}
+                  value={data.files.vcfName} onChange={(n) => update("files", { vcfName: n })} />
+                <Field label={t.vcfReference}>
+                  <select value={data.files.vcfRef} onChange={e => update("files", { vcfRef: e.target.value })}>
+                    <option value="GRCh38">GRCh38 / hg38</option>
+                    <option value="GRCh37">GRCh37 / hg19</option>
+                  </select>
+                </Field>
+                <FilePicker t={t} label={t.previousTests + " " + t.optionalLabel} accept=".pdf,.jpg,.png"
+                  hint={t.geneticReportHint}
+                  value={data.files.prevReportName} onChange={(n) => update("files", { prevReportName: n })} />
+              </>
+            )}
+            {serviceType === "second_opinion" && (
+              <>
+                <h3 style={{marginBottom:8}}>{t.secondOpinionFilesTitle}</h3>
+                <p style={{fontSize:13, color:"var(--ink-2)", marginTop:0, marginBottom:18, lineHeight:1.6}}>{t.secondOpinionFilesDesc}</p>
+                <FilePicker t={t} label={t.geneticReport} required accept=".pdf,.jpg,.png" hint={t.geneticReportHint}
+                  value={data.files.reportName} onChange={(n) => update("files", { reportName: n })} />
+                <Field label={t.additionalNotes}>
+                  <textarea value={data.clinical.additionalNotes}
+                    onChange={e => update("clinical", { additionalNotes: e.target.value })}
+                    placeholder={t.additionalNotesPlaceholder} style={{minHeight:80}} />
+                </Field>
+              </>
+            )}
+            {serviceType === "next_step" && (
+              <>
+                <h3 style={{marginBottom:8}}>{t.nextStepFilesTitle}</h3>
+                <p style={{fontSize:13, color:"var(--ink-2)", marginTop:0, marginBottom:18, lineHeight:1.6}}>{t.nextStepFilesDesc}</p>
+                <FilePicker t={t} label={t.geneticReport + " " + t.optionalLabel} accept=".pdf,.jpg,.png"
+                  hint={t.geneticReportHint}
+                  value={data.files.reportName} onChange={(n) => update("files", { reportName: n })} />
+                <Field label={t.additionalNotes}>
+                  <textarea value={data.clinical.additionalNotes}
+                    onChange={e => update("clinical", { additionalNotes: e.target.value })}
+                    placeholder={t.additionalNotesPlaceholder} style={{minHeight:80}} />
+                </Field>
+              </>
+            )}
+          </div>
+        )}
+        {step === 4 && (() => {
+          const fee = sys.standardFee, vat = Math.round(fee * sys.vatRate / 100), total = fee + vat;
+          return (
+            <div>
+              <h3 style={{marginBottom:8}}>{t.paymentRedirectTitle}</h3>
+              <p style={{fontSize:13, color:"var(--ink-2)", marginTop:0, marginBottom:18, lineHeight:1.6}}>{t.paymentRedirectIntro}</p>
+
+              <div style={{background:"var(--surface-2)", padding:"14px 18px", borderRadius:"var(--radius)", marginBottom:14, fontSize:13}}>
+                <div style={{display:"flex", justifyContent:"space-between", padding:"4px 0", color:"var(--ink-2)"}}>
+                  <span>{t.serviceLabel}</span>
+                  <span style={{fontWeight:500, color:"#690f56"}}>
+                    {serviceType === "wes_reanalysis" && t.serviceTypeWes}
+                    {serviceType === "second_opinion" && t.serviceTypeSecondOpinion}
+                    {serviceType === "next_step" && t.serviceTypeNextStep}
+                  </span>
+                </div>
+                <div style={{display:"flex", justifyContent:"space-between", padding:"4px 0", color:"var(--ink-2)"}}>
+                  <span>{t.fullName}</span>
+                  <span style={{fontWeight:500, color:"var(--ink)"}}>{data.patient.fullName || "—"}</span>
+                </div>
+                <div style={{display:"flex", justifyContent:"space-between", padding:"4px 0", color:"var(--ink-2)"}}>
+                  <span>{t.email}</span>
+                  <span style={{fontWeight:500, color:"var(--ink)", fontFamily:"var(--font-mono)", fontSize:12}}>{data.patient.email || "—"}</span>
+                </div>
+              </div>
+
+              <div className="price-table">
+                <div className="price-row"><span>{t.serviceFee}</span><span>{fee.toLocaleString()} ₺</span></div>
+                <div className="price-row"><span>{t.vat.replace("20", sys.vatRate)}</span><span>{vat.toLocaleString()} ₺</span></div>
+                <div className="price-row total"><span>{t.total}</span><span>{total.toLocaleString()} ₺</span></div>
+              </div>
+
+              <div style={{padding:"12px 14px", background:"var(--brand-bg, var(--accent-bg))", borderRadius:"var(--radius)", marginTop:14,
+                fontSize:12, color:"var(--ink-2)", lineHeight:1.6,
+                display:"flex", gap:10, alignItems:"flex-start"}}>
+                <span style={{fontSize:16, lineHeight:1}}>🔒</span>
+                <span>{t.paymentSecureNote}</span>
+              </div>
+            </div>
+          );
+        })()}
+        {step === 5 && (
+          <div className="confirm-screen">
+            <div style={{width:64, height:64, borderRadius:"50%", background:"var(--surface-2)",
+              color:"var(--ink-2)", display:"inline-flex", alignItems:"center", justifyContent:"center",
+              fontSize:30, marginBottom:18}}>💳</div>
+            <h3 style={{marginBottom:10}}>{t.paymentPendingTitle}</h3>
+            <p style={{fontSize:14, color:"var(--ink-2)", lineHeight:1.7, maxWidth:480, margin:"0 auto 20px"}}>{t.paymentPendingBody}</p>
+            {submittedCaseId && (
+              <div style={{background:"var(--surface-2)", padding:"16px 20px", borderRadius:"var(--radius)", marginBottom:20, display:"inline-block"}}>
+                <div style={{fontSize:11, color:"var(--ink-3)", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:6}}>{t.yourCaseId}</div>
+                <div style={{fontFamily:"var(--font-mono)", fontSize:18, fontWeight:500}}>{submittedCaseId}</div>
+                <div style={{fontSize:11, color:"var(--ink-3)", marginTop:8, maxWidth:320, lineHeight:1.4}}>{t.saveCaseId}</div>
+              </div>
+            )}
+            <div style={{display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap"}}>
+              <a href={IYZICO_PAYMENT_URL + "?ref=" + encodeURIComponent(submittedCaseId || "")}
+                target="_blank" rel="noopener noreferrer"
+                style={{textDecoration:"none"}}>
+                <button className="primary" style={{padding:"10px 18px"}}>
+                  🔒 {t.proceedToPayment} →
+                </button>
+              </a>
+              <button onClick={() => onComplete("paid", submittedCaseId)}>
+                ✓ {t.paymentReturn}
+              </button>
+            </div>
+            <div style={{marginTop:24}}>
+              <button className="ghost" onClick={() => onComplete("home")}>{t.backToHome}</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {step === 4 && (
+        <div style={{marginTop:14, fontSize:12, color:"var(--ink-3)", textAlign:"center"}}>
+          {/* hint about the redirect, optional */}
+        </div>
+      )}
+
+      {step < 5 && (
+        <div style={{display:"flex", justifyContent:"space-between", marginTop:18}}>
+          <button onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1}>← {t.back}</button>
+          <button className="primary" onClick={async () => {
+            if (step === 4) {
+              const now = new Date().toISOString();
+              const fee = sys.standardFee;
+              const vatAmount = Math.round(fee * sys.vatRate / 100);
+              const totalAmount = fee + vatAmount;
+              const newCase = {
+                id: newId(), createdAt: now, status: "payment_pending",
+                serviceType: serviceType || "wes_reanalysis",
+                patient: data.patient, clinical: data.clinical, files: data.files,
+                payment: { amount: totalAmount, currency: "TRY" },
+                payments: [],
+                reportFileName: null, reportSummary: "", assignee: null, notes: [],
+                events: [{ id: newEventId(), type: "case_created", actorName: "System",
+                  timestamp: now, detail: { amount: totalAmount, serviceType: serviceType || "wes_reanalysis" } }]
+              };
+
+              // 1) Lokal kayıt
+              onComplete("submit", newCase);
+              setSubmittedCaseId(newCase.id);
+
+              // 2) Formspree'ye gönder (e-mail tahiratik@yahoo.com'a düşer)
+              const serviceLabel = serviceType === "second_opinion" ? "İkincil Görüş"
+                : serviceType === "next_step" ? "Sıradaki Test Danışmanlığı"
+                : "WES Reanaliz";
+              const formData = {
+                _subject: `[PediatriPLUS] Yeni vaka: ${newCase.id} — ${serviceLabel}`,
+                _replyto: data.patient.email,
+                "Vaka Numarası": newCase.id,
+                "Hizmet Türü": serviceLabel,
+                "Hasta Adı": data.patient.fullName,
+                "Doğum Tarihi": data.patient.birthDate,
+                "Cinsiyet": data.patient.sex === "M" ? "Erkek" : data.patient.sex === "F" ? "Kadın" : "Diğer",
+                "E-posta": data.patient.email,
+                "Telefon": data.patient.phone || "—",
+                "Akraba Evliliği": data.patient.consanguinity === "yes" ? "Evet" : data.patient.consanguinity === "no" ? "Hayır" : "Bilinmiyor",
+                "Aile Öyküsü": data.clinical.familyHistory || "—",
+                "Klinik Bulgular": data.clinical.findings,
+                "Önceki Testler": data.clinical.previousTests || "—",
+                "Ek Notlar": data.clinical.additionalNotes || "—",
+                "VCF Dosyası": data.files.vcfName || "—",
+                "Referans Genom": data.files.vcfRef || "—",
+                "Genetik Rapor": data.files.reportName || "—",
+                "Önceki Rapor": data.files.prevReportName || "—",
+                "Tutar": totalAmount.toLocaleString() + " ₺ (KDV dahil)",
+                "Talep Zamanı": new Date().toLocaleString("tr-TR"),
+                "Durum": "Ödeme bekleniyor",
+                "Iyzico Linki": IYZICO_PAYMENT_URL + "?ref=" + newCase.id,
+                "_note": "Hastadan VCF/PDF dosyasını e-mail ile beklemeyi unutmayın. Ödeme tamamlandığında Iyzico ayrı bildirim gönderecek."
+              };
+              try {
+                fetch(FORMSPREE_URL, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                  body: JSON.stringify(formData)
+                }).catch(err => console.error("Formspree gönderim hatası:", err));
+              } catch (e) { console.error("Formspree:", e); }
+
+              // 3) Iyzico ödeme sayfasını yeni sekmede aç
+              window.open(IYZICO_PAYMENT_URL + "?ref=" + encodeURIComponent(newCase.id), "_blank", "noopener,noreferrer");
+              setStep(5);
+            } else { setStep(s => s + 1); }
+          }} disabled={!canNext}>
+            {step === 4 ? t.proceedToPayment + " →" : t.next + " →"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailRow({ label, value, multiline }) {
+  return (
+    <div className={"detail-row" + (multiline ? " multi" : "")}>
+      <div className="detail-label">{label}</div>
+      <div className="detail-value">{value || "—"}</div>
+    </div>
+  );
+}
+
+function PatientCaseDetail({ caseData, t, onBack }) {
+  const c = caseData;
+  const isPaymentPending = c.status === "payment_pending";
+  return (
+    <div className="content content-narrow">
+      <button className="ghost" onClick={onBack} style={{marginBottom:18}}>← {t.backToHome}</button>
+      {isPaymentPending && (
+        <div className="card" style={{padding:"18px 22px", marginBottom:14,
+          background:"var(--warn-bg)", borderColor:"var(--warn-bg)"}}>
+          <div style={{display:"flex", gap:12, alignItems:"flex-start"}}>
+            <div style={{fontSize:24, lineHeight:1}}>💳</div>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600, color:"var(--warn)", marginBottom:4, fontSize:14}}>{t.paymentPendingTitle}</div>
+              <div style={{fontSize:12, color:"var(--warn)", lineHeight:1.6, marginBottom:10}}>{t.paymentPendingBody}</div>
+              <a href={IYZICO_PAYMENT_URL + "?ref=" + encodeURIComponent(c.id)}
+                target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}>
+                <button className="primary" style={{fontSize:12}}>🔒 {t.proceedToPayment} →</button>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="card">
+        <div className="case-detail-title-row">
+          <div>
+            <div style={{display:"flex", alignItems:"center", gap:10, marginBottom:6, flexWrap:"wrap"}}>
+              <div className="case-detail-title">{c.patient.fullName}</div>
+              <ServiceBadge serviceType={c.serviceType} t={t} />
+            </div>
+            <div className="case-detail-meta">
+              <code>{c.id}</code>
+              <span className="case-detail-meta-sep">·</span>
+              <span>{fmtDateTime(c.createdAt)}</span>
+            </div>
+          </div>
+          <Pill status={c.status} t={t} />
+        </div>
+        <DetailRow label={t.email} value={c.patient.email} />
+        <DetailRow label={t.birthDate} value={c.patient.birthDate ? `${fmtDate(c.patient.birthDate)} (${calcAge(c.patient.birthDate)} ${t.age})` : "-"} />
+        <DetailRow label={t.clinicalFindings} value={c.clinical.findings} multiline />
+        {c.files?.vcfName && (
+          <DetailRow label={t.vcfFile} value={`${c.files.vcfName} (${c.files.vcfRef})`} />
+        )}
+        {c.files?.reportName && (
+          <DetailRow label={t.geneticReport} value={c.files.reportName} />
+        )}
+        {c.status === "completed" && c.reportFileName && (
+          <div style={{marginTop:20, padding:"14px 16px", background:"var(--success-bg)", borderRadius:"var(--radius)", display:"flex", alignItems:"center", gap:12}}>
+            <div style={{fontSize:20}}>📄</div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13, fontWeight:500, color:"var(--success)"}}>{c.reportFileName}</div>
+              <div style={{fontSize:11, color:"var(--success)", marginTop:2}}>{t.emailSent}</div>
+            </div>
+            <button className="accent" onClick={() => alert("⬇ " + c.reportFileName)}>↓ {t.downloadReport}</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AdminQueue({ cases, t, onView }) {
+  const [filter, setFilter] = useState("paid");
+  const counts = {
+    payment_pending: cases.filter(c => c.status === "payment_pending").length,
+    paid: cases.filter(c => c.status === "paid").length,
+    in_review: cases.filter(c => c.status === "in_review").length,
+    awaiting_info: cases.filter(c => c.status === "awaiting_info").length,
+    completed: cases.filter(c => c.status === "completed").length
+  };
+  const slaRisk = cases.filter(c => c.status === "paid" && hoursSince(c.createdAt) > 48).length;
+  const today = new Date().toDateString();
+  const doneToday = cases.filter(c => c.status === "completed" && c.completedAt && new Date(c.completedAt).toDateString() === today).length;
+  const completedDurations = cases.filter(c => c.status === "completed" && c.completedAt).map(c => (new Date(c.completedAt) - new Date(c.createdAt)) / 36e5);
+  const avgHours = completedDurations.length > 0 ? Math.round(completedDurations.reduce((a, b) => a + b) / completedDurations.length) : 0;
+  const avgDays = avgHours > 0 ? Math.round(avgHours / 24 * 10) / 10 : 0;
+
+  const filtered = cases.filter(c => c.status === filter);
+
+  return (
+    <div className="content">
+      <div className="page-header">
+        <div className="page-title-block">
+          <div className="page-eyebrow">{t.adminEyebrow}</div>
+          <h2>{t.adminQueue}</h2>
+        </div>
+      </div>
+
+      <div className="metrics">
+        <div className="metric">
+          <div className="metric-label">{t.mPending}</div>
+          <div className="metric-value">{counts.paid}</div>
+        </div>
+        <div className="metric">
+          <div className="metric-label">{t.mAvg}</div>
+          <div className="metric-value">{avgDays > 0 ? avgDays : t.none}{avgDays > 0 && <span className="metric-unit">{t.days}</span>}</div>
+        </div>
+        <div className={"metric" + (slaRisk > 0 ? " warn" : "")}>
+          <div className="metric-label">{t.mSla}</div>
+          <div className="metric-value">{slaRisk}</div>
+        </div>
+        <div className="metric">
+          <div className="metric-label">{t.mToday}</div>
+          <div className="metric-value">{doneToday}</div>
+        </div>
+      </div>
+
+      <div className="filter-row">
+        <div className={"filter-chip" + (filter === "payment_pending" ? " active" : "")} onClick={() => setFilter("payment_pending")}>
+          {t.paymentPendingStatus} <span className="count">{counts.payment_pending}</span>
+        </div>
+        <div className={"filter-chip" + (filter === "paid" ? " active" : "")} onClick={() => setFilter("paid")}>
+          {t.pending} <span className="count">{counts.paid}</span>
+        </div>
+        <div className={"filter-chip" + (filter === "in_review" ? " active" : "")} onClick={() => setFilter("in_review")}>
+          {t.inProgress} <span className="count">{counts.in_review}</span>
+        </div>
+        <div className={"filter-chip" + (filter === "awaiting_info" ? " active" : "")} onClick={() => setFilter("awaiting_info")}>
+          {t.awaitingInfo} <span className="count">{counts.awaiting_info}</span>
+        </div>
+        <div className={"filter-chip" + (filter === "completed" ? " active" : "")} onClick={() => setFilter("completed")}>
+          {t.completedFilter} <span className="count">{counts.completed}</span>
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">∅</div>
+          <div className="empty-state-text">{t.noResults}</div>
+        </div>
+      ) : (
+        <div className="case-list">
+          {filtered.map((c, i) => {
+            const hrs = hoursSince(c.createdAt);
+            const slaWarn = c.status === "paid" && hrs > 48;
+            return (
+              <div key={c.id} className={"case-row" + (slaWarn ? " warn" : "")} onClick={() => onView(c.id, filtered.map(f => f.id), i)}>
+                <div style={{flex: 1, minWidth: 0}}>
+                  <div className="case-title-row">
+                    <span className="case-title">{c.patient.fullName}</span>
+                    <Pill status={c.status} t={t} />
+                    <ServiceBadge serviceType={c.serviceType} t={t} />
+                    {slaWarn && <span className="badge-tag warn">⚠ {t.sla48}</span>}
+                    {c.assignee && <span className="badge-tag">{c.assignee === CURRENT_USER ? t.you : t.drYilmaz}</span>}
+                    {c.notes && c.notes.length > 0 && <span className="badge-tag notes">📝 {c.notes.length}</span>}
+                  </div>
+                  <div className="case-meta">
+                    <code>{c.id}</code>
+                    <span className="case-detail-meta-sep">·</span>
+                    <span>{hrs >= 24 ? Math.floor(hrs/24) + " " + t.days : hrs + " " + t.hrs}</span>
+                    {(c.files?.vcfName || c.files?.reportName) && (
+                      <>
+                        <span className="case-detail-meta-sep">·</span>
+                        <span style={{fontFamily:"var(--font-mono)"}}>{c.files.vcfName || c.files.reportName}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <button>{t.viewDetails} →</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PaymentSummary({ c, t }) {
+  const txns = c.payments && c.payments.length > 0
+    ? c.payments
+    : [{ id: "init", type: "initial", amount: c.payment?.amount || 9000, timestamp: c.createdAt }];
+
+  const totalIn = txns.filter(p => p.type !== "refund").reduce((s, p) => s + p.amount, 0);
+  const totalOut = txns.filter(p => p.type === "refund").reduce((s, p) => s + p.amount, 0);
+  const net = totalIn - totalOut;
+
+  const typeLabel = (type) => {
+    if (type === "initial") return t.paymentTypeInitial;
+    if (type === "refund") return t.paymentTypeRefund;
+    if (type === "extra") return t.paymentTypeExtra;
+    return type;
+  };
+  const typeColor = (type) => {
+    if (type === "refund") return "var(--danger)";
+    if (type === "extra") return "var(--warn)";
+    return "var(--success)";
+  };
+  const typeSign = (type) => type === "refund" ? "−" : "+";
+
+  return (
+    <div>
+      <div style={{display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:12, marginBottom:16}}>
+        <div style={{background:"var(--surface-2)", padding:"12px 14px", borderRadius:"var(--radius)"}}>
+          <div style={{fontSize:11, color:"var(--ink-3)", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:4}}>{t.paidAmount}</div>
+          <div style={{fontFamily:"var(--font-display)", fontSize:22, fontWeight:500}}>{totalIn.toLocaleString()} ₺</div>
+        </div>
+        <div style={{background:"var(--surface-2)", padding:"12px 14px", borderRadius:"var(--radius)"}}>
+          <div style={{fontSize:11, color:"var(--ink-3)", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:4}}>{t.netRefunded}</div>
+          <div style={{fontFamily:"var(--font-display)", fontSize:22, fontWeight:500, color: totalOut > 0 ? "var(--danger)" : "var(--ink-3)"}}>{totalOut.toLocaleString()} ₺</div>
+        </div>
+        <div style={{background:"var(--accent-bg)", padding:"12px 14px", borderRadius:"var(--radius)"}}>
+          <div style={{fontSize:11, color:"var(--success)", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:4}}>{t.netPaid}</div>
+          <div style={{fontFamily:"var(--font-display)", fontSize:22, fontWeight:500, color:"var(--success)"}}>{net.toLocaleString()} ₺</div>
+        </div>
+      </div>
+
+      <div style={{fontSize:11, color:"var(--ink-3)", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:8, fontWeight:600}}>{t.paymentHistory}</div>
+      <div style={{display:"flex", flexDirection:"column", gap:6}}>
+        {txns.map(p => (
+          <div key={p.id} style={{display:"flex", alignItems:"center", gap:12, padding:"10px 12px", background:"var(--surface-2)", borderRadius:"var(--radius)"}}>
+            <div style={{fontSize:11, color:"var(--ink-3)", minWidth:120}}>{fmtDateTime(p.timestamp)}</div>
+            <div style={{fontSize:12, fontWeight:500, minWidth:100}}>{typeLabel(p.type)}</div>
+            <div style={{flex:1, fontSize:11, color:"var(--ink-2)", fontStyle: p.reason ? "italic" : "normal"}}>{p.reason || "—"}</div>
+            <div style={{fontFamily:"var(--font-mono)", fontSize:13, fontWeight:500, color: typeColor(p.type)}}>
+              {typeSign(p.type)}{p.amount.toLocaleString()} ₺
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Timeline({ events, t }) {
+  const labelMap = {
+    case_created: { color: "", label: t.caseCreated },
+    paid: { color: "info", label: t.timelinePaid },
+    assigned: { color: "info", label: t.timelineAssigned },
+    note: { color: "", label: t.timelineNote },
+    hold: { color: "warn", label: t.timelineHold },
+    resume: { color: "info", label: t.timelineResume },
+    report_uploaded: { color: "info", label: t.timelineReportUploaded },
+    delivered: { color: "success", label: t.timelineDelivered },
+    reassigned: { color: "warn", label: t.timelineReassigned },
+    cancelled: { color: "danger", label: t.timelineCancelled },
+    refund: { color: "danger", label: t.timelineRefund },
+    extra: { color: "warn", label: t.timelineExtra }
+  };
+  if (!events || events.length === 0) return <p style={{fontSize:12, color:"var(--ink-3)", fontStyle:"italic", margin:"4px 0"}}>—</p>;
+  const sorted = [...events].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  return (
+    <div className="timeline">
+      {sorted.map(e => {
+        const meta = labelMap[e.type] || { color: "", label: e.type };
+        return (
+          <div key={e.id} className="timeline-event">
+            <div className={"timeline-dot " + meta.color}></div>
+            <div className="timeline-title">{meta.label}</div>
+            {e.detail && e.detail.message && <div className="timeline-detail">"{e.detail.message}"</div>}
+            {e.detail && e.detail.preview && <div className="timeline-detail">"{e.detail.preview}..."</div>}
+            {e.detail && e.detail.reason && <div className="timeline-detail">{e.detail.reason}</div>}
+            {e.detail && e.detail.reportName && <div className="timeline-detail" style={{fontFamily:"var(--font-mono)", fontStyle:"normal"}}>{e.detail.reportName}</div>}
+            {e.detail && typeof e.detail.amount === "number" && (
+              <div className="timeline-detail" style={{fontStyle:"normal", fontFamily:"var(--font-mono)", color:"var(--ink-2)"}}>
+                {e.type === "refund" ? "−" : "+"}{e.detail.amount.toLocaleString()} ₺
+              </div>
+            )}
+            <div className="timeline-meta">{e.actorName} · {fmtDateTime(e.timestamp)}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Modal({ title, onClose, children }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <div className="modal-title">{title}</div>
+          <button className="ghost icon-btn" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function AdminCaseDetail({ caseData, t, onBack, onUpdate, queueIds, queueIdx, onNavigate }) {
+  const c = caseData;
+  const [activeModal, setActiveModal] = useState(null);
+  const [noteText, setNoteText] = useState("");
+  const [holdMsg, setHoldMsg] = useState("");
+  const [cancelReason, setCancelReason] = useState("");
+  const [reassignAdmin, setReassignAdmin] = useState("dr_yilmaz");
+  const [reassignReason, setReassignReason] = useState("");
+  const [reportFile, setReportFile] = useState("");
+  const [reportSummary, setReportSummary] = useState("");
+  const [refundType, setRefundType] = useState("partial");
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundReason, setRefundReason] = useState("");
+  const [extraAmount, setExtraAmount] = useState("");
+  const [extraReason, setExtraReason] = useState("");
+  const [cancelWithRefund, setCancelWithRefund] = useState(true);
+
+  const addEvent = (type, detail) => ({
+    id: newEventId(), type, actorName: t.drAtik, timestamp: new Date().toISOString(), detail: detail || null
+  });
+
+  const takeCase = () => {
+    onUpdate({ ...c, status: "in_review", assignee: CURRENT_USER, takenAt: new Date().toISOString(),
+      events: [...(c.events || []), addEvent("assigned", null)] });
+  };
+
+  const confirmPayment = () => {
+    const amt = c.payment?.amount || 0;
+    onUpdate({ ...c, status: "paid",
+      payments: [...(c.payments || []), {
+        id: newEventId(), type: "initial", amount: amt,
+        reason: "Manuel onay (Iyzico)", timestamp: new Date().toISOString()
+      }],
+      events: [...(c.events || []), addEvent("paid", { amount: amt })] });
+  };
+
+  const doReassign = () => {
+    onUpdate({ ...c, assignee: reassignAdmin,
+      events: [...(c.events || []), addEvent("reassigned", { reason: reassignReason })] });
+    setActiveModal(null); setReassignReason("");
+  };
+
+  const doRequestInfo = () => {
+    onUpdate({ ...c, status: "awaiting_info", awaitingMessage: holdMsg,
+      events: [...(c.events || []), addEvent("hold", { message: holdMsg })] });
+    setTimeout(() => alert("📧 E-mail → " + c.patient.email + "\n\n\"" + holdMsg + "\""), 200);
+    setActiveModal(null); setHoldMsg("");
+  };
+
+  const resumeReview = () => {
+    onUpdate({ ...c, status: "in_review", awaitingMessage: null,
+      events: [...(c.events || []), addEvent("resume", null)] });
+  };
+
+  const doCancel = () => {
+    const updates = {
+      ...c, status: "cancelled", cancelReason,
+      events: [...(c.events || []), addEvent("cancelled", { reason: cancelReason })]
+    };
+    if (cancelWithRefund) {
+      const totalPaid = (c.payments || [{ type: "initial", amount: c.payment?.amount || 9000 }])
+        .reduce((sum, p) => p.type === "refund" ? sum - p.amount : sum + p.amount, 0);
+      const refundTxn = {
+        id: newEventId(), type: "refund",
+        amount: totalPaid,
+        reason: cancelReason || "Vaka iptali — tam iade",
+        timestamp: new Date().toISOString()
+      };
+      updates.payments = [...(c.payments || []), refundTxn];
+      updates.events = [...updates.events, addEvent("refund", { amount: totalPaid, reason: "İptal — tam iade" })];
+    }
+    onUpdate(updates);
+    setActiveModal(null); setCancelReason(""); setCancelWithRefund(true);
+  };
+
+  const doRefund = () => {
+    const amount = parseFloat(refundAmount);
+    if (isNaN(amount) || amount <= 0) { alert(t.refundAmountInvalid); return; }
+    const refundTxn = {
+      id: newEventId(), type: "refund", amount,
+      reason: refundReason, timestamp: new Date().toISOString()
+    };
+    onUpdate({ ...c,
+      payments: [...(c.payments || []), refundTxn],
+      events: [...(c.events || []), addEvent("refund", { amount, reason: refundReason })]
+    });
+    setTimeout(() => alert("💳 İade Iyzico'ya gönderildi: " + amount.toLocaleString() + " ₺"), 200);
+    setActiveModal(null); setRefundAmount(""); setRefundReason(""); setRefundType("partial");
+  };
+
+  const doExtraCharge = () => {
+    const amount = parseFloat(extraAmount);
+    if (isNaN(amount) || amount <= 0) { alert(t.refundAmountInvalid); return; }
+    const chargeTxn = {
+      id: newEventId(), type: "extra", amount,
+      reason: extraReason, timestamp: new Date().toISOString()
+    };
+    onUpdate({ ...c,
+      payments: [...(c.payments || []), chargeTxn],
+      events: [...(c.events || []), addEvent("extra", { amount, reason: extraReason })]
+    });
+    setTimeout(() => alert("💳 Ek ücret talebi gönderildi: " + amount.toLocaleString() + " ₺ → " + c.patient.email), 200);
+    setActiveModal(null); setExtraAmount(""); setExtraReason("");
+  };
+
+  const doComplete = () => {
+    onUpdate({ ...c, status: "completed", reportFileName: reportFile, reportSummary,
+      completedAt: new Date().toISOString(),
+      events: [...(c.events || []),
+        addEvent("report_uploaded", { reportName: reportFile }),
+        addEvent("delivered", null)] });
+    setTimeout(() => alert("📧 " + t.emailSent + "\n→ " + c.patient.email), 200);
+    setActiveModal(null); setReportFile(""); setReportSummary("");
+  };
+
+  const addNote = () => {
+    if (!noteText.trim()) return;
+    onUpdate({ ...c,
+      notes: [...(c.notes || []), { id: newEventId(), text: noteText.trim(), authorName: t.drAtik, timestamp: new Date().toISOString() }],
+      events: [...(c.events || []), addEvent("note", { preview: noteText.slice(0, 60) })] });
+    setNoteText("");
+  };
+
+  const hrsWaiting = hoursSince(c.createdAt);
+
+  let actionBar = null;
+  if (c.status === "payment_pending") {
+    actionBar = (
+      <div>
+        <div className="notice" style={{marginBottom:10}}>
+          💳 {t.paymentPendingAdminNote}
+        </div>
+        <div className="action-bar">
+          <button className="primary" onClick={confirmPayment}>✓ {t.actConfirmPayment}</button>
+          <button className="danger" onClick={() => setActiveModal("cancel")}>✕ {t.actCancel}</button>
+        </div>
+      </div>
+    );
+  } else if (c.status === "paid") {
+    actionBar = (
+      <div className="action-bar action-bar-full">
+        <button className="primary" onClick={takeCase}>📋 {t.actAssign}</button>
+      </div>
+    );
+  } else if (c.status === "in_review") {
+    actionBar = (
+      <div className="action-bar">
+        <button className="success" onClick={() => setActiveModal("complete")}>✓ {t.actComplete}</button>
+        <button className="warn" onClick={() => setActiveModal("hold")}>? {t.actHold}</button>
+        <button onClick={() => setActiveModal("reassign")}>→ {t.actReassign}</button>
+        <button onClick={() => setActiveModal("refund")}>↩ {t.actRefund}</button>
+        <button onClick={() => setActiveModal("extra")}>+ {t.actExtraCharge}</button>
+        <button className="danger" onClick={() => setActiveModal("cancel")}>✕ {t.actCancel}</button>
+      </div>
+    );
+  } else if (c.status === "awaiting_info") {
+    actionBar = (
+      <div>
+        {c.awaitingMessage && <div className="notice">{t.awaitingMessage}: {c.awaitingMessage}</div>}
+        <div className="action-bar">
+          <button className="primary" onClick={resumeReview}>▶ {t.actResume}</button>
+          <button className="danger" onClick={() => setActiveModal("cancel")}>✕ {t.actCancel}</button>
+        </div>
+      </div>
+    );
+  } else if (c.status === "completed") {
+    actionBar = (
+      <div>
+        <div className="notice notice-success" style={{marginBottom:10}}>
+          ✉ {t.emailSent} → {c.patient.email}
+        </div>
+        <div className="action-bar">
+          <button onClick={() => setActiveModal("refund")}>↩ {t.actRefund}</button>
+        </div>
+      </div>
+    );
+  } else if (c.status === "cancelled") {
+    actionBar = (
+      <div className="notice notice-danger">
+        ✕ {c.cancelReason || "Cancelled"}
+      </div>
+    );
+  }
+
+  return (
+    <div className="content">
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18}}>
+        <button className="ghost" onClick={onBack}>← {t.backToQueue}</button>
+        {queueIds && queueIds.length > 1 && (
+          <div className="nav-arrows">
+            <button className="ghost icon-btn" onClick={() => onNavigate(-1)} disabled={queueIdx === 0}>◀</button>
+            <span className="nav-counter">{queueIdx + 1} {t.pageOf} {queueIds.length}</span>
+            <button className="ghost icon-btn" onClick={() => onNavigate(1)} disabled={queueIdx === queueIds.length - 1}>▶</button>
+          </div>
+        )}
+      </div>
+
+      <div className="case-detail-header">
+        <div className="case-detail-title-row">
+          <div style={{flex:1}}>
+            <div style={{display:"flex", alignItems:"center", gap:10, marginBottom:6, flexWrap:"wrap"}}>
+              <div className="case-detail-title">{c.patient.fullName}</div>
+              <ServiceBadge serviceType={c.serviceType} t={t} />
+            </div>
+            <div className="case-detail-meta">
+              <code>{c.id}</code>
+              <span className="case-detail-meta-sep">·</span>
+              <span>{fmtDateTime(c.createdAt)}</span>
+              <span className="case-detail-meta-sep">·</span>
+              <span style={{color: hrsWaiting > 48 ? "var(--warn)" : "var(--ink-3)"}}>
+                {t.waitingFor}: {hrsWaiting >= 24 ? Math.floor(hrsWaiting/24) + " " + t.daysWaiting : hrsWaiting + " " + t.hoursWaiting}
+              </span>
+            </div>
+          </div>
+          <Pill status={c.status} t={t} />
+        </div>
+        {actionBar}
+      </div>
+
+      <div className="card">
+        <div className="card-header">{t.patientInfo}</div>
+        <DetailRow label={t.email} value={c.patient.email} />
+        <DetailRow label={t.birthDate} value={c.patient.birthDate ? `${fmtDate(c.patient.birthDate)} (${calcAge(c.patient.birthDate)} ${t.age})` : "-"} />
+        <DetailRow label={t.sex} value={t["sex" + (c.patient.sex || "O")] || "-"} />
+        <DetailRow label={t.consanguinity} value={c.patient.consanguinity ? t[c.patient.consanguinity] : "-"} />
+      </div>
+
+      <div className="card">
+        <div className="card-header">{t.clinicalInfo}</div>
+        <DetailRow label={t.familyHistory} value={c.clinical.familyHistory} multiline />
+        <DetailRow label={t.clinicalFindings} value={c.clinical.findings} multiline />
+        <DetailRow label={t.previousTests} value={c.clinical.previousTests} multiline />
+      </div>
+
+      <div className="card">
+        <div className="card-header">{t.files}</div>
+        {c.files?.vcfName && (
+          <div className="file-row">
+            <span>📄</span>
+            <span className="file-name">{c.files.vcfName}</span>
+            <span className="file-meta">{c.files.vcfRef}</span>
+            <button className="ghost icon-btn" onClick={() => alert("⬇ " + c.files.vcfName)}>↓</button>
+          </div>
+        )}
+        {c.files?.reportName && (
+          <div className="file-row">
+            <span>📋</span>
+            <span className="file-name">{c.files.reportName}</span>
+            <span className="file-meta">{t.geneticReport}</span>
+            <button className="ghost icon-btn" onClick={() => alert("⬇ " + c.files.reportName)}>↓</button>
+          </div>
+        )}
+        {c.files?.prevReportName && (
+          <div className="file-row">
+            <span>📑</span>
+            <span className="file-name">{c.files.prevReportName}</span>
+            <span className="file-meta">{t.previousTests}</span>
+            <button className="ghost icon-btn" onClick={() => alert("⬇ " + c.files.prevReportName)}>↓</button>
+          </div>
+        )}
+        {!c.files?.vcfName && !c.files?.reportName && !c.files?.prevReportName && (
+          <p style={{fontSize:12, color:"var(--ink-3)", fontStyle:"italic", margin:"4px 0"}}>—</p>
+        )}
+        {c.clinical?.additionalNotes && (
+          <div style={{marginTop:12, padding:"10px 12px", background:"var(--surface-2)", borderRadius:"var(--radius)"}}>
+            <div style={{fontSize:11, color:"var(--ink-3)", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:4, fontWeight:600}}>{t.additionalNotes}</div>
+            <div style={{fontSize:13, color:"var(--ink)", whiteSpace:"pre-wrap", lineHeight:1.5}}>{c.clinical.additionalNotes}</div>
+          </div>
+        )}
+        {c.status === "completed" && c.reportFileName && (
+          <div style={{marginTop:10, padding:"12px 14px", background:"var(--success-bg)", borderRadius:"var(--radius)", display:"flex", alignItems:"center", gap:10}}>
+            <span style={{fontSize:18}}>📄</span>
+            <span style={{flex:1, fontFamily:"var(--font-mono)", fontSize:12, color:"var(--success)"}}>{c.reportFileName}</span>
+            <button className="ghost icon-btn" onClick={() => alert("⬇ " + c.reportFileName)}>↓</button>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <div className="card-header">{t.payment}</div>
+        <PaymentSummary c={c} t={t} />
+      </div>
+
+      <div className="card">
+        <div className="card-header">{t.notes} ({(c.notes || []).length})</div>
+        {(!c.notes || c.notes.length === 0) ? (
+          <p style={{fontSize:13, color:"var(--ink-3)", fontStyle:"italic", margin:"4px 0 16px"}}>{t.notesEmpty}</p>
+        ) : (
+          <div className="notes-list">
+            {c.notes.map(n => (
+              <div key={n.id} className="note">
+                <div className="note-body">{n.text}</div>
+                <div className="note-foot">{n.authorName} · {fmtDateTime(n.timestamp)}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="notes-add">
+          <textarea value={noteText} onChange={e => setNoteText(e.target.value)} placeholder={t.notesAdd} />
+          <button className="primary" onClick={addNote} disabled={!noteText.trim()} style={{alignSelf:"flex-start"}}>
+            + {t.notesAddBtn}
+          </button>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">{t.timeline}</div>
+        <Timeline events={c.events || []} t={t} />
+      </div>
+
+      {activeModal === "hold" && (
+        <Modal title={t.requestInfo} onClose={() => setActiveModal(null)}>
+          <Field label={t.requestInfoMsg} required>
+            <textarea value={holdMsg} onChange={e => setHoldMsg(e.target.value)} placeholder={t.requestInfoExample} style={{minHeight:100}} autoFocus />
+          </Field>
+          <div className="modal-footer">
+            <button onClick={() => setActiveModal(null)}>{t.cancelBtn}</button>
+            <button className="warn" onClick={doRequestInfo} disabled={!holdMsg.trim()}>✉ {t.send}</button>
+          </div>
+        </Modal>
+      )}
+
+      {activeModal === "reassign" && (
+        <Modal title={t.actReassign} onClose={() => setActiveModal(null)}>
+          <Field label={t.reassignTo} required>
+            <select value={reassignAdmin} onChange={e => setReassignAdmin(e.target.value)}>
+              <option value="dr_yilmaz">Dr. Yılmaz · Klinik Genetik</option>
+              <option value="dr_demir">Dr. Demir · Pediatrik Genetik</option>
+              <option value="dr_kaya">Dr. Kaya · Erişkin Nörogenetik</option>
+            </select>
+          </Field>
+          <Field label={t.reassignReason}>
+            <textarea value={reassignReason} onChange={e => setReassignReason(e.target.value)} placeholder={t.reasonExample} style={{minHeight:70}} />
+          </Field>
+          <div className="modal-footer">
+            <button onClick={() => setActiveModal(null)}>{t.cancelBtn}</button>
+            <button className="primary" onClick={doReassign}>→ {t.send}</button>
+          </div>
+        </Modal>
+      )}
+
+      {activeModal === "cancel" && (
+        <Modal title={t.actCancel} onClose={() => setActiveModal(null)}>
+          <p style={{fontSize:13, color:"var(--ink-2)", margin:"0 0 14px"}}>{t.confirmCancel}</p>
+          <Field label={t.cancelReason}>
+            <textarea value={cancelReason} onChange={e => setCancelReason(e.target.value)} style={{minHeight:70}} autoFocus />
+          </Field>
+          <label style={{display:"flex", gap:10, alignItems:"flex-start", marginBottom:12, cursor:"pointer", fontSize:13, padding:"10px 12px", background:"var(--warn-bg)", borderRadius:"var(--radius)"}}>
+            <input type="checkbox" checked={cancelWithRefund} onChange={e => setCancelWithRefund(e.target.checked)} style={{marginTop:3}} />
+            <span style={{color:"var(--warn)"}}>{t.refundOnCancel}</span>
+          </label>
+          <div className="modal-footer">
+            <button onClick={() => setActiveModal(null)}>{t.keepIt}</button>
+            <button className="danger" onClick={doCancel}>✕ {t.confirm}</button>
+          </div>
+        </Modal>
+      )}
+
+      {activeModal === "refund" && (() => {
+        const txns = c.payments && c.payments.length > 0
+          ? c.payments
+          : [{ type: "initial", amount: c.payment?.amount || 9000 }];
+        const totalIn = txns.filter(p => p.type !== "refund").reduce((s, p) => s + p.amount, 0);
+        const totalOut = txns.filter(p => p.type === "refund").reduce((s, p) => s + p.amount, 0);
+        const refundable = totalIn - totalOut;
+        return (
+          <Modal title={t.refundTitle} onClose={() => setActiveModal(null)}>
+            <div style={{background:"var(--surface-2)", padding:"12px 14px", borderRadius:"var(--radius)", marginBottom:14, fontSize:12, color:"var(--ink-2)"}}>
+              {t.netPaid}: <strong style={{fontFamily:"var(--font-mono)"}}>{refundable.toLocaleString()} ₺</strong>
+            </div>
+            <Field label={t.refundType} required>
+              <select value={refundType} onChange={e => {
+                setRefundType(e.target.value);
+                if (e.target.value === "full") setRefundAmount(String(refundable));
+                else setRefundAmount("");
+              }}>
+                <option value="partial">{t.refundPartial}</option>
+                <option value="full">{t.refundFull}</option>
+              </select>
+            </Field>
+            <Field label={t.refundAmount} required>
+              <input type="number" value={refundAmount} onChange={e => setRefundAmount(e.target.value)}
+                disabled={refundType === "full"} min="0" max={refundable} style={{fontFamily:"var(--font-mono)"}} />
+            </Field>
+            <Field label={t.refundReason} required>
+              <textarea value={refundReason} onChange={e => setRefundReason(e.target.value)}
+                placeholder={t.refundReasonExample} style={{minHeight:80}} />
+            </Field>
+            <div className="modal-footer">
+              <button onClick={() => setActiveModal(null)}>{t.cancelBtn}</button>
+              <button className="danger" onClick={doRefund}
+                disabled={!refundAmount || !refundReason.trim()}>↩ {t.refundApply}</button>
+            </div>
+          </Modal>
+        );
+      })()}
+
+      {activeModal === "extra" && (
+        <Modal title={t.extraChargeTitle} onClose={() => setActiveModal(null)}>
+          <Field label={t.extraChargeAmount} required>
+            <input type="number" value={extraAmount} onChange={e => setExtraAmount(e.target.value)}
+              min="0" style={{fontFamily:"var(--font-mono)"}} autoFocus />
+          </Field>
+          <Field label={t.extraChargeReason} required>
+            <textarea value={extraReason} onChange={e => setExtraReason(e.target.value)}
+              placeholder={t.extraChargeExample} style={{minHeight:80}} />
+          </Field>
+          <div className="modal-footer">
+            <button onClick={() => setActiveModal(null)}>{t.cancelBtn}</button>
+            <button className="warn" onClick={doExtraCharge}
+              disabled={!extraAmount || !extraReason.trim()}>+ {t.extraChargeApply}</button>
+          </div>
+        </Modal>
+      )}
+
+      {activeModal === "complete" && (
+        <Modal title={t.reportUpload} onClose={() => setActiveModal(null)}>
+          <FilePicker t={t} label={t.finalReport} accept=".pdf" required value={reportFile} onChange={setReportFile} />
+          <Field label={t.reportSummary} required>
+            <textarea value={reportSummary} onChange={e => setReportSummary(e.target.value)} placeholder={t.reportSummaryPlaceholder} style={{minHeight:120}} />
+          </Field>
+          <div className="modal-footer">
+            <button onClick={() => setActiveModal(null)}>{t.cancelBtn}</button>
+            <button className="success" onClick={doComplete} disabled={!reportFile || !reportSummary.trim()}>✓ {t.markComplete}</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+function seedDemoCases() {
+  const existing = loadCases();
+  if (existing.length > 0) return existing;
+  const now = Date.now();
+  const demos = [
+    {
+      id: "CASE-2026-10428", createdAt: new Date(now - 14 * 36e5).toISOString(), status: "paid",
+      serviceType: "wes_reanalysis",
+      patient: { fullName: "Ayşe Kaplan", birthDate: "2019-03-14", sex: "F", email: "ayse.kaplan@example.com", phone: "+90 555 123 4567", consanguinity: "yes" },
+      clinical: { familyHistory: "Anne ve baba 1. derece kuzen. Ailede benzer fenotip yok.", findings: "Gelişim geriliği, mikrosefali (-2.5 SD), aksiyel hipotoni, fasiyal dismorfizm (geniş alın, bademgöz). HPO: HP:0001263, HP:0000252, HP:0001252", previousTests: "2022 - WES (Genoks Lab) - negatif rapor\n2021 - aCGH (Düzen Lab) - normal", additionalNotes: "" },
+      files: { vcfName: "AK_20220318_GRCh38.vcf.gz", vcfRef: "GRCh38" },
+      payment: { amount: 9000, currency: "TRY" }, reportFileName: null, assignee: null, notes: [],
+      events: [{ id: "e_init1", type: "paid", actorName: "System", timestamp: new Date(now - 14 * 36e5).toISOString(), detail: null }]
+    },
+    {
+      id: "CASE-2026-10427", createdAt: new Date(now - 72 * 36e5).toISOString(), status: "paid",
+      serviceType: "second_opinion",
+      patient: { fullName: "Mehmet Yıldız", birthDate: "2015-08-22", sex: "M", email: "yildiz.aile@example.com", phone: "+90 555 234 5678", consanguinity: "no" },
+      clinical: { familyHistory: "Aile öyküsünde özellik yok.", findings: "Otizm spektrum bozukluğu, makrosefali, ataksik yürüyüş başlangıcı 4 yaş.", previousTests: "2023 - WES negatif raporu, ancak SCN1A geninde VUS bildirildi", additionalNotes: "SCN1A varyantı klinik tablo ile uyumlu mu? Anne-babada da bulundu mu test edilmedi." },
+      files: { reportName: "MY_WES_rapor_2023.pdf" },
+      payment: { amount: 9000, currency: "TRY" }, reportFileName: null, assignee: null, notes: [],
+      events: [{ id: "e_init2", type: "paid", actorName: "System", timestamp: new Date(now - 72 * 36e5).toISOString(), detail: null }]
+    },
+    {
+      id: "CASE-2026-10425", createdAt: new Date(now - 28 * 36e5).toISOString(), status: "in_review",
+      serviceType: "wes_reanalysis",
+      patient: { fullName: "Zeynep Demir", birthDate: "2020-11-05", sex: "F", email: "z.demir@example.com", phone: "+90 555 345 6789", consanguinity: "unknown" },
+      clinical: { familyHistory: "—", findings: "Konjenital katarakt, dental anomaliler, hipokalsemi. HPO: HP:0000518, HP:0006482, HP:0002901", previousTests: "Önceki test yok", additionalNotes: "" },
+      files: { vcfName: "ZD_20240101_GRCh38.vcf.gz", vcfRef: "GRCh38" },
+      payment: { amount: 9000, currency: "TRY" },
+      payments: [
+        { id: "p_z1", type: "initial", amount: 9000, reason: "İlk ödeme", timestamp: new Date(now - 28 * 36e5).toISOString() },
+        { id: "p_z2", type: "extra", amount: 3600, reason: "Trio analizi gerekti (anne-baba örnekleri)", timestamp: new Date(now - 5 * 36e5).toISOString() }
+      ],
+      reportFileName: null, assignee: CURRENT_USER, takenAt: new Date(now - 6 * 36e5).toISOString(),
+      notes: [{ id: "e_note1", text: "WES tekrar incelendi. Mitokondri panel bakılmalı mı? IVA filtrelemesi sonrası 3 candidate gene var: ALPL, CASR, GATA3.", authorName: "Dr. Atik", timestamp: new Date(now - 4 * 36e5).toISOString() }],
+      events: [
+        { id: "e_init3", type: "paid", actorName: "System", timestamp: new Date(now - 28 * 36e5).toISOString(), detail: { amount: 9000 } },
+        { id: "e_a3", type: "assigned", actorName: "Dr. Atik", timestamp: new Date(now - 6 * 36e5).toISOString(), detail: null },
+        { id: "e_x3", type: "extra", actorName: "Dr. Atik", timestamp: new Date(now - 5 * 36e5).toISOString(), detail: { amount: 3600, reason: "Trio analizi gerekti" } },
+        { id: "e_n3", type: "note", actorName: "Dr. Atik", timestamp: new Date(now - 4 * 36e5).toISOString(), detail: { preview: "WES tekrar incelendi. Mitokondri panel bakılmalı mı?" } }
+      ]
+    },
+    {
+      id: "CASE-2026-10421", createdAt: new Date(now - 56 * 36e5).toISOString(), status: "awaiting_info",
+      serviceType: "next_step",
+      patient: { fullName: "Ali Şahin", birthDate: "2018-02-10", sex: "M", email: "sahin.ali@example.com", phone: "+90 555 456 7890", consanguinity: "yes" },
+      clinical: { familyHistory: "Akraba evliliği, etkilenmiş ablası 4 yaşında vefat.", findings: "Süt çocuğunda nöbet, gelişim geriliği, hepatomegali", previousTests: "Geniş metabolik tarama (normal), WES (negatif), karyotip (46,XY)", additionalNotes: "Bundan sonra hangi test? Mitokondri panel mi, mtDNA tüm dizileme mi? WGS düşünülmeli mi?" },
+      files: {},
+      payment: { amount: 9000, currency: "TRY" }, reportFileName: null, assignee: CURRENT_USER, awaitingMessage: "Ablanızın klinik kayıtlarını paylaşabilir misiniz? Otopsi raporu varsa ekleyin.", notes: [],
+      events: [
+        { id: "e_init4", type: "paid", actorName: "System", timestamp: new Date(now - 56 * 36e5).toISOString(), detail: null },
+        { id: "e_a4", type: "assigned", actorName: "Dr. Atik", timestamp: new Date(now - 30 * 36e5).toISOString(), detail: null },
+        { id: "e_h4", type: "hold", actorName: "Dr. Atik", timestamp: new Date(now - 20 * 36e5).toISOString(), detail: { message: "Ablanızın klinik kayıtlarını paylaşabilir misiniz? Otopsi raporu varsa ekleyin." } }
+      ]
+    },
+    {
+      id: "CASE-2026-10412", createdAt: new Date(now - 240 * 36e5).toISOString(), status: "completed",
+      serviceType: "wes_reanalysis",
+      patient: { fullName: "Elif Aydın", birthDate: "2017-06-30", sex: "F", email: "aydin.elif@example.com", phone: "+90 555 567 8901", consanguinity: "no" },
+      clinical: { familyHistory: "—", findings: "Boy kısalığı (-3.2 SD), mikrosefali, fasiyal dismorfizm, ID. Primrose sendromu şüphesi.", previousTests: "2020 - WES negatif", additionalNotes: "" },
+      files: { vcfName: "EA_20200422_GRCh37.vcf.gz", vcfRef: "GRCh37" },
+      payment: { amount: 9000, currency: "TRY" },
+      reportFileName: "EA_reanalysis_report_v1.pdf",
+      reportSummary: "ZBTB20 geninde de novo missense varyant: NM_001164342.2:c.1924C>T, p.Arg642Cys. Primrose sendromu (OMIM #259050) ile uyumlu. Klinik fenotip ile korele.",
+      assignee: CURRENT_USER, completedAt: new Date(now - 144 * 36e5).toISOString(),
+      notes: [{ id: "e_note5", text: "Final raporda OMIM ID ve referans literatür eklendi. Sonuç aile danışmanlığı için yönlendirildi.", authorName: "Dr. Atik", timestamp: new Date(now - 144 * 36e5).toISOString() }],
+      events: [
+        { id: "e_init5", type: "paid", actorName: "System", timestamp: new Date(now - 240 * 36e5).toISOString(), detail: null },
+        { id: "e_a5", type: "assigned", actorName: "Dr. Atik", timestamp: new Date(now - 200 * 36e5).toISOString(), detail: null },
+        { id: "e_r5", type: "report_uploaded", actorName: "Dr. Atik", timestamp: new Date(now - 144 * 36e5).toISOString(), detail: { reportName: "EA_reanalysis_report_v1.pdf" } },
+        { id: "e_d5", type: "delivered", actorName: "Dr. Atik", timestamp: new Date(now - 144 * 36e5).toISOString(), detail: null }
+      ]
+    }
+  ];
+  saveCases(demos);
+  return demos;
+}
+
+function SettingsModal({ t, settings, onSave, onClose }) {
+  const [draft, setDraft] = useState(settings);
+  const updatePromo = (idx, field, val) => {
+    setDraft(d => ({ ...d, promos: d.promos.map((p, i) => i === idx ? { ...p, [field]: val } : p) }));
+  };
+  const addPromo = () => {
+    setDraft(d => ({ ...d, promos: [...d.promos, { code: "", discount: 0, active: true }] }));
+  };
+  const removePromo = (idx) => {
+    setDraft(d => ({ ...d, promos: d.promos.filter((_, i) => i !== idx) }));
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()} style={{maxWidth:640}}>
+        <div className="modal-header">
+          <div>
+            <div className="modal-title">{t.settingsTitle}</div>
+            <div style={{fontSize:12, color:"var(--ink-3)", marginTop:2}}>{t.settingsSubtitle}</div>
+          </div>
+          <button className="ghost icon-btn" onClick={onClose}>✕</button>
+        </div>
+
+        <div style={{fontSize:11, color:"var(--ink-3)", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:10, fontWeight:600}}>{t.pricingSection}</div>
+        <div className="field-grid-2">
+          <Field label={t.standardFee} required>
+            <input type="number" value={draft.standardFee} onChange={e => setDraft({ ...draft, standardFee: parseFloat(e.target.value) || 0 })} style={{fontFamily:"var(--font-mono)"}} />
+          </Field>
+          <Field label={t.vatRate} required>
+            <input type="number" value={draft.vatRate} onChange={e => setDraft({ ...draft, vatRate: parseFloat(e.target.value) || 0 })} style={{fontFamily:"var(--font-mono)"}} />
+          </Field>
+          <Field label={t.trioFee}>
+            <input type="number" value={draft.trioFee} onChange={e => setDraft({ ...draft, trioFee: parseFloat(e.target.value) || 0 })} style={{fontFamily:"var(--font-mono)"}} />
+          </Field>
+          <Field label={t.urgentFee}>
+            <input type="number" value={draft.urgentFee} onChange={e => setDraft({ ...draft, urgentFee: parseFloat(e.target.value) || 0 })} style={{fontFamily:"var(--font-mono)"}} />
+          </Field>
+        </div>
+
+        <hr />
+
+        <div style={{fontSize:11, color:"var(--ink-3)", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:10, fontWeight:600}}>{t.promoSection}</div>
+        <div style={{display:"flex", flexDirection:"column", gap:8, marginBottom:12}}>
+          {draft.promos.map((p, i) => (
+            <div key={i} style={{display:"grid", gridTemplateColumns:"2fr 1fr auto auto", gap:8, alignItems:"center"}}>
+              <input value={p.code} onChange={e => updatePromo(i, "code", e.target.value.toUpperCase())}
+                style={{fontFamily:"var(--font-mono)"}} placeholder={t.promoCode} />
+              <input type="number" value={p.discount} onChange={e => updatePromo(i, "discount", parseFloat(e.target.value) || 0)}
+                placeholder="%" style={{fontFamily:"var(--font-mono)"}} />
+              <label style={{display:"flex", alignItems:"center", gap:6, fontSize:12, color:"var(--ink-2)"}}>
+                <input type="checkbox" checked={p.active} onChange={e => updatePromo(i, "active", e.target.checked)} />
+                {t.promoActive}
+              </label>
+              <button className="ghost icon-btn" onClick={() => removePromo(i)}>✕</button>
+            </div>
+          ))}
+        </div>
+        <button onClick={addPromo} style={{fontSize:12}}>+ {t.addPromo}</button>
+
+        <div className="modal-footer" style={{marginTop:20}}>
+          <button onClick={onClose}>{t.cancelBtn}</button>
+          <button className="primary" onClick={() => { onSave(draft); onClose(); }}>{t.saveSettings}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [lang, setLang] = useState("tr");
+  const [role, setRole] = useState("patient");
+  const [view, setView] = useState("landing");
+  const [activeCase, setActiveCase] = useState(null);
+  const [queueIds, setQueueIds] = useState([]);
+  const [queueIdx, setQueueIdx] = useState(0);
+  const [cases, setCases] = useState([]);
+  const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
+  const [showSettings, setShowSettings] = useState(false);
+  const [toast, setToast] = useState("");
+  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
+  const [selectedService, setSelectedService] = useState("wes_reanalysis");
+
+  useEffect(() => {
+    const seeded = seedDemoCases();
+    const s = loadSettings();
+    const sys = loadSystemSettings();
+
+    // URL'den ödeme dönüşü parametrelerini oku
+    const urlParams = new URLSearchParams(window.location.search);
+    const paidParam = urlParams.get("paid");
+    const refParam = urlParams.get("ref");
+
+    let workingCases = seeded;
+    let redirectToCase = null;
+
+    if (paidParam === "true" && refParam) {
+      // Iyzico'dan başarılı dönüş — eşleşen vakayı paid'e çek
+      const targetCase = workingCases.find(c => c.id === refParam);
+      if (targetCase && targetCase.status === "payment_pending") {
+        const now = new Date().toISOString();
+        workingCases = workingCases.map(c => {
+          if (c.id !== refParam) return c;
+          return {
+            ...c,
+            status: "paid",
+            payments: [...(c.payments || []), {
+              id: newEventId(), type: "initial",
+              amount: c.payment?.amount || 0,
+              reason: "İlk ödeme (Iyzico)",
+              timestamp: now
+            }],
+            events: [...(c.events || []), {
+              id: newEventId(), type: "paid",
+              actorName: "System", timestamp: now,
+              detail: { amount: c.payment?.amount || 0 }
+            }]
+          };
+        });
+        saveCases(workingCases);
+        redirectToCase = refParam;
+      }
+      // URL'i temizle
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+
+    setCases(workingCases);
+    setSystemSettings(sys);
+    setLang(s.lang || "tr");
+    const initialRole = s.role || "patient";
+    setRole(initialRole);
+    const adminSession = (() => {
+      try { return localStorage.getItem(ADMIN_SESSION_KEY); } catch { return null; }
+    })();
+    const isAuthed = adminSession === "active";
+    setAdminAuthenticated(isAuthed);
+    if (initialRole === "admin" && !isAuthed) {
+      setRole("patient");
+      setView("landing");
+    } else if (redirectToCase) {
+      // Ödeme tamamlandı → vakanın detayına yönlendir
+      setActiveCase(redirectToCase);
+      setView("detail");
+    } else {
+      setView(initialRole === "admin" ? "list" : "landing");
+    }
+  }, []);
+
+  useEffect(() => { saveSettings({ lang, role }); }, [lang, role]);
+  useEffect(() => {
+    setView(role === "admin" ? "list" : "landing");
+    setActiveCase(null);
+  }, [role]);
+
+  const t = STRINGS[lang];
+
+  const handleNewCase = useCallback((newCase) => {
+    if (newCase) {
+      setCases(prev => {
+        const updated = [newCase, ...prev];
+        saveCases(updated);
+        return updated;
+      });
+    }
+  }, []);
+
+  const handleUpdate = useCallback((updated) => {
+    setCases(prev => {
+      const next = prev.map(c => c.id === updated.id ? updated : c);
+      saveCases(next);
+      return next;
+    });
+    setActiveCase(updated.id);
+  }, []);
+
+  const handleNavigate = (delta) => {
+    const newIdx = queueIdx + delta;
+    if (newIdx >= 0 && newIdx < queueIds.length) {
+      setQueueIdx(newIdx);
+      setActiveCase(queueIds[newIdx]);
+    }
+  };
+
+  const currentCase = activeCase ? cases.find(c => c.id === activeCase) : null;
+
+  return (
+    <div>
+      <TopBar t={t} lang={lang} setLang={setLang} role={role} setRole={setRole}
+        onSettings={() => setShowSettings(true)}
+        adminAuthenticated={adminAuthenticated}
+        onAdminLogout={() => {
+          setAdminAuthenticated(false);
+          try { localStorage.removeItem(ADMIN_SESSION_KEY); } catch {}
+          setRole("patient");
+          setView("landing");
+        }} />
+      {toast && (
+        <div style={{position:"fixed", top:80, right:32, zIndex:200,
+          background:"var(--success)", color:"white", padding:"10px 16px",
+          borderRadius:"var(--radius)", fontSize:13, fontWeight:500,
+          boxShadow:"0 4px 12px rgba(0,0,0,0.15)"}}>
+          ✓ {toast}
+        </div>
+      )}
+      {role === "patient" && view === "landing" && (
+        <LandingPage t={t} systemSettings={systemSettings}
+          onPickService={(type) => { setSelectedService(type); setView("wizard"); }}
+          onTrack={() => setView("track")} />
+      )}
+      {role === "patient" && view === "track" && (
+        <TrackCase t={t} cases={cases}
+          onFound={(id) => { setActiveCase(id); setView("detail"); }}
+          onBack={() => setView("landing")} />
+      )}
+      {role === "patient" && view === "wizard" && (
+        <Wizard t={t} systemSettings={systemSettings} serviceType={selectedService}
+          onComplete={(action, payload) => {
+            if (action === "submit" && payload) {
+              handleNewCase(payload);
+            } else if (action === "view" && payload) {
+              setActiveCase(payload);
+              setView("detail");
+            } else if (action === "paid" && payload) {
+              // Hasta Iyzico'da ödediğini bildirdi → vakayı paid'e çek
+              setCases(prev => {
+                const next = prev.map(c => {
+                  if (c.id !== payload) return c;
+                  const now = new Date().toISOString();
+                  return {
+                    ...c,
+                    status: "paid",
+                    payments: [...(c.payments || []), {
+                      id: newEventId(), type: "initial",
+                      amount: c.payment?.amount || 0,
+                      reason: t.paymentTypeInitial,
+                      timestamp: now
+                    }],
+                    events: [...(c.events || []), {
+                      id: newEventId(), type: "paid",
+                      actorName: "System", timestamp: now,
+                      detail: { amount: c.payment?.amount || 0 }
+                    }]
+                  };
+                });
+                saveCases(next);
+                return next;
+              });
+              setActiveCase(payload);
+              setView("detail");
+            } else {
+              setView("landing");
+            }
+          }}
+          onCancel={() => setView("landing")} />
+      )}
+      {role === "patient" && view === "detail" && currentCase && (
+        <PatientCaseDetail caseData={currentCase} t={t}
+          onBack={() => { setView("landing"); setActiveCase(null); }} />
+      )}
+      {role === "admin" && !adminAuthenticated && (
+        <AdminLogin t={t}
+          onSuccess={() => {
+            setAdminAuthenticated(true);
+            try { localStorage.setItem(ADMIN_SESSION_KEY, "active"); } catch {}
+          }}
+          onCancel={() => {
+            setRole("patient");
+            setView("landing");
+          }} />
+      )}
+      {role === "admin" && adminAuthenticated && view === "list" && (
+        <AdminQueue cases={cases} t={t} onView={(id, ids, idx) => { setActiveCase(id); setQueueIds(ids); setQueueIdx(idx); setView("detail"); }} />
+      )}
+      {role === "admin" && adminAuthenticated && view === "detail" && currentCase && (
+        <AdminCaseDetail caseData={currentCase} t={t} onBack={() => { setView("list"); setActiveCase(null); }}
+          onUpdate={handleUpdate} queueIds={queueIds} queueIdx={queueIdx} onNavigate={handleNavigate} />
+      )}
+      {showSettings && (
+        <SettingsModal t={t} settings={systemSettings}
+          onSave={(s) => {
+            setSystemSettings(s);
+            saveSystemSettings(s);
+            setToast(t.settingsSaved);
+            setTimeout(() => setToast(""), 2500);
+          }}
+          onClose={() => setShowSettings(false)} />
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
