@@ -132,6 +132,22 @@ def _proto(key, requested):
     return dvs
 
 
+class _SahteCall(Exception):
+    """grpc.Call gibi .code() donduren sahte neden (handle_rpc_error 'raise ... from error')."""
+    def __init__(self, ad):
+        super(_SahteCall, self).__init__(ad)
+        self._ad = ad
+
+    def code(self):
+        return types.SimpleNamespace(name=self._ad)
+
+
+def _grpc_hata(kod, mesaj):
+    e = IndexError(mesaj) if kod == "OUT_OF_RANGE" else ValueError(mesaj)
+    e.__cause__ = _SahteCall(kod)
+    return e
+
+
 class FakeClient(object):
     def __init__(self):
         self.calls = []
@@ -146,7 +162,7 @@ class FakeClient(object):
         key = "%s:%d:%s:%s" % (v.chromosome, v.position, v.reference_bases, v.alternate_bases)
         self.calls.append(key)
         if key == NOTFOUND:
-            raise ValueError("Variant not found")          # mirrors handle_rpc_error NOT_FOUND
+            raise _grpc_hata("NOT_FOUND", "Variant not found")   # mirrors handle_rpc_error NOT_FOUND
         meta = {k: m.track_metadata.copy() for k, m in META.items()}
         return atlas.convert_variant_scores_to_anndata([_proto(key, set(requested_scorers))], meta)
 
@@ -466,6 +482,152 @@ class CalistirTest(unittest.TestCase):
         oz = AG.calistir(self.tmp, adaylar=[], genome="hg38", onbellek=False, sessiz=True)
         self.assertEqual(oz["durum"], "tamam")
         self.assertEqual(oz["aday"], 0)
+
+
+class IncelemeDuzeltmeTest(unittest.TestCase):
+    """Bagimsiz incelemede bulunan kusurlarin regresyon testleri."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        _kanit(self.tmp)
+        self.dosyalar = [os.path.join(self.tmp, d) for d in os.listdir(self.tmp)
+                         if d.startswith("222080_") or d.startswith("DENOVO_")]
+        self.adaylar = AG.adaylari_topla(self.tmp, dosyalar=self.dosyalar)
+
+    def test_bulunamadi_mi(self):
+        self.assertTrue(AG._bulunamadi_mi(_grpc_hata("NOT_FOUND", "x")))
+        self.assertTrue(AG._bulunamadi_mi(_grpc_hata("OUT_OF_RANGE", "x")))
+        self.assertFalse(AG._bulunamadi_mi(_grpc_hata("INVALID_ARGUMENT", "Invalid filter")))
+        self.assertFalse(AG._bulunamadi_mi(ValueError("var must have as many rows as X has columns")))
+        self.assertTrue(AG._bulunamadi_mi(ValueError("Variant not found")))
+
+    def test_gecersiz_arguman_hata_sayilir(self):
+        class Kirik(FakeSorgu):
+            def _atlas_tek(self, v):
+                raise _grpc_hata("INVALID_ARGUMENT", "Invalid filter")
+        s = Kirik(model=True)
+        ozet, _ = s.sorgula(self.adaylar, onbellek=None)
+        durumlar = {r["key"]: r["durum"] for r in ozet}
+        self.assertEqual(durumlar[STRONG], "hata")
+        self.assertEqual(s.model_calls, [])                    # hata -> model denenmez
+        self.assertTrue(s.hatalar)
+
+    def test_hata_onbellege_girmez(self):
+        ob = AG.Onbellek(os.path.join(self.tmp, "cache"))
+        class Zaman(FakeSorgu):
+            def _atlas_tek(self, v):
+                raise TimeoutError("Deadline Exceeded")
+        s1 = Zaman(model=False)
+        ozet1, _ = s1.sorgula(self.adaylar, onbellek=ob)
+        self.assertEqual({r["durum"] for r in ozet1 if r["key"] != BAD}, {"hata"})
+        s2 = FakeSorgu(model=False)
+        ozet2, _ = s2.sorgula(self.adaylar, onbellek=ob)
+        self.assertEqual(len(s2.fake.calls), 3)                 # yeniden soruldu
+        self.assertEqual([r for r in ozet2 if r["key"] == STRONG][0]["durum"], "atlas")
+
+    def test_onbellek_model_bayragi(self):
+        ob = AG.Onbellek(os.path.join(self.tmp, "cache"))
+        s1 = FakeSorgu(model=False)
+        s1.sorgula(self.adaylar, onbellek=ob)                  # NOTFOUND -> bulunamadi (model kapali)
+        s2 = FakeSorgu(model=True)
+        ozet2, _ = s2.sorgula(self.adaylar, onbellek=ob)
+        nf = [r for r in ozet2 if r["key"] == NOTFOUND][0]
+        self.assertEqual(nf["durum"], "model")                 # model acilinca yeniden denendi
+        self.assertEqual(s2.model_calls, [NOTFOUND])
+        s3 = FakeSorgu(model=True)
+        s3.sorgula(self.adaylar, onbellek=ob)
+        self.assertEqual(s3.model_calls, [])                   # model sonucu onbellekten
+
+    def test_kaynak_korunur(self):
+        s = FakeSorgu(model=False)
+        ozet, _ = s.sorgula(self.adaylar, onbellek=None)
+        st = [r for r in ozet if r["key"] == STRONG][0]
+        self.assertIn("222080_nadir_lof", st["kaynak"])
+        self.assertEqual(st["durum"], "atlas")
+
+    def test_ham_ve_kantil_ayni_hucre(self):
+        import anndata
+        s = FakeSorgu()
+        s._secili = s.secili_skorlar()
+        X = np.array([[-0.9, .05, .05], [.05, .05, .40]], dtype=np.float32)
+        Q = np.array([[-.80, .1, .1], [.1, .1, .97]], dtype=np.float32)
+        a = anndata.AnnData(X=X, obs=pd.DataFrame({"gene_name": ["GENE1", "GENE2"], "variant": ["v", "v"]},
+                                                  index=["0", "1"]),
+                            var=_tracks(3, "RNA_SEQ", CURIES), layers={"quantiles": Q})
+        oz, det = s._ozetle("chr1:1:A:T", {"RNA_SEQ": a}, None, None, "atlas")
+        self.assertEqual(oz["ekspresyon_kantil"], 0.97)
+        self.assertEqual(oz["ekspresyon_gen"], "GENE2")
+        self.assertAlmostEqual(oz["ekspresyon_ham"], 0.40, places=2)   # ayni hucre
+        self.assertEqual(oz["ekspresyon_doku"], "kan")
+
+    def test_splicing_birlesik_max_ham(self):
+        import anndata
+        s = FakeSorgu()
+        s._secili = s.secili_skorlar()
+        X = np.array([[0.9, 0.1]], dtype=np.float32)
+        Q = np.array([[0.5, 0.99]], dtype=np.float32)     # kantil hucresi != max ham hucresi
+        a = anndata.AnnData(X=X, obs=pd.DataFrame({"gene_name": ["G"], "variant": ["v"]}, index=["0"]),
+                            var=_tracks(2, "SPLICE_SITES", CURIES), layers={"quantiles": Q})
+        oz, _ = s._ozetle("chr1:1:A:T", {"SPLICE_SITES": a}, None, None, "atlas")
+        self.assertAlmostEqual(oz["splicing_birlesik"], 0.9, places=2)   # makale: max ham
+        self.assertAlmostEqual(oz["splice_site_ham"], 0.1, places=2)      # tablo: kantil hucresi
+
+    def test_tum_nan_kantil(self):
+        import anndata
+        s = FakeSorgu()
+        s._secili = s.secili_skorlar()
+        a = anndata.AnnData(X=np.array([[0.3, -0.2]], dtype=np.float32),
+                            obs=pd.DataFrame({"variant": ["v"]}, index=["0"]),
+                            var=_tracks(2, "ATAC", CURIES),
+                            layers={"quantiles": np.array([[np.nan, np.nan]], dtype=np.float32)})
+        oz, det = s._ozetle("chr1:1:A:T", {"ATAC": a}, None, None, "atlas")
+        self.assertEqual(oz["atac_ham"], 0.3)
+        self.assertIsNone(oz["atac_kantil"])
+        self.assertTrue(det)
+
+    def test_nan_biosample(self):
+        var = pd.DataFrame({"name": ["t0", "t1"], "biosample_name": ["brain", np.nan]}, index=["0", "1"])
+        self.assertEqual(AG.AtlasSorgu._doku_adlari(var), ["brain", "t1"])
+
+    def test_model_araligi(self):
+        from alphagenome.data import genome
+        from alphagenome.models import dna_client
+        a = AG.AtlasSorgu._model_araligi(genome.Variant("chr1", 12345, "A", "G"))
+        self.assertEqual(a.start, 0)
+        self.assertEqual(a.width, dna_client.SEQUENCE_LENGTH_1MB)
+        b = AG.AtlasSorgu._model_araligi(genome.Variant("chr12", 13865958, "C", "T"))
+        self.assertEqual(b.width, dna_client.SEQUENCE_LENGTH_1MB)
+        self.assertTrue(b.start < 13865958 < b.end)
+
+    def test_avi_yok_uyarisi(self):
+        class AviSiz(FakeSorgu):
+            def secili_skorlar(self):
+                return [s for s in super(AviSiz, self).secili_skorlar() if "AVI" not in s]
+        orig, orig_key = AG.AtlasSorgu, AG.api_key
+        AG.AtlasSorgu, AG.api_key = AviSiz, (lambda: "k")
+        try:
+            oz = AG.calistir(self.tmp, adaylar=self.adaylar, genome="hg38", onbellek=False, sessiz=True)
+        finally:
+            AG.AtlasSorgu, AG.api_key = orig, orig_key
+        self.assertIsNone(oz["avi_skoru"])
+        self.assertIn("AVI", oz["uyari"])
+        rapor = open(os.path.join(self.tmp, "alphagenome_rapor.txt"), encoding="utf-8").read()
+        self.assertNotIn("PHRED skoru (10 =", rapor)
+        self.assertIn("Uyarı:", rapor)
+
+    def test_hicbiri_bulunamadi_uyarisi(self):
+        class Yok(FakeSorgu):
+            def _atlas_tek(self, v):
+                raise _grpc_hata("NOT_FOUND", "not found")
+        orig, orig_key = AG.AtlasSorgu, AG.api_key
+        AG.AtlasSorgu, AG.api_key = Yok, (lambda: "k")
+        try:
+            oz = AG.calistir(self.tmp, adaylar=self.adaylar, genome="hg38", onbellek=False, sessiz=True,
+                             model=False)
+        finally:
+            AG.AtlasSorgu, AG.api_key = orig, orig_key
+        self.assertEqual(oz["durum"], "tamam")
+        self.assertIn("Atlas'ta bulunamadi", oz["uyari"])
 
 
 @unittest.skipUnless(os.path.exists(os.path.join(PIPE, "rutin.py")),

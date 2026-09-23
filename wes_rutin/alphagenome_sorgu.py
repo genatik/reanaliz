@@ -50,6 +50,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -248,6 +249,23 @@ class Onbellek(object):
 # Atlas istemcisi
 # --------------------------------------------------------------------------
 
+def _bulunamadi_mi(e):
+    """atlas.handle_rpc_error NOT_FOUND -> ValueError(from grpc.Call), OUT_OF_RANGE -> IndexError.
+    gRPC kodunu __cause__ uzerinden oku; kutuphane kaynakli ValueError'lar hata sayilir."""
+    if isinstance(e, IndexError):
+        return True
+    c = getattr(e, "__cause__", None)
+    kod = getattr(c, "code", None)
+    try:
+        kod = kod() if callable(kod) else kod
+    except Exception:
+        kod = None
+    ad = getattr(kod, "name", None) or (str(kod) if kod is not None else "")
+    if ad.endswith("NOT_FOUND") or ad.endswith("OUT_OF_RANGE"):
+        return True
+    return c is None and "not found" in str(e).lower()
+
+
 class AtlasSorgu(object):
     """alphagenome.atlas uzerinden sorgu; skor metaverisi bir kez cekilir."""
 
@@ -261,9 +279,12 @@ class AtlasSorgu(object):
         self._meta = None
         self._model = None
         self._model_sayac = 0
+        self._kilit = threading.Lock()
         self.skor_adlari = []
         self.hatalar = []
         self.paket_surum = None
+        self.avi_ad = None
+        self.katki_ad = None
 
     # -- baglanti -----------------------------------------------------------
     def baglan(self):
@@ -324,10 +345,14 @@ class AtlasSorgu(object):
                 continue
             m = self.meta().get(ad)
             n = len(m.track_metadata) if m is not None and m.track_metadata is not None else 0
-            if any(k in u for k in ("SHAP", "ATTRIB", "KATKI", "FEATURE", "CONTRIB")) or n > 1:
+            if any(k in u for k in ("SHAP", "ATTRIB", "KATKI", "FEATURE", "CONTRIB")):
                 katki = katki or ad
-            else:
-                avi = avi or ad
+            elif avi is None:
+                avi = ad
+            elif n > 1 and katki is None:
+                katki = ad
+        if avi is None:
+            log("UYARI: sunucu skor listesinde AVI skoru bulunamadi; yalniz modalite skorlari alinacak")
         return avi, katki
 
     # -- sorgu ------------------------------------------------------------
@@ -337,14 +362,24 @@ class AtlasSorgu(object):
         var = genome.Variant(chromosome=v[0], position=v[1], reference_bases=v[2], alternate_bases=v[3])
         return c.query_variants([var], requested_scorers=self._secili, progress_bar=False, max_workers=1)
 
+    @staticmethod
+    def _model_araligi(var):
+        """1 Mb pencere; kromozom basinda negatif baslangic olusursa saga kaydir."""
+        from alphagenome.models import dna_client
+        aralik = var.reference_interval.resize(dna_client.SEQUENCE_LENGTH_1MB)
+        if aralik.start < 0:
+            aralik = aralik.shift(-aralik.start)
+        return aralik
+
     def _model_tek(self, v):
         """Atlas'ta olmayan varyant icin canli model (1 Mb pencere)."""
         from alphagenome.data import genome
         from alphagenome.models import dna_client, variant_scorers
-        if self._model is None:
-            self._model = dna_client.create(self.key, timeout=60)
+        with self._kilit:                      # tek kanal; is parcaciklari ayni istemciyi paylasir
+            if self._model is None:
+                self._model = dna_client.create(self.key, timeout=60)
         var = genome.Variant(chromosome=v[0], position=v[1], reference_bases=v[2], alternate_bases=v[3])
-        aralik = var.reference_interval.resize(dna_client.SEQUENCE_LENGTH_1MB)
+        aralik = self._model_araligi(var)
         adlar = [ad for ad, _, _ in MODALITELER if ad in variant_scorers.RECOMMENDED_VARIANT_SCORERS]
         sk = [variant_scorers.RECOMMENDED_VARIANT_SCORERS[ad] for ad in adlar]
         cikti = self._model.score_variant(interval=aralik, variant=var, variant_scorers=sk)
@@ -355,7 +390,8 @@ class AtlasSorgu(object):
         """adaylar: [{'key':..., 'gene':..., ...}] -> (ozet satirlari, detay satirlari)."""
         self._secili = self.secili_skorlar()
         avi_ad, katki_ad = self.avi_adlari(self._secili)
-        etiket = "atlas:" + ",".join(self._secili) + "|doku:" + ",".join(self.doku)
+        self.avi_ad, self.katki_ad = avi_ad, katki_ad
+        etiket = "atlas:%s|doku:%s|model:%d" % (",".join(self._secili), ",".join(self.doku), int(self.model_ac))
         ozet, detay = [], []
         isler = {}
         with ThreadPoolExecutor(max_workers=ISCI) as ex:
@@ -383,7 +419,11 @@ class AtlasSorgu(object):
                         oz, det = None, []
                 for d in det:
                     d["gene"] = a.get("gene")
-                if onbellek:
+                # Yalniz kalici sonuclar onbellege girer: gecici hata / yetki / kota
+                # sorunlari ve model kapaliyken "bulunamadi" bir sonraki calismada
+                # yeniden denenmeli.
+                kalici = durum in ("atlas", "model") or (durum == "bulunamadi" and not self.model_ac)
+                if onbellek and kalici:
                     onbellek.yaz(a["key"], etiket, {"durum": durum, "not": not_, "ozet": oz, "detay": det})
                 ozet.append(self._satir(a, oz, durum=durum, not_=not_))
                 detay.extend(det)
@@ -401,16 +441,25 @@ class AtlasSorgu(object):
             if s and any(getattr(a, "n_obs", 0) > 0 for a in s.values()):
                 return "atlas", s, None
             durum, not_ = "bulunamadi", "Atlas'ta kayit yok"
-        except (ValueError, IndexError) as e:      # NOT_FOUND / INVALID_ARGUMENT / OUT_OF_RANGE
-            durum, not_ = "bulunamadi", "Atlas: %s" % str(e)[:120]
+        except (ValueError, IndexError) as e:
+            # handle_rpc_error: NOT_FOUND/INVALID_ARGUMENT -> ValueError, OUT_OF_RANGE -> IndexError.
+            # Yalniz NOT_FOUND/OUT_OF_RANGE "kayit yok"tur; digerleri (gecersiz filtre,
+            # kutuphane hatasi) gercek hatadir ve sessizce negatif sonuca donusmemeli.
+            if not _bulunamadi_mi(e):
+                self.hatalar.append("%s: %s" % (type(e).__name__, str(e)[:160]))
+                return "hata", None, "Atlas: %s: %s" % (type(e).__name__, str(e)[:120])
+            durum, not_ = "bulunamadi", "Atlas'ta kayit yok"
         except PermissionError as e:
             self.hatalar.append("yetki: %s" % e)
             return "hata", None, "API anahtari reddedildi: %s" % str(e)[:120]
         except Exception as e:                     # zaman asimi, ag, protokol
             self.hatalar.append("%s: %s" % (type(e).__name__, str(e)[:160]))
             return "hata", None, "%s: %s" % (type(e).__name__, str(e)[:120])
-        if self.model_ac and self._model_sayac < self.model_max:
-            self._model_sayac += 1
+        with self._kilit:
+            model_dene = self.model_ac and self._model_sayac < self.model_max
+            if model_dene:
+                self._model_sayac += 1
+        if model_dene:
             try:
                 s = self._model_tek(v)
                 return "model", s, "Atlas'ta yok; canli AlphaGenome modeli (1 Mb) ile skorlandi"
@@ -423,8 +472,9 @@ class AtlasSorgu(object):
     def _ozetle(self, key, sonuc, avi_ad, katki_ad, durum):
         """{skor: AnnData} -> (ozet dict, detay satirlari)."""
         import numpy as np
-        oz, det = {"kaynak": durum}, []
+        oz, det = {}, []
         genel = []                       # (|kantil|, modalite)
+        hammax = {}                      # kisa ad -> max |ham| (birlesik splicing icin)
         for ad, a in sonuc.items():
             X = np.asarray(a.X, dtype=float)
             if X.size == 0:
@@ -455,13 +505,15 @@ class AtlasSorgu(object):
             if Xs.size == 0 or not np.isfinite(Xs).any():
                 continue
             i, j = np.unravel_index(np.nanargmax(np.abs(Xs)), Xs.shape)
-            ham = _yuvarla(Xs[i, j])
+            ham_max = _yuvarla(Xs[i, j])
             kantil = None
-            if qs is not None and qs.size:
+            if qs is not None and np.isfinite(qs).any():
                 iq, jq = np.unravel_index(np.nanargmax(np.abs(qs)), qs.shape)
                 kantil = _yuvarla(qs[iq, jq], 4)
-                i, j = iq, jq            # doku/gen etiketi kantile gore
+                i, j = iq, jq            # ham/doku/gen etiketi AYNI hucreden (kantile gore)
+            ham = _yuvarla(Xs[i, j])
             kisa = MOD_KISA.get(ad, ad.lower())
+            hammax[kisa] = ham_max
             oz["%s_ham" % kisa] = ham
             oz["%s_kantil" % kisa] = kantil
             oz["%s_doku" % kisa] = doku_ad[sut[j]]
@@ -470,7 +522,7 @@ class AtlasSorgu(object):
                 genel.append((abs(kantil), kantil, ad))
 
             # detay: en yuksek |kantil| (yoksa |ham|) olan N hucre
-            skor = qs if qs is not None else Xs
+            skor = qs if (qs is not None and np.isfinite(qs).any()) else Xs
             duz = np.abs(skor).ravel()
             duz = np.where(np.isfinite(duz), duz, -1.0)      # NaN hucreler en sona
             n = min(DETAY_DOKU_N, int((duz >= 0).sum()))
@@ -485,7 +537,8 @@ class AtlasSorgu(object):
             _, kantil, ad = max(genel)
             oz["en_yuksek_kantil"] = kantil
             oz["en_yuksek_modalite"] = ad
-        ss = oz.get("splice_site_ham"); su = oz.get("splice_usage_ham"); sj = oz.get("splice_junc_ham")
+        # Birlesik splicing makaledeki gibi gen/doku uzerinden MAX ham degerlerle
+        ss = hammax.get("splice_site"); su = hammax.get("splice_usage"); sj = hammax.get("splice_junc")
         if any(x is not None for x in (ss, su, sj)):
             oz["splicing_birlesik"] = _yuvarla(abs(ss or 0) + abs(su or 0) + abs(sj or 0) / 5.0)
         det.sort(key=lambda r: -abs(r["kantil"] if r["kantil"] is not None else (r["ham"] or 0)))
@@ -493,10 +546,15 @@ class AtlasSorgu(object):
 
     @staticmethod
     def _doku_adlari(var):
-        for k in ("biosample_name", "name"):
-            if k in var:
-                return [str(x) for x in var[k]]
-        return [str(x) for x in var.index]
+        """Doku etiketi: biosample_name, bos/NaN ise track adi, o da yoksa indeks."""
+        adlar = [str(x) for x in (var["name"] if "name" in var else var.index)]
+        if "biosample_name" not in var:
+            return adlar
+        out = []
+        for b, n in zip(var["biosample_name"], adlar):
+            s = "" if b is None else str(b).strip()
+            out.append(n if s in ("", "nan", "None", "<NA>") else s)
+        return out
 
     @staticmethod
     def _katki_ozet(X, adlar):
@@ -771,9 +829,17 @@ def calistir(olgu_klasoru, adaylar=None, genome="hg38", doku=None, model=True, m
         if r.get("kategori") in ozet["kategori"]:
             ozet["kategori"][r["kategori"]] += 1
     ozet["hatalar"] = sorgu.hatalar[:20]
+    ozet["avi_skoru"] = sorgu.avi_ad
+    ozet["katki_skoru"] = sorgu.katki_ad
     ozet["durum"] = "tamam" if (ozet["atlas"] + ozet["model"]) > 0 else ("hata" if ozet["hata"] else "tamam")
     if ozet["durum"] == "hata":
         ozet["neden"] = "hicbir varyant skorlanamadi; ilk hata: %s" % (sorgu.hatalar[0] if sorgu.hatalar else "?")
+    elif ozet["atlas"] + ozet["model"] == 0 and ozet["bulunamadi"] > 0:
+        ozet["uyari"] = ("hicbir aday varyant Atlas'ta bulunamadi (%d); genom surumu, key bicimi ve "
+                         "skor adlari (sunucu_skorlari) kontrol edilmeli" % ozet["bulunamadi"])
+        log("UYARI: " + ozet["uyari"])
+    if sorgu.avi_ad is None:
+        ozet.setdefault("uyari", "AVI skoru sunucu skor listesinde bulunamadi; yalniz modalite skorlari alindi")
 
     # Siralama: kategori, sonra AlphaGenome'a ozgu sinyal (splicing/kantil), sonra AVI
     satirlar.sort(key=sinyal_anahtari)
@@ -842,17 +908,22 @@ def rapor_metni(ozet, satirlar, en_fazla=15):
         return "\n".join(b), "", KAYNAKCA
     n = ozet.get("aday", 0)
     kat = ozet.get("kategori") or {}
+    avi_var = bool(ozet.get("avi_skoru", True))     # eski ozet.json'larda alan yok -> var say
+    avi_cumle = ("AVI (AlphaGenome Variant Impact) PHRED skoru (10 = tüm SNV'lerin en yüksek %10'u, "
+                 "20 = en yüksek %1'i, 30 = en yüksek %0,1'i), " if avi_var else "")
     b.append("Yöntem: Aday varyantlar (%d) Google DeepMind AlphaGenome Atlas'a (önhesaplanmış in silico "
-             "doygunluk mutagenezi, GRCh38; alphagenome %s) sorulmuştur. Her varyant için AVI "
-             "(AlphaGenome Variant Impact) PHRED skoru (10 = tüm SNV'lerin en yüksek %%10'u, 20 = en yüksek "
-             "%%1'i, 30 = en yüksek %%0,1'i), modalite bazlı etki skorları (gen ekspresyonu, splice site / "
+             "doygunluk mutagenezi, GRCh38; alphagenome %s) sorulmuştur. Her varyant için %s"
+             "modalite bazlı etki skorları (gen ekspresyonu, splice site / "
              "splice site kullanımı / splice junction, poliadenilasyon, kromatin erişilebilirliği, TF ve "
              "histon bağlanması, TSS aktivitesi, 3B kontakt) ve bunların yaygın varyant arka planına göre "
              "kalibre kantil değerleri (|0,99| = arka planın en uç %%1'i) alınmıştır. Birleşik splicing skoru "
              "= max(splice site) + max(splice site kullanımı) + max(splice junction)/5; >1,0 genellikle "
              "büyük etki. %s"
-             % (n, ozet.get("paket") or "?", _sayim_cumlesi(ozet)))
+             % (n, ozet.get("paket") or "?", avi_cumle, _sayim_cumlesi(ozet)))
     b.append("")
+    if ozet.get("uyari"):
+        b.append("Uyarı: %s." % ozet["uyari"])
+        b.append("")
     b.append("Özet: yüksek etki kategorisi %d, orta %d, düşük %d varyant. Kategoriler sıralama yardımcısıdır "
              "(AVI ≥ 20 veya |kantil| ≥ 0,99 veya birleşik splicing ≥ 1,0 → yüksek; AVI ≥ 10 / |kantil| ≥ 0,95 / "
              "splicing ≥ 0,5 → orta); makale sabit eşik yerine bölgeye/uygulamaya duyarlı sıralama önerir."
