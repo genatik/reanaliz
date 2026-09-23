@@ -408,6 +408,8 @@ class CalistirTest(unittest.TestCase):
         self.assertEqual(oz["aday"], 0)
 
 
+@unittest.skipUnless(os.path.exists(os.path.join(PIPE, "rutin.py")),
+                     "rutin.py lives in the Drive _sistem folder, not in this checkout")
 class RutinHookTest(unittest.TestCase):
     """rutin.py imports openpyxl/genomize_seq/akrabalik/yollar at module level; stub them."""
 
