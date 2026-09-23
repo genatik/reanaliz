@@ -32,10 +32,11 @@ if "$PY" -c "import alphagenome" >/dev/null 2>&1; then
     ALPHAGENOME_API_KEY="$(tr -d '[:space:]' < "$HOME/.alphagenome_api_key")"
   fi
   if [ -z "$ALPHAGENOME_API_KEY" ]; then
+    # export ALPHAGENOME_API_KEY="anahtar"  # yorum   ->  anahtar   (tirnak, ';' ve '# yorum' atilir)
+    AG_SED='s/^[^=]*=[[:space:]]*//; s/[[:space:]]+#.*$//; s/;[[:space:]]*$//; s/[[:space:]]+$//; s/^"(.*)"$/\1/; s/^'"'"'(.*)'"'"'$/\1/'
     for rc in "$HOME/.zprofile" "$HOME/.zshrc" "$HOME/.bash_profile"; do
       [ -f "$rc" ] || continue
-      v="$(grep -E '^[[:space:]]*export[[:space:]]+ALPHAGENOME_API_KEY=' "$rc" | tail -1 \
-           | sed -E 's/^[^=]*=//; s/^["'"'"']//; s/["'"'"'][[:space:]]*$//')"
+      v="$(grep -E '^[[:space:]]*export[[:space:]]+ALPHAGENOME_API_KEY=' "$rc" | tail -1 | sed -E "$AG_SED")"
       if [ -n "$v" ]; then ALPHAGENOME_API_KEY="$v"; break; fi
     done
   fi

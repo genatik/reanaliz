@@ -1,4 +1,4 @@
---------
+--------------------------------------------------------
 ALPHAGENOME ATLAS (Google DeepMind) - DUZENLEYICI/SPLICING ETKI
 --------------------------------------------------------
 Rutin, probandin aday varyantlarini (eksenler + DENOVO_* + ORTAK_*)
@@ -26,6 +26,8 @@ KURULUM (bir kez, her bilgisayarda):
 VAR OLAN OLGULARA SONRADAN EKLEMEK (Genomize gerekmez):
   python rutin.py --alphagenome 222080-DOR-HAY
   python rutin.py --alphagenome TUMU
+  (yalniz kanit/ dosyalarini ve ozet.json'u gunceller; olgular.xlsx'teki
+   Sonuc Ozeti sutununa dokunmaz - o sutun rutin calisirken yazilir)
 Tek varyant / skor listesi:
   python alphagenome_sorgu.py --varyant chr12:13865958:C:T
   python alphagenome_sorgu.py --skorlar-listele
@@ -37,7 +39,9 @@ SKORLARIN ANLAMI:
   kantil       : -1..1; |0,99| = yaygin varyant arka planinin en uc %1'i.
                  Isaret yonu gosterir (ekspresyonda - azalma).
   splicing     : max(SS)+max(SSU)+max(SJ)/5; >1,0 genellikle buyuk etki.
-  kategori     : siralama yardimcisidir, klinik esik DEGILDIR.
+  kategori     : yuksek = AVI>=20 ya da |kantil|>=0,99 ya da splicing>=1,0
+                 orta   = AVI>=10 ya da |kantil|>=0,95 ya da splicing>=0,5
+                 Siralama yardimcisidir, klinik esik DEGILDIR.
 Atlas yalniz hg38 ve on-hesaplanmis SNV/indel icerir; bulunmayanlar
 canli modelle (1 Mb pencere, en fazla 25 varyant) skorlanir.
 Referans genomu hg19 olan olgularda adim atlanir.

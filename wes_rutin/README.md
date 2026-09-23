@@ -19,7 +19,7 @@ AlphaGenome Atlas API'sine sorar ve `kanit/` içine yazar:
 | `alphagenome_ozet.json` | çalışma durumu, sayımlar, sunucudaki skor adları, hatalar |
 | `alphagenome_rapor.txt` | rapora girecek hazır Türkçe bloklar (kapsamlı rapor bölümü, yöntem cümlesi, kaynakça) |
 
-Özet `ozet.json > alphagenome` altına ve `olgular.xlsx` *Sonuç Özeti* sütununa ("AlphaGenome yuksek N / orta M") da yazılır.
+Özet `ozet.json > alphagenome` altına ve, rutin çalışırken, `olgular.xlsx` *Sonuç Özeti* sütununa ("AlphaGenome yuksek N / orta M") da yazılır. Sonradan `--alphagenome` ile çalıştırıldığında yalnız `kanit/` ve `ozet.json` güncellenir; `olgular.xlsx` değişmez.
 API anahtarı, paket ya da ağ yoksa adım **sessizce atlanır**; olgu HATA'ya düşmez.
 
 Var olan olgulara sonradan eklemek için (Genomize gerekmez):
@@ -51,7 +51,7 @@ python alphagenome_sorgu.py --skorlar-listele
 - **AVI (PHRED)**: tüm SNV'ler içinde sıralama; 10 = en yüksek %10, 20 = en yüksek %1, 30 = en yüksek %0,1.
 - **Kalibre kantil (−1…1)**: yaygın varyant arka planına göre uçluk; |0,99| = en uç %1. İşaret yönü gösterir.
 - **Birleşik splicing**: max(SS) + max(SSU) + max(SJ)/5; > 1,0 genellikle büyük etki.
-- **Kategori**: sıralama yardımcısıdır, klinik eşik değildir.
+- **Kategori**: *yuksek* = AVI ≥ 20 ya da |kantil| ≥ 0,99 ya da splicing ≥ 1,0; *orta* = AVI ≥ 10 ya da |kantil| ≥ 0,95 ya da splicing ≥ 0,5; gerisi *dusuk*. Sıralama yardımcısıdır, klinik eşik değildir.
 
 AlphaGenome çıktıları araştırma amaçlıdır; ACMG PP3/BP4 kanıtı yerine geçmez ve tek başına klinik karar
 verdirmez (kullanım koşulları). Kaynaklar: Avsec ve ark., *Nature* 2026 (doi:10.1038/s41586-025-10014-0);

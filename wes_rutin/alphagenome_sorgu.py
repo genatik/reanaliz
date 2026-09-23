@@ -49,7 +49,9 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sys
+import tempfile
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -794,66 +796,72 @@ def calistir(olgu_klasoru, adaylar=None, genome="hg38", doku=None, model=True, m
         ozet["neden"] = "alphagenome paketi kurulu degil (pip install alphagenome)"
         return bitir()
 
-    if adaylar is None:
-        adaylar = adaylari_topla(olgu_klasoru, ust=ust)
-    ozet["aday"] = len(adaylar)
-    if not adaylar:
-        ozet["durum"] = "tamam"
-        ozet["neden"] = "sorulacak aday varyant yok"
-        return bitir()
-
-    skor_listesi = skorlar or [s.strip() for s in (env("ALPHAGENOME_SKORLAR") or "").split(",") if s.strip()]
-    sorgu = AtlasSorgu(skorlar=skor_listesi or None, doku=doku, model=model, model_max=model_max)
     try:
-        sorgu.meta()
-    except Exception as e:
+        if adaylar is None:
+            adaylar = adaylari_topla(olgu_klasoru, ust=ust)
+        ozet["aday"] = len(adaylar)
+        if not adaylar:
+            ozet["durum"] = "tamam"
+            ozet["neden"] = "sorulacak aday varyant yok"
+            return bitir()
+
+        skor_listesi = skorlar or [s.strip() for s in (env("ALPHAGENOME_SKORLAR") or "").split(",") if s.strip()]
+        sorgu = AtlasSorgu(skorlar=skor_listesi or None, doku=doku, model=model, model_max=model_max)
+        try:
+            sorgu.meta()
+        except Exception as e:
+            ozet["durum"] = "hata"
+            ozet["neden"] = "Atlas'a baglanilamadi: %s: %s" % (type(e).__name__, str(e)[:200])
+            ozet["hatalar"] = [ozet["neden"]]
+            return bitir()
+        ozet["paket"] = sorgu.paket_surum
+        ozet["skorlar"] = sorgu.secili_skorlar()
+        ozet["sunucu_skorlari"] = sorgu.skor_adlari
+
+        ob = Onbellek(onbellek_klasoru(olgu_klasoru)) if onbellek else None
+        if not sessiz:
+            log("%d aday varyant Atlas'a soruluyor (%d skor)" % (len(adaylar), len(ozet["skorlar"])))
+        satirlar, detay = sorgu.sorgula(
+            adaylar, onbellek=ob,
+            ilerleme=None if sessiz else (lambda n, t: log("  %d/%d" % (n, t))))
+
+        for r in satirlar:
+            d = r.get("durum")
+            if d in ("atlas", "model", "bulunamadi", "hata", "sorulamadi"):
+                ozet[d] += 1
+            if r.get("kategori") in ozet["kategori"]:
+                ozet["kategori"][r["kategori"]] += 1
+        ozet["hatalar"] = sorgu.hatalar[:20]
+        ozet["avi_skoru"] = sorgu.avi_ad
+        ozet["katki_skoru"] = sorgu.katki_ad
+        ozet["durum"] = "tamam" if (ozet["atlas"] + ozet["model"]) > 0 else ("hata" if ozet["hata"] else "tamam")
+        if ozet["durum"] == "hata":
+            ozet["neden"] = "hicbir varyant skorlanamadi; ilk hata: %s" % (sorgu.hatalar[0] if sorgu.hatalar else "?")
+        elif ozet["atlas"] + ozet["model"] == 0 and ozet["bulunamadi"] > 0:
+            ozet["uyari"] = ("hicbir aday varyant Atlas'ta bulunamadi (%d); genom surumu, key bicimi ve "
+                             "skor adlari (sunucu_skorlari) kontrol edilmeli" % ozet["bulunamadi"])
+            log("UYARI: " + ozet["uyari"])
+        if sorgu.avi_ad is None:
+            ozet.setdefault("uyari", "AVI skoru sunucu skor listesinde bulunamadi; yalniz modalite skorlari alindi")
+
+        # Siralama: kategori, sonra AlphaGenome'a ozgu sinyal (splicing/kantil), sonra AVI
+        satirlar.sort(key=sinyal_anahtari)
+        ozet["dosya"] = yaz_csv(os.path.join(olgu_klasoru, "alphagenome.csv"), satirlar, OZET_SUTUNLAR)
+        ozet["detay_dosya"] = yaz_csv(os.path.join(olgu_klasoru, "alphagenome_detay.csv"),
+                                      detay, DETAY_SUTUNLAR)
+        ozet["yuksek_varyantlar"] = [
+            {"key": r["key"], "gene": r["gene"], "avi": r["avi"], "kategori": r["kategori"], "yorum": r["yorum"]}
+            for r in satirlar if r.get("kategori") == "yuksek"][:30]
+        try:
+            ozet["rapor_dosya"] = rapor_dosyasi_yaz(olgu_klasoru, ozet, satirlar)
+        except OSError as e:
+            ozet["hatalar"].append("rapor metni yazilamadi: %s" % e)
+        return bitir()
+    except Exception as e:                    # hicbir kosulda istisna firlatma (rutin.py'ye soz)
         ozet["durum"] = "hata"
-        ozet["neden"] = "Atlas'a baglanilamadi: %s: %s" % (type(e).__name__, str(e)[:200])
-        ozet["hatalar"] = [ozet["neden"]]
+        ozet["neden"] = "AlphaGenome adimi beklenmedik hata: %s: %s" % (type(e).__name__, str(e)[:200])
+        ozet.setdefault("hatalar", []).append(ozet["neden"])
         return bitir()
-    ozet["paket"] = sorgu.paket_surum
-    ozet["skorlar"] = sorgu.secili_skorlar()
-    ozet["sunucu_skorlari"] = sorgu.skor_adlari
-
-    ob = Onbellek(onbellek_klasoru(olgu_klasoru)) if onbellek else None
-    if not sessiz:
-        log("%d aday varyant Atlas'a soruluyor (%d skor)" % (len(adaylar), len(ozet["skorlar"])))
-    satirlar, detay = sorgu.sorgula(
-        adaylar, onbellek=ob,
-        ilerleme=None if sessiz else (lambda n, t: log("  %d/%d" % (n, t))))
-
-    for r in satirlar:
-        d = r.get("durum")
-        if d in ("atlas", "model", "bulunamadi", "hata", "sorulamadi"):
-            ozet[d] += 1
-        if r.get("kategori") in ozet["kategori"]:
-            ozet["kategori"][r["kategori"]] += 1
-    ozet["hatalar"] = sorgu.hatalar[:20]
-    ozet["avi_skoru"] = sorgu.avi_ad
-    ozet["katki_skoru"] = sorgu.katki_ad
-    ozet["durum"] = "tamam" if (ozet["atlas"] + ozet["model"]) > 0 else ("hata" if ozet["hata"] else "tamam")
-    if ozet["durum"] == "hata":
-        ozet["neden"] = "hicbir varyant skorlanamadi; ilk hata: %s" % (sorgu.hatalar[0] if sorgu.hatalar else "?")
-    elif ozet["atlas"] + ozet["model"] == 0 and ozet["bulunamadi"] > 0:
-        ozet["uyari"] = ("hicbir aday varyant Atlas'ta bulunamadi (%d); genom surumu, key bicimi ve "
-                         "skor adlari (sunucu_skorlari) kontrol edilmeli" % ozet["bulunamadi"])
-        log("UYARI: " + ozet["uyari"])
-    if sorgu.avi_ad is None:
-        ozet.setdefault("uyari", "AVI skoru sunucu skor listesinde bulunamadi; yalniz modalite skorlari alindi")
-
-    # Siralama: kategori, sonra AlphaGenome'a ozgu sinyal (splicing/kantil), sonra AVI
-    satirlar.sort(key=sinyal_anahtari)
-    ozet["dosya"] = yaz_csv(os.path.join(olgu_klasoru, "alphagenome.csv"), satirlar, OZET_SUTUNLAR)
-    ozet["detay_dosya"] = yaz_csv(os.path.join(olgu_klasoru, "alphagenome_detay.csv"),
-                                  detay, DETAY_SUTUNLAR)
-    ozet["yuksek_varyantlar"] = [
-        {"key": r["key"], "gene": r["gene"], "avi": r["avi"], "kategori": r["kategori"], "yorum": r["yorum"]}
-        for r in satirlar if r.get("kategori") == "yuksek"][:30]
-    try:
-        ozet["rapor_dosya"] = rapor_dosyasi_yaz(olgu_klasoru, ozet, satirlar)
-    except OSError as e:
-        ozet["hatalar"].append("rapor metni yazilamadi: %s" % e)
-    return bitir()
 
 
 def _fmt(v, n=2):
@@ -1046,15 +1054,22 @@ def main():
     doku = [d.strip() for d in (a.doku or "").split(",") if d.strip()]
     skorlar = [s.strip() for s in (a.skorlar or "").split(",") if s.strip()]
     if a.varyant:
-        klasor = a.klasor or "."
+        # Klasor verilmediyse ciktilar gecici bir klasore yazilir (bulunulan klasor kirletilmez);
+        # onbellek yine _sistem/alphagenome_onbellek'tedir.
+        gecici = None if a.klasor else tempfile.mkdtemp(prefix="alphagenome_")
+        klasor = a.klasor or gecici
         adaylar = [{"key": v, "gene": None, "kaynak": "komut"} for v in a.varyant]
-        oz = calistir(klasor, adaylar=adaylar, genome=a.genome, doku=doku, model=a.model,
-                      model_max=a.model_max, skorlar=skorlar, onbellek=a.onbellek)
-        _, satirlar = ozet_oku(klasor)
+        try:
+            oz = calistir(klasor, adaylar=adaylar, genome=a.genome, doku=doku, model=a.model,
+                          model_max=a.model_max, skorlar=skorlar, onbellek=a.onbellek)
+            _, satirlar = ozet_oku(klasor)
+        finally:
+            if gecici:
+                shutil.rmtree(gecici, ignore_errors=True)
         for r in satirlar:
             print(json.dumps(r, ensure_ascii=False, indent=1))
-        print(json.dumps({k: v for k, v in oz.items() if k not in ("yuksek_varyantlar",)},
-                         ensure_ascii=False, indent=1))
+        gizle = ("yuksek_varyantlar",) + (("dosya", "detay_dosya", "rapor_dosya") if gecici else ())
+        print(json.dumps({k: v for k, v in oz.items() if k not in gizle}, ensure_ascii=False, indent=1))
         return
     if not a.klasor:
         p.error("olgu klasoru ya da --varyant gerekli")

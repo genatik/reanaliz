@@ -7,8 +7,11 @@ DenseVariantScores protos and feeds them through the genuine
 shapes the module will see in production.
 """
 import csv
+import io
 import json
 import os
+import shutil
+import subprocess
 import sys
 import tempfile
 import types
@@ -483,6 +486,40 @@ class CalistirTest(unittest.TestCase):
         self.assertEqual(oz["durum"], "tamam")
         self.assertEqual(oz["aday"], 0)
 
+    def test_yazim_hatasi_istisna_firlatmaz(self):
+        """Review #2: sorgula/yaz_csv/rapor asamasindaki bir hata calistir()'dan disari cikmamali."""
+        orig = AG.yaz_csv
+        AG.yaz_csv = lambda *a, **k: (_ for _ in ()).throw(OSError("disk dolu"))
+        try:
+            oz = AG.calistir(self.tmp, adaylar=self.adaylar, genome="hg38", onbellek=False, sessiz=True)
+        finally:
+            AG.yaz_csv = orig
+        self.assertEqual(oz["durum"], "hata")
+        self.assertIn("disk dolu", oz["neden"])
+        self.assertIn(oz["neden"], oz["hatalar"])
+        j = json.load(open(os.path.join(self.tmp, "alphagenome_ozet.json"), encoding="utf-8"))
+        self.assertEqual(j["durum"], "hata")
+
+    def test_varyant_komutu_bulunulan_klasoru_kirletmez(self):
+        """Review #2: `--varyant` klasorsuz cagrildiginda ciktilar cwd'ye degil gecici klasore yazilir."""
+        cwd, argv, out = os.getcwd(), sys.argv, sys.stdout
+        bos = tempfile.mkdtemp()
+        os.chdir(bos)
+        sys.argv = ["alphagenome_sorgu.py", "--varyant", STRONG, "--onbellek-yok"]
+        sys.stdout = io.StringIO()
+        try:
+            AG.main()
+            cikti = sys.stdout.getvalue()
+        finally:
+            sys.stdout, sys.argv = out, argv
+            os.chdir(cwd)
+        self.assertEqual(os.listdir(bos), [])
+        self.assertIn(STRONG, cikti)
+        self.assertIn('"durum": "tamam"', cikti)
+        self.assertNotIn('"rapor_dosya"', cikti)
+        self.assertFalse([d for d in os.listdir(tempfile.gettempdir()) if d.startswith("alphagenome_")
+                          and os.path.exists(os.path.join(tempfile.gettempdir(), d, "alphagenome.csv"))])
+
 
 class IncelemeDuzeltmeTest(unittest.TestCase):
     """Bagimsiz incelemede bulunan kusurlarin regresyon testleri."""
@@ -710,6 +747,21 @@ class RutinHookTest(unittest.TestCase):
         self.assertEqual(ozet["alphagenome"]["durum"], "tamam")
         self.assertEqual(ozet["alphagenome"]["aday"], 4)
 
+    def test_komut_alphagenome_degismeyince_yazmaz(self):
+        """Review #2: sonuc aynıysa (or. anahtar yok -> atlandi) ozet.json yeniden yazilmaz."""
+        out, _ = self._olgu()
+        AG.api_key = lambda: None
+        yol = os.path.join(out, "ozet.json")
+        self.rutin.komut_alphagenome(["222080-DOR-HAY"])
+        with open(yol, encoding="utf-8") as f:
+            ilk = f.read()
+        self.assertIn('"atlandi"', ilk)
+        os.utime(yol, (1000000000, 1000000000))
+        self.rutin.komut_alphagenome(["222080-DOR-HAY"])
+        self.assertEqual(int(os.stat(yol).st_mtime), 1000000000)      # dokunulmadi
+        with open(yol, encoding="utf-8") as f:
+            self.assertEqual(f.read(), ilk)
+
     def test_modul_yoksa(self):
         out, ozet = self._olgu()
         ag, self.rutin.AG, self.rutin.AG_HATA = self.rutin.AG, None, "ImportError: x"
@@ -719,6 +771,36 @@ class RutinHookTest(unittest.TestCase):
             self.rutin.AG = ag
         self.assertEqual(sonuc["durum"], "atlandi")
         self.assertIn("ImportError", sonuc["neden"])
+
+
+MAC_BASLATICI = os.path.join(PIPE, "BASLAT_mac.command")
+
+
+@unittest.skipUnless(os.path.exists(MAC_BASLATICI) and shutil.which("bash") and shutil.which("sed"),
+                     "BASLAT_mac.command / bash / sed yok")
+class BaslatMacTest(unittest.TestCase):
+    """Review #2: rc dosyasindaki export satirindan anahtar; yorum, ';' ve tirnaklar atilmali."""
+
+    def _anahtar(self, satir):
+        with open(MAC_BASLATICI, encoding="utf-8") as f:
+            tanim = next(l.strip() for l in f if l.strip().startswith("AG_SED="))
+        komut = "%s; printf '%%s\\n' \"$1\" | grep -E '^[[:space:]]*export[[:space:]]+ALPHAGENOME_API_KEY=' " \
+                "| tail -1 | sed -E \"$AG_SED\"" % tanim
+        return subprocess.run(["bash", "-c", komut, "_", satir], capture_output=True, text=True).stdout.rstrip("\n")
+
+    def test_bicimler(self):
+        for satir, beklenen in [
+            ('export ALPHAGENOME_API_KEY="AIza-abc_123"', "AIza-abc_123"),
+            ("export ALPHAGENOME_API_KEY='AIza-abc_123'", "AIza-abc_123"),
+            ("export ALPHAGENOME_API_KEY=AIza-abc_123", "AIza-abc_123"),
+            ('export ALPHAGENOME_API_KEY="AIza-abc_123"  # alphagenome.google/api', "AIza-abc_123"),
+            ("export ALPHAGENOME_API_KEY='AIza-abc_123' ;", "AIza-abc_123"),
+            ("export ALPHAGENOME_API_KEY=AIza-abc_123; # yorum", "AIza-abc_123"),
+            ("  export   ALPHAGENOME_API_KEY=AIza-abc_123   ", "AIza-abc_123"),
+            ("# export ALPHAGENOME_API_KEY=eski", ""),
+            ("export OTHER_KEY=x", ""),
+        ]:
+            self.assertEqual(self._anahtar(satir), beklenen, satir)
 
 
 if __name__ == "__main__":
