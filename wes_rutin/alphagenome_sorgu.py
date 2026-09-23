@@ -169,12 +169,16 @@ def _hg38(genome):
 
 
 def _yuvarla(x, n=3):
+    """float'a cevirip yuvarla; None/NaN/inf -> None (CSV'ye 'nan' sizmasin)."""
     if x is None:
         return None
     try:
-        return round(float(x), n)
+        f = float(x)
     except (TypeError, ValueError):
         return None
+    if f != f or f in (float("inf"), float("-inf")):
+        return None
+    return round(f, n)
 
 
 def avi_yorumla(avi):
@@ -284,8 +288,15 @@ class AtlasSorgu(object):
             self.skor_adlari = sorted(self._meta.keys())
             # query_variants her cagrida scorer_metadata() cekiyor; varyant
             # basina ~MB'larca metaveri inmesin diye bellekten ver.
+            # Her cagrida kopya: query_variants var.index'i yerinde degistiriyor,
+            # es zamanli is parcaciklari ayni DataFrame'i paylasmasin.
+            import dataclasses
             meta = self._meta
-            c.scorer_metadata = lambda: meta
+
+            def _kopya():
+                return {k: dataclasses.replace(m, track_metadata=m.track_metadata.copy())
+                        for k, m in meta.items()}
+            c.scorer_metadata = _kopya
         return self._meta
 
     def secili_skorlar(self):
@@ -427,7 +438,8 @@ class AtlasSorgu(object):
             onto = list(var["ontology_curie"]) if "ontology_curie" in var else [None] * X.shape[1]
 
             if ad == avi_ad:
-                oz["avi"] = _yuvarla(np.nanmax(X), 1)
+                if np.isfinite(X).any():
+                    oz["avi"] = _yuvarla(np.nanmax(X), 1)
                 continue
             if ad == katki_ad:
                 oz["avi_katki"] = self._katki_ozet(X, doku_ad)
@@ -460,8 +472,9 @@ class AtlasSorgu(object):
             # detay: en yuksek |kantil| (yoksa |ham|) olan N hucre
             skor = qs if qs is not None else Xs
             duz = np.abs(skor).ravel()
-            n = min(DETAY_DOKU_N, duz.size)
-            for idx in np.argpartition(-duz, n - 1)[:n]:
+            duz = np.where(np.isfinite(duz), duz, -1.0)      # NaN hucreler en sona
+            n = min(DETAY_DOKU_N, int((duz >= 0).sum()))
+            for idx in np.argpartition(-duz, n - 1)[:n] if n else []:
                 ii, jj = np.unravel_index(idx, skor.shape)
                 det.append({"key": key, "skor": ad, "gen_ag": gen_ad[ii],
                             "doku": doku_ad[sut[jj]], "ontoloji": onto[sut[jj]],
@@ -529,6 +542,26 @@ def kategori(r):
     return "dusuk"
 
 
+LOF_SONUC = ("stop gained", "frameshift", "start lost", "stop lost", "stop_gained",
+             "frameshift_variant", "start_lost", "stop_lost")
+
+
+def lof_mu(consequence):
+    c = (consequence or "").lower()
+    return any(t in c for t in LOF_SONUC)
+
+
+def sinyal_anahtari(r):
+    """Siralama: kategori, sonra AlphaGenome'a ozgu sinyal (splicing, kantil), sonra AVI.
+
+    Kodlayici LoF varyantlarda AVI zaten yuksektir; tabloyu gercek splicing /
+    duzenleyici sinyali olan varyantlar acsin diye AVI en sona konur.
+    """
+    k = {"yuksek": 0, "orta": 1, "dusuk": 2}.get(r.get("kategori"), 3)
+    return (k, -(_sayi(r.get("splicing_birlesik")) or 0), -abs(_sayi(r.get("en_yuksek_kantil")) or 0),
+            -(_sayi(r.get("avi")) or 0))
+
+
 def yorumla(r):
     """Satirdan kisa Turkce yorum (rapor tablosunun son sutunu)."""
     p = []
@@ -556,6 +589,8 @@ def yorumla(r):
             p.append("%s kantil %s (%s)" % (ad, q, r.get("%s_doku" % kisa)))
     if r.get("avi_katki"):
         p.append("AVI katki: %s" % r["avi_katki"])
+    if lof_mu(r.get("consequence")) and (r.get("avi") or 0) >= AVI_YUKSEK:
+        p.append("LoF varyantinda yuksek AVI beklenen bulgudur, ek bilgi degildir")
     if not p:
         p.append("belirgin duzenleyici/splicing etkisi ongorulmuyor")
     return "; ".join(p)
@@ -620,19 +655,24 @@ def adaylari_topla(klasor, ust=VARSAYILAN_ADAY_UST, dosyalar=None, max_af=0.02, 
             k = (r.get("key") or "").strip()
             if not k:
                 continue
+            nk = varyant_ayristir(k) or k        # '12:..' ve 'chr12:..' ayni varyant
             af = _sayi(r.get("af_max"))
             if max_af is not None and af is not None and af > max_af:
                 continue
             ic = _sayi(r.get("internal_freq"))
             if max_ic is not None and ic is not None and ic >= max_ic:
                 continue
-            if k in gorulen:
-                if kaynak not in gorulen[k]["kaynak"].split(","):
-                    gorulen[k]["kaynak"] += "," + kaynak
+            if nk in gorulen:
+                g = gorulen[nk]
+                if kaynak not in g["kaynak"].split(","):
+                    g["kaynak"] += "," + kaynak
+                for alan in ("gene", "hgvsc", "hgvsp", "consequence"):   # eksik alani sonrakinden doldur
+                    if not g.get(alan) and r.get(alan):
+                        g[alan] = r.get(alan)
                 continue
             a = {"key": k, "gene": r.get("gene"), "hgvsc": r.get("hgvsc"), "hgvsp": r.get("hgvsp"),
                  "consequence": r.get("consequence"), "kaynak": kaynak}
-            gorulen[k] = a
+            gorulen[nk] = a
             out.append(a)
     if len(out) > ust:
         log("aday sayisi %d > %d; ilk %d (oncelik sirasina gore) sorulacak" % (len(out), ust, ust))
@@ -735,11 +775,8 @@ def calistir(olgu_klasoru, adaylar=None, genome="hg38", doku=None, model=True, m
     if ozet["durum"] == "hata":
         ozet["neden"] = "hicbir varyant skorlanamadi; ilk hata: %s" % (sorgu.hatalar[0] if sorgu.hatalar else "?")
 
-    # Siralama: kategori (yuksek>orta>dusuk), sonra AVI, sonra |kantil|
-    def anahtar(r):
-        k = {"yuksek": 0, "orta": 1, "dusuk": 2}.get(r.get("kategori"), 3)
-        return (k, -(r.get("avi") or 0), -abs(r.get("en_yuksek_kantil") or 0))
-    satirlar.sort(key=anahtar)
+    # Siralama: kategori, sonra AlphaGenome'a ozgu sinyal (splicing/kantil), sonra AVI
+    satirlar.sort(key=sinyal_anahtari)
     ozet["dosya"] = yaz_csv(os.path.join(olgu_klasoru, "alphagenome.csv"), satirlar, OZET_SUTUNLAR)
     ozet["detay_dosya"] = yaz_csv(os.path.join(olgu_klasoru, "alphagenome_detay.csv"),
                                   detay, DETAY_SUTUNLAR)
@@ -772,6 +809,20 @@ KAYNAKCA = [
 ]
 
 
+def _sayim_cumlesi(ozet):
+    """Atlas / canlı model / skorlanamayan sayımları (durum sayaçları birbirini dışlar)."""
+    atlas = ozet.get("atlas", 0) or 0
+    model = ozet.get("model", 0) or 0
+    yok = (ozet.get("bulunamadi", 0) or 0) + (ozet.get("hata", 0) or 0) + (ozet.get("sorulamadi", 0) or 0)
+    p = ["%d varyant Atlas'ta önhesaplanmış olarak bulunmuştur" % atlas]
+    if model:
+        p.append("Atlas'ta bulunmayan %d varyant canlı AlphaGenome modeliyle (1 Mb pencere; AVI skoru yok) "
+                 "skorlanmıştır" % model)
+    if yok:
+        p.append("%d varyant skorlanamamıştır (Atlas'ta yok, hata ya da kapsam dışı)" % yok)
+    return "; ".join(p) + "."
+
+
 def rapor_metni(ozet, satirlar, en_fazla=15):
     """alphagenome_ozet.json + alphagenome.csv -> raporlara girecek Türkçe metin.
 
@@ -799,17 +850,16 @@ def rapor_metni(ozet, satirlar, en_fazla=15):
              "histon bağlanması, TSS aktivitesi, 3B kontakt) ve bunların yaygın varyant arka planına göre "
              "kalibre kantil değerleri (|0,99| = arka planın en uç %%1'i) alınmıştır. Birleşik splicing skoru "
              "= max(splice site) + max(splice site kullanımı) + max(splice junction)/5; >1,0 genellikle "
-             "büyük etki. Atlas'ta bulunmayan varyantlar (%d) canlı AlphaGenome modeliyle (1 Mb pencere) "
-             "skorlanmıştır; %d varyant skorlanamamıştır."
-             % (n, ozet.get("paket") or "?", ozet.get("model", 0),
-                ozet.get("bulunamadi", 0) - ozet.get("model", 0) + ozet.get("hata", 0) + ozet.get("sorulamadi", 0)))
+             "büyük etki. %s"
+             % (n, ozet.get("paket") or "?", _sayim_cumlesi(ozet)))
     b.append("")
     b.append("Özet: yüksek etki kategorisi %d, orta %d, düşük %d varyant. Kategoriler sıralama yardımcısıdır "
              "(AVI ≥ 20 veya |kantil| ≥ 0,99 veya birleşik splicing ≥ 1,0 → yüksek; AVI ≥ 10 / |kantil| ≥ 0,95 / "
              "splicing ≥ 0,5 → orta); makale sabit eşik yerine bölgeye/uygulamaya duyarlı sıralama önerir."
              % (kat.get("yuksek", 0), kat.get("orta", 0), kat.get("dusuk", 0)))
     b.append("")
-    secilen = [r for r in satirlar if r.get("kategori") in ("yuksek", "orta")][:en_fazla]
+    secilen = sorted([r for r in satirlar if r.get("kategori") in ("yuksek", "orta")],
+                     key=sinyal_anahtari)[:en_fazla]
     if secilen:
         b.append("Öne çıkan varyantlar (AlphaGenome):")
         b.append("Gen | Varyant | Kaynak | AVI (PHRED) | En yüksek kantil (modalite) | Birleşik splicing | "
@@ -821,7 +871,7 @@ def rapor_metni(ozet, satirlar, en_fazla=15):
             b.append(" | ".join([
                 r.get("gene") or "-", var or "-", (r.get("kaynak") or "-").replace(",", ", "),
                 _fmt(r.get("avi"), 1),
-                "%s (%s)" % (_fmt(r.get("en_yuksek_kantil"), 3), r.get("en_yuksek_modalite") or "-"),
+                "%s (%s)" % (_fmt(r.get("en_yuksek_kantil"), 4), r.get("en_yuksek_modalite") or "-"),
                 _fmt(r.get("splicing_birlesik"), 2),
                 "%s (%s)" % (_fmt(r.get("ekspresyon_ham"), 2), r.get("ekspresyon_doku") or "-"),
                 r.get("kategori") or "-", r.get("yorum") or ""]))
@@ -831,6 +881,10 @@ def rapor_metni(ozet, satirlar, en_fazla=15):
                  "girmemiştir; bu, kodlayıcı-olmayan/düzenleyici bir mekanizma lehine ek kanıt bulunmadığı "
                  "anlamına gelir (bir genetik nedeni dışlamaz).")
         b.append("")
+    b.append("Tablo, AlphaGenome'a özgü sinyali (splicing, kantil) yüksek olan varyantları öne alır; "
+             "kodlayıcı LoF (stop-gain/frameshift) varyantlarında yüksek AVI protein kesilmesinden beklenen "
+             "bir bulgudur ve tek başına ek bilgi taşımaz.")
+    b.append("")
     b.append("Yorumlama ilkeleri: (i) Yüksek AVI ve güçlü splicing/ekspresyon sinyali olan bir varyant, "
              "fenotiple uyumlu bir gende ise öncelik kazanır ve RNA düzeyinde doğrulama (RT-PCR / RNA-seq) "
              "önerilir; (ii) AlphaGenome skorları ACMG/AMP çerçevesinde PP3/BP4 kanıtı yerine geçmez, "

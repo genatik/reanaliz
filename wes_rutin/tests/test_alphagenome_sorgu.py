@@ -9,7 +9,6 @@ shapes the module will see in production.
 import csv
 import json
 import os
-import struct
 import sys
 import tempfile
 import types
@@ -205,6 +204,54 @@ def _kanit(tmp):
     _write_csv(os.path.join(tmp, "222080_nadir_lof_ARTEFAKT.csv"), [{"key": "chr4:1:A:T", "gene": "X"}])
 
 
+class YardimciTest(unittest.TestCase):
+    def test_yuvarla_nan(self):
+        self.assertIsNone(AG._yuvarla(float("nan")))
+        self.assertIsNone(AG._yuvarla(float("inf")))
+        self.assertIsNone(AG._yuvarla("x"))
+        self.assertEqual(AG._yuvarla("0.12345", 3), 0.123)
+
+    def test_lof_ve_siralama(self):
+        self.assertTrue(AG.lof_mu("Stop Gained"))
+        self.assertTrue(AG.lof_mu("frameshift_variant"))
+        self.assertFalse(AG.lof_mu("Missense Variant"))
+        a = {"kategori": "yuksek", "avi": 52.0, "splicing_birlesik": 0.1, "en_yuksek_kantil": 0.5}
+        b = {"kategori": "yuksek", "avi": 21.0, "splicing_birlesik": 1.9, "en_yuksek_kantil": 0.999}
+        c = {"kategori": "orta", "avi": 12.0}
+        self.assertEqual(sorted([a, b, c], key=AG.sinyal_anahtari), [b, a, c])
+        r = {k: None for k in AG.OZET_SUTUNLAR}
+        r.update({"avi": 48.0, "avi_yorum": AG.avi_yorumla(48.0), "consequence": "Stop Gained"})
+        self.assertIn("LoF varyantinda yuksek AVI beklenen", AG.yorumla(r))
+        r["consequence"] = "Missense Variant"
+        self.assertNotIn("LoF varyantinda", AG.yorumla(r))
+
+    def test_sayim_cumlesi(self):
+        s = AG._sayim_cumlesi({"atlas": 5, "model": 2, "bulunamadi": 1, "hata": 1, "sorulamadi": 1})
+        self.assertIn("5 varyant Atlas'ta", s)
+        self.assertIn("2 varyant canlı", s)
+        self.assertIn("3 varyant skorlanamamıştır", s)
+        s = AG._sayim_cumlesi({"atlas": 3})
+        self.assertNotIn("canlı", s)
+        self.assertNotIn("skorlanamamıştır", s)
+
+    def test_nan_avi_ve_detay(self):
+        import anndata
+        s = FakeSorgu()
+        s._secili = s.secili_skorlar()
+        a = anndata.AnnData(X=np.array([[np.nan, 0.5]], dtype=np.float32),
+                            obs=pd.DataFrame({"variant": ["v"]}, index=["0"]),
+                            var=pd.DataFrame({"strand": [".", "."]}, index=["t0", "t1"]),
+                            layers={"quantiles": np.array([[np.nan, 0.995]], dtype=np.float32)})
+        avi = anndata.AnnData(X=np.array([[np.nan]], dtype=np.float32),
+                              obs=pd.DataFrame({"variant": ["v"]}, index=["0"]), var=pd.DataFrame(index=["0"]))
+        oz, det = s._ozetle("chr1:1:A:T", {"ATAC": a, "AVI": avi}, "AVI", None, "atlas")
+        self.assertNotIn("avi", oz)
+        self.assertEqual(oz["atac_kantil"], 0.995)
+        self.assertEqual(oz["atac_doku"], "t1")            # var without name/biosample -> index
+        self.assertEqual(len(det), 1)                       # NaN cell excluded from detail rows
+        self.assertEqual(det[0]["kantil"], 0.995)
+
+
 class VaryantAyristirTest(unittest.TestCase):
     def test_parse(self):
         self.assertEqual(AG.varyant_ayristir("12:13865958:C:T"), ("chr12", 13865958, "C", "T"))
@@ -243,6 +290,19 @@ class AdayToplaTest(unittest.TestCase):
         self.assertIn("fenotip_iliskili", strong["kaynak"])
         self.assertIn("nadir_lof", strong["kaynak"])
         self.assertEqual(keys[0], BAD)              # DENOVO first by priority
+
+    def test_ayni_varyant_farkli_yazim(self):
+        tmp = tempfile.mkdtemp()
+        _kanit(tmp)
+        with open(os.path.join(tmp, "222080_tier.csv"), "w", encoding="utf-8-sig", newline="") as f:
+            f.write("key,gene,af_max\n12:13865958:C:T,GRIN2B,0\n12:13865958:C:T,GRIN2B,0\n")
+        dosyalar = [os.path.join(tmp, d) for d in os.listdir(tmp) if d.startswith("222080_")]
+        adaylar = AG.adaylari_topla(tmp, dosyalar=dosyalar)
+        hits = [a for a in adaylar if AG.varyant_ayristir(a["key"]) == ("chr12", 13865958, "C", "T")]
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0]["key"], "12:13865958:C:T")          # tier has priority
+        self.assertEqual(set(hits[0]["kaynak"].split(",")),
+                         {"222080_tier", "222080_nadir_lof", "222080_fenotip_iliskili"})
 
 
 class SorguTest(unittest.TestCase):

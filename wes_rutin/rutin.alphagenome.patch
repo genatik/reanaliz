@@ -1,5 +1,5 @@
 --- a/rutin.py	2026-09-23 07:51:21.993400456 +0000
-+++ b/rutin.py	2026-09-23 07:53:24.449778952 +0000
++++ b/rutin.py	2026-09-23 09:25:06.399443737 +0000
 @@ -32,6 +32,11 @@
  import genomize_seq as G                    # noqa: E402
  import akrabalik as AK                      # noqa: E402
@@ -127,25 +127,19 @@
  def olgu_isle(seq, ws, r):
      kod = str(hucre(ws, r, "Olgu Kodu")).strip()
      test = (str(hucre(ws, r, "Test") or "WES")).strip().upper()
-@@ -498,6 +611,9 @@
-                                  "kapsama ve filtre farklari yalanci de novo uretir. "
-                                  "Populasyon frekansi >0,001 olan bir varyant de novo olamaz.")
+@@ -547,6 +660,11 @@
+             log("  aile kontrolu calistirilamadi: %s" % e)
+             ozet["aile_kontrolu"] = {"hata": str(e)}
  
-+    # --- AlphaGenome Atlas: probandin aday varyantlari (eksenler + DENOVO + ORTAK)
++    # --- AlphaGenome Atlas: probandin aday varyantlari (eksenler + DENOVO + ORTAK).
++    # Aile kontrolunden SONRA: uyumsuz olguda (HATA) bosa API cagrisi yapilmasin.
 +    alphagenome_calistir(out, ozet, proband[0] if proband else None)
++    parcalar.append(alphagenome_ozet_metni(ozet))
 +
      with open(os.path.join(out, "ozet.json"), "w", encoding="utf-8") as f:
          json.dump(ozet, f, indent=1, ensure_ascii=False)
  
-@@ -515,6 +631,7 @@
-         parcalar.append("ortak fenotip: %s" % ozet["ortak"].get("fenotip_iliskili", "-"))
-     if "de_novo" in ozet:
-         parcalar.append("de novo aday: %s" % ozet["de_novo"].get("nadir_lof", "-"))
-+    parcalar.append(alphagenome_ozet_metni(ozet))
- 
-     # --- AILE ILISKISI KONTROLU
-     # Trio/duo cikarimlarinin tamami ornek iliskisinin dogrulugana dayanir;
-@@ -597,10 +714,15 @@
+@@ -597,10 +715,15 @@
                      help="yalnizca bos 'Genomize Run' hucrelerini doldur")
      ap.add_argument("--qc-doldur", action="store_true",
                      help="eski olgularin ozet.json'una kalite/kapsama verisini ekle")

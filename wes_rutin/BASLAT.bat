@@ -32,22 +32,25 @@ if errorlevel 1 (
 )
 
 REM --- AlphaGenome Atlas (istege bagli): paket/anahtar yoksa adim atlanir ---------
+REM     Not: %DEGISKEN% ayni parantez blogu icinde erken genisletilir; bu yuzden
+REM     kontroller ic ice degil, ardisik yazildi (GENOMIZE_USER ile ayni desen).
 python -c "import alphagenome" >nul 2>nul
 if errorlevel 1 (
   echo   UYARI: alphagenome paketi yok - AlphaGenome adimi atlanacak.
   echo          Kurmak icin: python -m pip install alphagenome
-) else (
-  if "%ALPHAGENOME_API_KEY%"=="" (
-    for /f "usebackq delims=" %%K in (`powershell -NoProfile -Command ^
-      "[Environment]::GetEnvironmentVariable('ALPHAGENOME_API_KEY','User')"`) do set "ALPHAGENOME_API_KEY=%%K"
-  )
-  if "%ALPHAGENOME_API_KEY%"=="" (
-    echo   UYARI: ALPHAGENOME_API_KEY tanimli degil - AlphaGenome adimi atlanacak.
-    echo          setx ALPHAGENOME_API_KEY "anahtar"   ^(https://alphagenome.google/api^)
-  ) else (
-    echo   AlphaGenome: paket + API anahtari var
-  )
+  goto :ag_bitti
 )
+if "%ALPHAGENOME_API_KEY%"=="" (
+  for /f "usebackq delims=" %%K in (`powershell -NoProfile -Command ^
+    "[Environment]::GetEnvironmentVariable('ALPHAGENOME_API_KEY','User')"`) do set "ALPHAGENOME_API_KEY=%%K"
+)
+if "%ALPHAGENOME_API_KEY%"=="" (
+  echo   UYARI: ALPHAGENOME_API_KEY tanimli degil - AlphaGenome adimi atlanacak.
+  echo          setx ALPHAGENOME_API_KEY "anahtar"   ^(https://alphagenome.google/api^)
+) else (
+  echo   AlphaGenome: paket + API anahtari var
+)
+:ag_bitti
 
 REM --- Kullanici adi -------------------------------------------------------
 if "%GENOMIZE_USER%"=="" (
