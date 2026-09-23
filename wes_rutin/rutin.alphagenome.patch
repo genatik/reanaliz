@@ -1,0 +1,163 @@
+--- a/rutin.py	2026-09-23 07:51:21.993400456 +0000
++++ b/rutin.py	2026-09-23 07:53:24.449778952 +0000
+@@ -32,6 +32,11 @@
+ import genomize_seq as G                    # noqa: E402
+ import akrabalik as AK                      # noqa: E402
+ import yollar as Y                          # noqa: E402
++try:
++    import alphagenome_sorgu as AG          # noqa: E402  (AlphaGenome Atlas; istege bagli)
++    AG_HATA = None
++except Exception as _e:                     # modul/paket sorunu rutini durdurmasin
++    AG, AG_HATA = None, "%s: %s" % (type(_e).__name__, _e)
+ 
+ XLSX = Y.olgular_xlsx()     # Drive gecisinden sonra Drive klasorundedir
+ RAPOR = Y.rapor_koku()        # olgu klasorleri Drive kokunde (kanit + raporlar)
+@@ -342,6 +347,114 @@
+     return 0
+ 
+ 
++# --------------------------------------------------------------------------
++# AlphaGenome Atlas (Google DeepMind) - aday varyantlarin duzenleyici/splicing
++# etki skorlari. Kanit uretir, karar vermez; hicbir kosulda olguyu HATA'ya
++# dusurmez (API anahtari yoksa / ag yoksa / paket yoksa adim ATLANIR ve
++# ozet.json'a nedeni yazilir). Ciktilar kanit/ icine:
++#   alphagenome.csv, alphagenome_detay.csv, alphagenome_ozet.json,
++#   alphagenome_rapor.txt (rapor yazan Claude icin hazir Turkce bolum)
++# --------------------------------------------------------------------------
++def alphagenome_dosyalari(kanit, proband):
++    """Sorulacak CSV'ler: probandin eksenleri + aile modeli dosyalari."""
++    out = []
++    for ad in sorted(os.listdir(kanit)):
++        a = ad.lower()
++        if not a.endswith(".csv") or "artefakt" in a or "_cnv" in a or a.startswith("alphagenome"):
++            continue
++        if ad.startswith(proband + "_") or a.startswith("denovo_") or a.startswith("ortak_"):
++            out.append(os.path.join(kanit, ad))
++    return out
++
++
++def alphagenome_calistir(out, ozet, proband):
++    """Olgu klasoru icin AlphaGenome adimi. Donus: ozet['alphagenome'] sozlugu."""
++    kanit = os.path.join(out, "kanit")
++    sonuc = {"durum": "atlandi", "neden": None}
++    if AG is None:
++        sonuc["neden"] = "alphagenome_sorgu.py yuklenemedi: %s" % AG_HATA
++        ozet["alphagenome"] = sonuc
++        log("  AlphaGenome ATLANDI: %s" % sonuc["neden"])
++        return sonuc
++    if not proband:
++        sonuc["neden"] = "proband kodu yok"
++        ozet["alphagenome"] = sonuc
++        return sonuc
++    try:
++        genom = ((ozet.get("bireyler") or {}).get(proband) or {}).get("genom") or "hg38"
++        dosyalar = alphagenome_dosyalari(kanit, proband)
++        adaylar = AG.adaylari_topla(kanit, dosyalar=dosyalar)
++        log("  AlphaGenome Atlas: %d aday varyant (%d dosya, %s)" % (len(adaylar), len(dosyalar), genom))
++        oz = AG.calistir(kanit, adaylar=adaylar, genome=genom)
++        sonuc = {k: oz.get(k) for k in ("durum", "neden", "aday", "atlas", "model", "bulunamadi",
++                                        "hata", "sorulamadi", "kategori", "paket", "sure_sn",
++                                        "skorlar", "yuksek_varyantlar", "rapor_dosya")}
++        if oz.get("durum") == "tamam":
++            sonuc["rapor_notu"] = ("Rapor yazarken kanit/alphagenome_rapor.txt'deki bolumu kapsamli analiz "
++                                   "raporuna, yontem cumlesini sonuc/resmi rapora ekleyin; ayrinti "
++                                   "kanit/alphagenome.csv (arastirma amacli, ACMG kaniti degildir).")
++        if oz.get("durum") == "tamam":
++            k = oz.get("kategori") or {}
++            log("  AlphaGenome bitti: atlas %s, model %s, bulunamadi %s, hata %s; yuksek %s / orta %s / dusuk %s (%s sn)"
++                % (oz.get("atlas"), oz.get("model"), oz.get("bulunamadi"), oz.get("hata"),
++                   k.get("yuksek"), k.get("orta"), k.get("dusuk"), oz.get("sure_sn")))
++            for v in (oz.get("yuksek_varyantlar") or [])[:8]:
++                log("    %-24s %-10s AVI=%s  %s" % (v.get("key"), v.get("gene") or "-", v.get("avi"), v.get("yorum")))
++        else:
++            log("  AlphaGenome %s: %s" % (oz.get("durum"), oz.get("neden")))
++    except Exception as e:                    # asla olguyu dusurme
++        sonuc = {"durum": "hata", "neden": "%s: %s" % (type(e).__name__, str(e)[:200])}
++        log("  !! AlphaGenome adimi hata verdi (olgu etkilenmedi): %s" % sonuc["neden"])
++    ozet["alphagenome"] = sonuc
++    return sonuc
++
++
++def alphagenome_ozet_metni(ozet):
++    a = ozet.get("alphagenome") or {}
++    if a.get("durum") == "tamam":
++        k = a.get("kategori") or {}
++        return "AlphaGenome yuksek %s / orta %s" % (k.get("yuksek", 0), k.get("orta", 0))
++    return "AlphaGenome %s" % (a.get("durum") or "-")
++
++
++def komut_alphagenome(kodlar):
++    """Var olan olgu klasorlerinde yalniz AlphaGenome adimini (yeniden) calistir.
++
++    Genomize'a baglanmaz; kanit/ CSV'leri yeter. 'TUMU' -> kanit klasoru olan tum olgular.
++    """
++    if kodlar == ["TUMU"]:
++        kodlar = [k for k in sorted(os.listdir(RAPOR))
++                  if os.path.isdir(os.path.join(RAPOR, k, "kanit")) and not k.startswith(("_", "."))]
++    for kod in kodlar:
++        out = os.path.join(RAPOR, kod)
++        yol = os.path.join(out, "ozet.json")
++        if not os.path.exists(yol):
++            log("!! %s: ozet.json yok, atlandi" % kod)
++            continue
++        with open(yol, encoding="utf-8") as f:
++            ozet = json.load(f)
++        proband = None
++        try:
++            with open(os.path.join(out, "KLINIK.txt"), encoding="utf-8") as f:
++                for s in f:
++                    if s.startswith("Proband"):
++                        proband = kodlar_ilk(s.split(":", 1)[1])
++                        break
++        except OSError:
++            pass
++        proband = proband or kodlar_ilk(",".join(ozet.get("etkilenen") or []))
++        log("=== %s  AlphaGenome (proband %s)" % (kod, proband))
++        alphagenome_calistir(out, ozet, proband)
++        with open(yol, "w", encoding="utf-8") as f:
++            json.dump(ozet, f, indent=1, ensure_ascii=False)
++    return 0
++
++
++def kodlar_ilk(metin):
++    k = kodlar(metin)
++    return k[0] if k else None
++
++
+ def olgu_isle(seq, ws, r):
+     kod = str(hucre(ws, r, "Olgu Kodu")).strip()
+     test = (str(hucre(ws, r, "Test") or "WES")).strip().upper()
+@@ -498,6 +611,9 @@
+                                  "kapsama ve filtre farklari yalanci de novo uretir. "
+                                  "Populasyon frekansi >0,001 olan bir varyant de novo olamaz.")
+ 
++    # --- AlphaGenome Atlas: probandin aday varyantlari (eksenler + DENOVO + ORTAK)
++    alphagenome_calistir(out, ozet, proband[0] if proband else None)
++
+     with open(os.path.join(out, "ozet.json"), "w", encoding="utf-8") as f:
+         json.dump(ozet, f, indent=1, ensure_ascii=False)
+ 
+@@ -515,6 +631,7 @@
+         parcalar.append("ortak fenotip: %s" % ozet["ortak"].get("fenotip_iliskili", "-"))
+     if "de_novo" in ozet:
+         parcalar.append("de novo aday: %s" % ozet["de_novo"].get("nadir_lof", "-"))
++    parcalar.append(alphagenome_ozet_metni(ozet))
+ 
+     # --- AILE ILISKISI KONTROLU
+     # Trio/duo cikarimlarinin tamami ornek iliskisinin dogrulugana dayanir;
+@@ -597,10 +714,15 @@
+                     help="yalnizca bos 'Genomize Run' hucrelerini doldur")
+     ap.add_argument("--qc-doldur", action="store_true",
+                     help="eski olgularin ozet.json'una kalite/kapsama verisini ekle")
++    ap.add_argument("--alphagenome", nargs="+", metavar="OLGU",
++                    help="var olan olgu(lar) icin yalniz AlphaGenome Atlas adimini calistir "
++                         "(Genomize gerekmez; 'TUMU' = kanit klasoru olan tum olgular)")
+     a = ap.parse_args()
+ 
+     os.makedirs(RAPOR, exist_ok=True)
+     os.makedirs(LOG, exist_ok=True)
++    if a.alphagenome:
++        return komut_alphagenome(a.alphagenome)
+     wb, ws = excel_ac()
+ 
+     if a.liste:
