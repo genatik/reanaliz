@@ -671,6 +671,12 @@ class IncelemeDuzeltmeTest(unittest.TestCase):
         var = pd.DataFrame({"name": ["t0", "t1"], "biosample_name": ["brain", np.nan]}, index=["0", "1"])
         self.assertEqual(AG.AtlasSorgu._doku_adlari(var), ["brain", "t1"])
 
+    def test_splicing_skoru_yoksa_yorumda_belirtilir(self):
+        r = {"durum": "atlas", "avi": 5.0, "avi_yorum": "x"}
+        self.assertIn("splicing skoru yok", AG.yorumla(r))
+        r2 = {"durum": "atlas", "avi": 5.0, "avi_yorum": "x", "splicing_birlesik": 0.1}
+        self.assertNotIn("splicing skoru yok", AG.yorumla(r2))
+
     def test_avi_phred(self):
         self.assertAlmostEqual(AG.avi_phred(0.9), 10.0, places=1)
         self.assertAlmostEqual(AG.avi_phred(0.99), 20.0, places=1)

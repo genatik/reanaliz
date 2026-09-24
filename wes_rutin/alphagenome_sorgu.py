@@ -740,6 +740,8 @@ def yorumla(r):
             p.append("olasi splicing etkisi (birlesik %.2f)" % sp)
         else:
             p.append("splicing etkisi ongorulmuyor (birlesik %.2f)" % sp)
+    elif r.get("durum") in ("atlas", "model"):
+        p.append("splicing skoru yok (pencerede gen bulunamadi)")
     anlamli = []
     for kisa in [k for _, k, _ in MODALITELER if k not in ("splice_site", "splice_usage", "splice_junc")]:
         pk = r.get("%s_p" % kisa)
