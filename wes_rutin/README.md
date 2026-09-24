@@ -48,10 +48,12 @@ python alphagenome_sorgu.py --skorlar-listele
 
 ## Skorların anlamı (kısa)
 
-- **AVI (PHRED)**: tüm SNV'ler içinde sıralama; 10 = en yüksek %10, 20 = en yüksek %1, 30 = en yüksek %0,1.
-- **Kalibre kantil (−1…1)**: yaygın varyant arka planına göre uçluk; |0,99| = en uç %1. İşaret yönü gösterir.
-- **Birleşik splicing**: max(SS) + max(SSU) + max(SJ)/5; > 1,0 genellikle büyük etki.
-- **Kategori**: *yuksek* = AVI ≥ 20 ya da |kantil| ≥ 0,99 ya da splicing ≥ 1,0; *orta* = AVI ≥ 10 ya da |kantil| ≥ 0,95 ya da splicing ≥ 0,5; gerisi *dusuk*. Sıralama yardımcısıdır, klinik eşik değildir.
+- **AVI (PHRED)**: tüm SNV'ler içinde sıralama; 10 = en yüksek %10, 20 = en yüksek %1, 30 = en yüksek %0,1. Atlas'ın kalibre kantilinden türetilir; `avi_ham` modelin ham logit'idir (SHAP katkılarının toplamı), PHRED değildir.
+- **Birleşik splicing**: max(SS) + max(SSU) + max(SJ)/5 (makale tanımı). Kanonik splice site varyantları 2,5–3,5; ≥ 1,0 güçlü, 0,5–1,0 olası etki.
+- **Kalibre kantil (−1…1)**: yaygın varyant arka planına göre uçluk. Yüzlerce doku/gen hücresi içinde en uç kantil her varyantta ~0,99 çıkar; bu yüzden yalnız **aktif dokularda** (aktif alel skoru ≥ en aktif dokunun %10'u) ve **Bonferroni** düzeltmesiyle (p = aktif hücre sayısı × (1−|kantil|) ≤ 0,01) anlamlı sayılır → `duzenleyici_sinyal` sütunu; `*_p`, `*_aktif` sütunları ayrıntıyı verir.
+- **Kategori**: *yuksek* = AVI ≥ 20 ya da splicing ≥ 1,0; *orta* = AVI ≥ 10, splicing ≥ 0,5 ya da düzenleyici sinyal; gerisi *dusuk*. Sıralama yardımcısıdır, klinik eşik değildir.
+- **İndel / MNV**: Atlas (v0.9 istemcisi) yalnız SNV kabul eder; bunlar canlı modele gider (`durum = model`, AVI yok, olgu başına en fazla 100).
+- **Tanı**: `python alphagenome_sorgu.py --incele chr6:10961512:A:T` sunucunun ham yanıtını `incele_<key>.txt` dosyasına yazar.
 
 AlphaGenome çıktıları araştırma amaçlıdır; ACMG PP3/BP4 kanıtı yerine geçmez ve tek başına klinik karar
 verdirmez (kullanım koşulları). Kaynaklar: Avsec ve ark., *Nature* 2026 (doi:10.1038/s41586-025-10014-0);

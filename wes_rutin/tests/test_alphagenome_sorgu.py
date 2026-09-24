@@ -55,18 +55,28 @@ for _s in GENE_SCORERS + TRACK_SCORERS:
     META[_s] = atlas.ScorerMetadata(name=_s, is_signed=_s in ("RNA_SEQ", "ATAC", "DNASE", "CHIP_TF",
                                                                 "CHIP_HISTONE", "CAGE", "PROCAP"),
                                     track_metadata=_tracks(n, _s, CURIES, biosample=_s != "SPLICE_SITES"))
-META["AVI"] = atlas.ScorerMetadata(name="AVI", is_signed=False, track_metadata=_tracks(1, "AVI", biosample=False))
-META["AVI_FEATURE_ATTRIBUTIONS"] = atlas.ScorerMetadata(
-    name="AVI_FEATURE_ATTRIBUTIONS", is_signed=True,
-    track_metadata=pd.DataFrame({"name": ["ATAC", "SPLICING", "ALPHAMISSENSE", "PHASTCONS"], "strand": "."},
-                                index=["0", "1", "2", "3"]))
+# Sunucudaki gercek adlar (24.09.2026 listesi): AVI_SCORE (1 iz), AVI_SCORE_FEATURE_IMPORTANCE (SHAP, 18),
+# AVI_SCORE_MODEL_FEATURES (ham ozellikler, 18) ve 7 modalite icin *_ACTIVE (aktif alel) skorlari.
+META["AVI_SCORE"] = atlas.ScorerMetadata(name="AVI_SCORE", is_signed=False,
+                                         track_metadata=_tracks(1, "AVI_SCORE", biosample=False))
+_OZELLIK = pd.DataFrame({"name": ["MAX_ABS_ATAC", "MERGED_SPLICING", "ALPHAMISSENSE", "PHASTCONS_470_WAY"],
+                         "strand": "."}, index=["0", "1", "2", "3"])
+META["AVI_SCORE_FEATURE_IMPORTANCE"] = atlas.ScorerMetadata(
+    name="AVI_SCORE_FEATURE_IMPORTANCE", is_signed=True, track_metadata=_OZELLIK.copy())
+META["AVI_SCORE_MODEL_FEATURES"] = atlas.ScorerMetadata(
+    name="AVI_SCORE_MODEL_FEATURES", is_signed=True, track_metadata=_OZELLIK.copy())
 META["RNA_SEQ_ACTIVE"] = atlas.ScorerMetadata(name="RNA_SEQ_ACTIVE", is_signed=False,
-                                              track_metadata=_tracks(3, "RNA_SEQ_ACTIVE", CURIES))
+                                              track_metadata=_tracks(3, "RNA_SEQ", CURIES))
+META["DNASE_ACTIVE"] = atlas.ScorerMetadata(name="DNASE_ACTIVE", is_signed=False,
+                                            track_metadata=_tracks(3, "DNASE", CURIES))
+ACTIVE_SCORERS = ["RNA_SEQ_ACTIVE", "DNASE_ACTIVE"]
 
 # per-variant designed scores: key -> {scorer: (raw matrix, quantile matrix or None)}
-STRONG = "chr12:13865958:C:T"     # splicing strong + AVI 31
-MILD = "chr6:80168944:C:T"        # expression mild
+STRONG = "chr12:13865958:C:T"     # splicing strong + AVI PHRED 31.4 + DNase signal (active tissue)
+MILD = "chr6:80168944:C:T"        # expression signal in an active tissue (Bonferroni-significant) + a saturated
+                                  # kantil -1.0 in an INACTIVE tissue that must be ignored
 NOTFOUND = "chr1:12345:A:G"       # Atlas miss -> model fallback
+INDEL = "chr17:7587073:TAGA:T"    # Atlas (v0.9) rejects ref/alt length > 1 -> model fallback
 BAD = "chrM:123:A:G"              # cannot be queried
 
 
@@ -102,17 +112,26 @@ def _design(key):
         if key == STRONG and s == "SPLICE_JUNCTIONS":
             raw[0, 2], q[0, 2] = 2.5, 0.997
         if key == MILD and s == "RNA_SEQ":
-            raw[1, 0], q[1, 0] = -0.9, -0.96
+            raw[1, 0], q[1, 0] = -0.9, -0.9999       # CACNA1C, beyin: aktif doku -> anlamli
+            raw[0, 1], q[0, 1] = -0.05, -1.0         # GRIN2B, karaciger: gen ifade edilmiyor -> yok sayilmali
         d[s] = (raw, q, genes)
+    # aktif alel (max(REF,ALT)) matrisleri: modalite ile ayni sekil
+    act = np.array([[0.0, 0.0, 0.0], [10.0, 0.5, 9.0]], dtype=np.float32)   # GRIN2B hic aktif degil
+    d["RNA_SEQ_ACTIVE"] = (act, None, genes)
     for s in TRACK_SCORERS:
         n = len(META[s].track_metadata)
         raw = np.full((1, n), 0.02, dtype=np.float32)
         q = np.full((1, n), 0.10, dtype=np.float32)
         if key == STRONG and s == "DNASE":
-            raw[0, 2], q[0, 2] = -1.4, -0.993
+            raw[0, 2], q[0, 2] = -1.4, -0.999        # kan: aktif -> p = 2 x 0.001 = 0.002
+            raw[0, 1], q[0, 1] = -0.3, -0.9999       # karaciger: aktif degil -> yok sayilir
         d[s] = (raw, q, None)
-    d["AVI"] = (np.array([[31.4 if key == STRONG else 7.2]], dtype=np.float32), None, None)
-    d["AVI_FEATURE_ATTRIBUTIONS"] = (np.array([[0.1, 2.3, 0.4, 0.9]], dtype=np.float32), None, None)
+    d["DNASE_ACTIVE"] = (np.array([[5.0, 0.2, 8.0]], dtype=np.float32), None, None)
+    # AVI: X = model logit (SHAP toplami), kalibre kantil -> PHRED. 0.999276 -> 31.4 ; 0.8095 -> 7.2
+    d["AVI_SCORE"] = (np.array([[3.1 if key == STRONG else 0.4]], dtype=np.float32),
+                      np.array([[0.999276 if key == STRONG else 0.8095]], dtype=np.float32), None)
+    d["AVI_SCORE_FEATURE_IMPORTANCE"] = (np.array([[0.1, 2.3, 0.4, 0.9]], dtype=np.float32), None, None)
+    d["AVI_SCORE_MODEL_FEATURES"] = (np.array([[0.02, 1.87, 0.0, 1.0]], dtype=np.float32), None, None)
     return d
 
 
@@ -166,6 +185,8 @@ class FakeClient(object):
         self.calls.append(key)
         if key == NOTFOUND:
             raise _grpc_hata("NOT_FOUND", "Variant not found")   # mirrors handle_rpc_error NOT_FOUND
+        if len(v.reference_bases) > 1 or len(v.alternate_bases) > 1:
+            raise _grpc_hata("INVALID_ARGUMENT", "Reference or alternate bases length > 1 not yet supported.")
         meta = {k: m.track_metadata.copy() for k, m in META.items()}
         return atlas.convert_variant_scores_to_anndata([_proto(key, set(requested_scorers))], meta)
 
@@ -212,6 +233,7 @@ def _kanit(tmp):
     _write_csv(os.path.join(tmp, "222080_nadir_lof.csv"), [
         {"key": NOTFOUND, "gene": "SCN1A", "hgvsc": "c.1A>G", "consequence": "Start Lost", "af_max": ""},
         {"key": STRONG, "gene": "GRIN2B", "consequence": "Missense Variant", "af_max": "0.000012"},
+        {"key": INDEL, "gene": "MPDU1", "hgvsc": "c.10_12del", "consequence": "Inframe Deletion", "af_max": "0"},
     ])
     _write_csv(os.path.join(tmp, "DENOVO_nadir_lof.csv"), [
         {"key": BAD, "gene": "MT-ND1", "consequence": "Missense", "af_max": ""},
@@ -234,8 +256,8 @@ class YardimciTest(unittest.TestCase):
         self.assertTrue(AG.lof_mu("Stop Gained"))
         self.assertTrue(AG.lof_mu("frameshift_variant"))
         self.assertFalse(AG.lof_mu("Missense Variant"))
-        a = {"kategori": "yuksek", "avi": 52.0, "splicing_birlesik": 0.1, "en_yuksek_kantil": 0.5}
-        b = {"kategori": "yuksek", "avi": 21.0, "splicing_birlesik": 1.9, "en_yuksek_kantil": 0.999}
+        a = {"kategori": "yuksek", "avi": 52.0, "splicing_birlesik": 0.1, "duzenleyici_sinyal": None}
+        b = {"kategori": "yuksek", "avi": 21.0, "splicing_birlesik": 1.9, "duzenleyici_sinyal": "DNASE- (kan)"}
         c = {"kategori": "orta", "avi": 12.0}
         self.assertEqual(sorted([a, b, c], key=AG.sinyal_anahtari), [b, a, c])
         r = {k: None for k in AG.OZET_SUTUNLAR}
@@ -263,8 +285,9 @@ class YardimciTest(unittest.TestCase):
                             layers={"quantiles": np.array([[np.nan, 0.995]], dtype=np.float32)})
         avi = anndata.AnnData(X=np.array([[np.nan]], dtype=np.float32),
                               obs=pd.DataFrame({"variant": ["v"]}, index=["0"]), var=pd.DataFrame(index=["0"]))
-        oz, det = s._ozetle("chr1:1:A:T", {"ATAC": a, "AVI": avi}, "AVI", None, "atlas")
+        oz, det = s._ozetle("chr1:1:A:T", {"ATAC": a, "AVI_SCORE": avi}, "AVI_SCORE", None, "atlas")
         self.assertNotIn("avi", oz)
+        self.assertNotIn("avi_ham", oz)
         self.assertEqual(oz["atac_kantil"], 0.995)
         self.assertEqual(oz["atac_doku"], "t1")            # var without name/biosample -> index
         self.assertEqual(len(det), 1)                       # NaN cell excluded from detail rows
@@ -336,10 +359,12 @@ class SorguTest(unittest.TestCase):
         s = FakeSorgu()
         sec = s.secili_skorlar()
         self.assertIn("RNA_SEQ", sec)
-        self.assertIn("AVI", sec)
-        self.assertIn("AVI_FEATURE_ATTRIBUTIONS", sec)
-        self.assertNotIn("RNA_SEQ_ACTIVE", sec)
-        self.assertEqual(s.avi_adlari(sec), ("AVI", "AVI_FEATURE_ATTRIBUTIONS"))
+        self.assertIn("AVI_SCORE", sec)
+        self.assertIn("AVI_SCORE_FEATURE_IMPORTANCE", sec)
+        self.assertIn("RNA_SEQ_ACTIVE", sec)                 # aktif alel skorlari kapilama icin istenir
+        self.assertIn("DNASE_ACTIVE", sec)
+        self.assertNotIn("ATAC_ACTIVE", sec)                 # sunucuda yoksa istenmez
+        self.assertEqual(s.avi_adlari(sec), ("AVI_SCORE", "AVI_SCORE_FEATURE_IMPORTANCE"))
 
     def test_sorgula(self):
         s = FakeSorgu(model=True, model_max=25)
@@ -348,27 +373,42 @@ class SorguTest(unittest.TestCase):
         self.assertEqual(len(ozet), len(self.adaylar))
         st = by[STRONG]
         self.assertEqual(st["durum"], "atlas")
-        self.assertAlmostEqual(st["avi"], 31.4, places=1)
+        self.assertAlmostEqual(st["avi"], 31.4, places=1)                # PHRED kalibre kantilden
+        self.assertAlmostEqual(st["avi_ham"], 3.1, places=2)              # logit ayrica
+        self.assertAlmostEqual(st["avi_kantil"], 0.999276, places=5)
         self.assertEqual(st["kategori"], "yuksek")
         self.assertAlmostEqual(st["splice_site_ham"], 0.82, places=2)
         self.assertAlmostEqual(st["splicing_birlesik"], 0.82 + 0.55 + 2.5 / 5.0, places=2)
         self.assertEqual(st["splice_site_gen"], "GRIN2B")
-        self.assertAlmostEqual(st["dnase_kantil"], -0.993, places=3)
+        self.assertAlmostEqual(st["dnase_kantil"], -0.999, places=3)      # aktif doku (kan), karaciger degil
         self.assertEqual(st["dnase_doku"], "kan")
-        self.assertIn("SPLICING:+2.30", st["avi_katki"])
+        self.assertAlmostEqual(st["dnase_p"], 0.002, places=3)            # 2 aktif hucre x 0.001
+        self.assertAlmostEqual(st["dnase_aktif"], 1.0, places=2)
+        self.assertEqual(st["duzenleyici_sinyal"], "DNASE- (kan)")
+        self.assertIn("MERGED_SPLICING:+2.30", st["avi_katki"])
         self.assertIn("splicing etkisi guclu", st["yorum"])
+        self.assertIn("DNase kantil -0.999", st["yorum"])
         self.assertIn("PHRED 31.4", st["avi_yorum"])
         mi = by[MILD]
-        self.assertEqual(mi["kategori"], "orta")
-        self.assertAlmostEqual(mi["ekspresyon_kantil"], -0.96, places=2)
-        self.assertEqual(mi["ekspresyon_gen"], "CACNA1C")
+        self.assertEqual(mi["kategori"], "orta")                          # yalniz duzeltilmis sinyalle
+        self.assertAlmostEqual(mi["avi"], 7.2, places=1)
+        self.assertAlmostEqual(mi["ekspresyon_kantil"], -0.9999, places=4)
+        self.assertEqual(mi["ekspresyon_gen"], "CACNA1C")                 # GRIN2B/karaciger (-1.0, inaktif) degil
+        self.assertEqual(mi["ekspresyon_doku"], "beyin")
+        self.assertEqual(mi["duzenleyici_sinyal"], "RNA_SEQ- (beyin)")
         self.assertIn("azalma", mi["yorum"])
+        self.assertIn("aktif doku", mi["yorum"])
         nf = by[NOTFOUND]
         self.assertEqual(nf["durum"], "model")
         self.assertIsNone(nf["avi"])
         self.assertEqual(nf["kategori"], "dusuk")
         self.assertIn("ongorulmuyor", nf["yorum"])
-        self.assertEqual(s.model_calls, [NOTFOUND])
+        self.assertIn("anlamli sinyal yok", nf["yorum"])
+        ind = by[INDEL]
+        self.assertEqual(ind["durum"], "model")                           # Atlas reddetti -> canli model
+        self.assertIn("indel/MNV", ind["yorum"])
+        self.assertEqual(sorted(s.model_calls), sorted([NOTFOUND, INDEL]))
+        self.assertFalse(s.hatalar)
         bad = by[BAD]
         self.assertEqual(bad["durum"], "sorulamadi")
         self.assertEqual(bad["kategori"], "-")
@@ -378,8 +418,11 @@ class SorguTest(unittest.TestCase):
         self.assertEqual(st_det[0]["gene"], "GRIN2B")
         self.assertLessEqual(max(sum(1 for d in st_det if d["skor"] == sc) for sc in set(d["skor"] for d in st_det)),
                              AG.DETAY_DOKU_N)
-        # AVI is not a detail row
-        self.assertFalse([d for d in st_det if d["skor"] == "AVI"])
+        # AVI and active-allele scorers are not detail rows; detail rows carry activity
+        self.assertFalse([d for d in st_det if d["skor"] in ("AVI_SCORE", "DNASE_ACTIVE", "RNA_SEQ_ACTIVE")])
+        dn = [d for d in st_det if d["skor"] == "DNASE"]
+        self.assertTrue(dn and all(d["doku"] != "karaciger" for d in dn))   # inaktif doku detayda da yok
+        self.assertEqual(dn[0]["aktif"], 1.0)
         # input order preserved
         self.assertEqual([r["key"] for r in ozet], [a["key"] for a in self.adaylar])
 
@@ -398,7 +441,7 @@ class SorguTest(unittest.TestCase):
         s2 = FakeSorgu(model=False)
         ozet2, detay2 = s2.sorgula(self.adaylar, onbellek=ob)
         self.assertEqual(len(s2.fake.calls), 0)          # everything served from cache
-        self.assertEqual(n1, 3)                           # STRONG, MILD, NOTFOUND (BAD never queried)
+        self.assertEqual(n1, 4)                           # STRONG, MILD, NOTFOUND, INDEL (BAD never queried)
         self.assertEqual([r["key"] for r in ozet2], [a["key"] for a in self.adaylar])
         self.assertTrue([d for d in detay2 if d["key"] == STRONG])
 
@@ -408,7 +451,7 @@ class SorguTest(unittest.TestCase):
         st = [r for r in ozet if r["key"] == STRONG][0]
         # DNase peak sits in track 2 (kan) -> filtered out; summary must fall back to brain track
         self.assertEqual(st["dnase_doku"], "beyin")
-        self.assertNotAlmostEqual(st["dnase_kantil"] or 0, -0.993, places=2)
+        self.assertNotAlmostEqual(st["dnase_kantil"] or 0, -0.999, places=2)
 
 
 class CalistirTest(unittest.TestCase):
@@ -430,10 +473,11 @@ class CalistirTest(unittest.TestCase):
     def test_calistir_yazar(self):
         oz = AG.calistir(self.tmp, adaylar=self.adaylar, genome="hg38", onbellek=False, sessiz=True)
         self.assertEqual(oz["durum"], "tamam")
-        self.assertEqual(oz["aday"], 4)
+        self.assertEqual(oz["aday"], 5)
         self.assertEqual(oz["atlas"], 2)
-        self.assertEqual(oz["model"], 1)
+        self.assertEqual(oz["model"], 2)
         self.assertEqual(oz["sorulamadi"], 1)
+        self.assertEqual(oz["hata"], 0)
         self.assertEqual(oz["kategori"]["yuksek"], 1)
         self.assertEqual(oz["kategori"]["orta"], 1)
         self.assertEqual(oz["yuksek_varyantlar"][0]["gene"], "GRIN2B")
@@ -451,11 +495,12 @@ class CalistirTest(unittest.TestCase):
         self.assertIn("10.1038/s41586-025-10014-0", rapor)
         self.assertIn("31,4", rapor)
         j = json.load(open(os.path.join(self.tmp, "alphagenome_ozet.json"), encoding="utf-8"))
-        self.assertIn("AVI", j["sunucu_skorlari"])
+        self.assertIn("AVI_SCORE", j["sunucu_skorlari"])
+        self.assertEqual(j["avi_skoru"], "AVI_SCORE")
         # second read via ozet_oku
         oz2, satirlar = AG.ozet_oku(self.tmp)
         self.assertEqual(oz2["durum"], "tamam")
-        self.assertEqual(len(satirlar), 4)
+        self.assertEqual(len(satirlar), 5)
 
     def test_hg19_atlanir(self):
         oz = AG.calistir(self.tmp, adaylar=self.adaylar, genome="hg19", onbellek=False, sessiz=True)
@@ -559,7 +604,7 @@ class IncelemeDuzeltmeTest(unittest.TestCase):
         self.assertEqual({r["durum"] for r in ozet1 if r["key"] != BAD}, {"hata"})
         s2 = FakeSorgu(model=False)
         ozet2, _ = s2.sorgula(self.adaylar, onbellek=ob)
-        self.assertEqual(len(s2.fake.calls), 3)                 # yeniden soruldu
+        self.assertEqual(len(s2.fake.calls), 4)                 # yeniden soruldu
         self.assertEqual([r for r in ozet2 if r["key"] == STRONG][0]["durum"], "atlas")
 
     def test_onbellek_model_bayragi(self):
@@ -570,7 +615,7 @@ class IncelemeDuzeltmeTest(unittest.TestCase):
         ozet2, _ = s2.sorgula(self.adaylar, onbellek=ob)
         nf = [r for r in ozet2 if r["key"] == NOTFOUND][0]
         self.assertEqual(nf["durum"], "model")                 # model acilinca yeniden denendi
-        self.assertEqual(s2.model_calls, [NOTFOUND])
+        self.assertEqual(sorted(s2.model_calls), sorted([NOTFOUND, INDEL]))
         s3 = FakeSorgu(model=True)
         s3.sorgula(self.adaylar, onbellek=ob)
         self.assertEqual(s3.model_calls, [])                   # model sonucu onbellekten
@@ -625,6 +670,90 @@ class IncelemeDuzeltmeTest(unittest.TestCase):
     def test_nan_biosample(self):
         var = pd.DataFrame({"name": ["t0", "t1"], "biosample_name": ["brain", np.nan]}, index=["0", "1"])
         self.assertEqual(AG.AtlasSorgu._doku_adlari(var), ["brain", "t1"])
+
+    def test_avi_phred(self):
+        self.assertAlmostEqual(AG.avi_phred(0.9), 10.0, places=1)
+        self.assertAlmostEqual(AG.avi_phred(0.99), 20.0, places=1)
+        self.assertAlmostEqual(AG.avi_phred(0.999276), 31.4, places=1)
+        self.assertEqual(AG.avi_phred(1.0), 60.0)
+        self.assertEqual(AG.avi_phred(-0.9), 10.0)                        # isaret goz ardi
+        self.assertIsNone(AG.avi_phred(None))
+        self.assertIsNone(AG.avi_phred(float("nan")))
+
+    def test_avi_kantilsiz_ham_kalir(self):
+        """Sunucu AVI icin kalibre kantil gondermezse PHRED hesaplanmaz, ham (logit) yazilir."""
+        import anndata
+        s = FakeSorgu()
+        s._secili = s.secili_skorlar()
+        avi = anndata.AnnData(X=np.array([[2.4]], dtype=np.float32),
+                              obs=pd.DataFrame({"variant": ["v"]}, index=["0"]), var=pd.DataFrame(index=["0"]))
+        oz, _ = s._ozetle("chr1:1:A:T", {"AVI_SCORE": avi}, "AVI_SCORE", None, "atlas")
+        self.assertNotIn("avi", oz)
+        self.assertAlmostEqual(oz["avi_ham"], 2.4, places=2)
+        r = {k: None for k in AG.OZET_SUTUNLAR}; r.update(oz)
+        self.assertEqual(AG.kategori(r), "dusuk")
+        self.assertIn("PHRED hesaplanamadi", AG.yorumla(r))
+
+    def test_coklu_karsilastirma(self):
+        """Yuzlerce izde max |kantil| ~0,99 sanstir: Bonferroni sonrasi anlamli sayilmamali."""
+        import anndata
+        s = FakeSorgu()
+        s._secili = s.secili_skorlar()
+        n = 300
+        rng = np.random.RandomState(0)
+        Q = rng.uniform(-0.999, 0.999, size=(1, n)).astype(np.float32)   # null: uniform kantiller
+        X = (Q * 0.1).astype(np.float32)
+        a = anndata.AnnData(X=X, obs=pd.DataFrame({"variant": ["v"]}, index=["0"]),
+                            var=_tracks(n, "ATAC", CURIES), layers={"quantiles": Q})
+        oz, _ = s._ozetle("chr1:1:A:T", {"ATAC": a}, None, None, "atlas")
+        self.assertGreaterEqual(abs(oz["atac_kantil"]), 0.99)           # ham max hala ~0,99
+        self.assertGreater(oz["atac_p"], AG.KANTIL_P)                    # ama anlamli degil
+        self.assertNotIn("duzenleyici_sinyal", oz)
+        r = {k: None for k in AG.OZET_SUTUNLAR}; r.update(oz)
+        self.assertEqual(AG.kategori(r), "dusuk")
+        self.assertIn("anlamli sinyal yok", AG.yorumla(r))
+        # gercek sinyal: tek izde kantil 1.0 -> p = 0
+        Q[0, 7] = 1.0; X[0, 7] = 2.0
+        a2 = anndata.AnnData(X=X, obs=pd.DataFrame({"variant": ["v"]}, index=["0"]),
+                             var=_tracks(n, "ATAC", CURIES), layers={"quantiles": Q})
+        oz2, _ = s._ozetle("chr1:1:A:T", {"ATAC": a2}, None, None, "atlas")
+        self.assertEqual(oz2["atac_p"], 0.0)
+        self.assertTrue(oz2["duzenleyici_sinyal"].startswith("ATAC+ ("))
+
+    def test_aktif_kapilama_inaktif_dokuyu_eler(self):
+        """Ifade edilmeyen gen/dokudaki doygun kantil (-1.0) secilmemeli; aktif matris yoksa kapilama yok."""
+        import anndata
+        s = FakeSorgu()
+        s._secili = s.secili_skorlar()
+        X = np.array([[-0.05, -0.9, 0.1]], dtype=np.float32)
+        Q = np.array([[-1.0, -0.9995, 0.2]], dtype=np.float32)
+        obs = pd.DataFrame({"gene_name": ["G"], "variant": ["v"]}, index=["0"])
+        a = anndata.AnnData(X=X, obs=obs, var=_tracks(3, "RNA_SEQ", CURIES), layers={"quantiles": Q})
+        act = anndata.AnnData(X=np.array([[0.0, 8.0, 6.0]], dtype=np.float32), obs=obs.copy(),
+                              var=_tracks(3, "RNA_SEQ", CURIES))
+        oz, det = s._ozetle("chr1:1:A:T", {"RNA_SEQ": a, "RNA_SEQ_ACTIVE": act}, None, None, "atlas")
+        self.assertEqual(oz["ekspresyon_doku"], "karaciger")             # track 1, aktif
+        self.assertAlmostEqual(oz["ekspresyon_kantil"], -0.9995, places=4)
+        self.assertAlmostEqual(oz["ekspresyon_p"], 0.001, places=3)      # 2 aktif hucre
+        self.assertEqual(oz["ekspresyon_aktif"], 1.0)
+        self.assertTrue(all(d["doku"] != "beyin" for d in det))
+        oz2, _ = s._ozetle("chr1:1:A:T", {"RNA_SEQ": a}, None, None, "atlas")   # aktif matris yok
+        self.assertEqual(oz2["ekspresyon_doku"], "beyin")                # kapilamasiz: max |q| = -1.0
+        self.assertIsNone(oz2["ekspresyon_aktif"])
+        self.assertEqual(oz2["ekspresyon_p"], 0.0)
+
+    def test_desteklenmeyen_varyant_modele_gider(self):
+        self.assertTrue(AG._desteklenmiyor_mu(ValueError("Reference or alternate bases length > 1 not yet supported.")))
+        self.assertFalse(AG._desteklenmiyor_mu(ValueError("Invalid filter")))
+        class Yok(FakeSorgu):
+            def _atlas_tek(self, v):
+                raise _grpc_hata("INVALID_ARGUMENT", "Reference or alternate bases length > 1 not yet supported.")
+        s = Yok(model=False)
+        ozet, _ = s.sorgula(self.adaylar, onbellek=None)
+        st = [r for r in ozet if r["key"] == STRONG][0]
+        self.assertEqual(st["durum"], "bulunamadi")                       # model kapali: hata degil
+        self.assertIn("desteklemiyor", st["yorum"])
+        self.assertFalse(s.hatalar)
 
     def test_model_araligi(self):
         from alphagenome.data import genome
@@ -745,7 +874,7 @@ class RutinHookTest(unittest.TestCase):
         with open(os.path.join(out, "ozet.json"), encoding="utf-8") as f:
             ozet = json.load(f)
         self.assertEqual(ozet["alphagenome"]["durum"], "tamam")
-        self.assertEqual(ozet["alphagenome"]["aday"], 4)
+        self.assertEqual(ozet["alphagenome"]["aday"], 5)
 
     def test_komut_alphagenome_degismeyince_yazmaz(self):
         """Review #2: sonuc aynıysa (or. anahtar yok -> atlandi) ozet.json yeniden yazilmaz."""

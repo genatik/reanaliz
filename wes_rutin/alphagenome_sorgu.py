@@ -47,6 +47,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -56,7 +57,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-SURUM = "1.0"
+SURUM = "1.1"
 
 # Raporda gosterilen modaliteler (Atlas skor adi -> kisa ad, aciklama).
 # Adlar RECOMMENDED_VARIANT_SCORERS anahtarlariyla aynidir; sunucu farkli
@@ -78,24 +79,39 @@ MODALITELER = [
 MOD_KISA = {ad: kisa for ad, kisa, _ in MODALITELER}
 SPLICE_SKORLAR = ("SPLICE_SITES", "SPLICE_SITE_USAGE", "SPLICE_JUNCTIONS")
 
+# "Aktif alel" skorlari (Cheng ve ark. 2026): max(REF, ALT) sinyali = genin /
+# elemanin o dokudaki mutlak aktivitesi. Kalibre kantiller yalnizca aktif
+# dokularda yorumlanir; aksi halde ifade edilmeyen bir gende kucucuk bir
+# log-FC bile "arka planin en ucu" (kantil +-1,0) gorunur.
+AKTIF_ES = {"RNA_SEQ": "RNA_SEQ_ACTIVE", "ATAC": "ATAC_ACTIVE", "DNASE": "DNASE_ACTIVE",
+            "CHIP_TF": "CHIP_TF_ACTIVE", "CHIP_HISTONE": "CHIP_HISTONE_ACTIVE",
+            "CAGE": "CAGE_ACTIVE", "PROCAP": "PROCAP_ACTIVE"}
+AKTIF_TERS = {v: k for k, v in AKTIF_ES.items()}
+AKTIF_ORAN = 0.10          # hucre aktif sayilir: aktivite >= en aktif hucrenin %10'u
+
 # Rapor/siralama esikleri. Makale (Cheng ve ark. 2026) sabit esik yerine
 # siralama onerir; bunlar yalnizca tabloyu okunur kilan yol gostericilerdir.
 AVI_YUKSEK, AVI_ORTA = 20.0, 10.0          # PHRED: %1 ve %10
-KANTIL_YUKSEK, KANTIL_ORTA = 0.99, 0.95    # |kalibre kantil|
-SPLICE_YUKSEK, SPLICE_ORTA = 1.0, 0.5      # birlesik splicing (dokumantasyon: >1 buyuk etki)
+SPLICE_YUKSEK, SPLICE_ORTA = 1.0, 0.5      # birlesik splicing (makale tanimi; splice site varyantlari 2,5-3,5)
+# Modalite kantili: yuzlerce doku/gen hucresi icinde max |kantil| her zaman
+# ~0,99'dur (coklu karsilastirma). Bonferroni: p = aktif hucre sayisi x (1-|q|).
+KANTIL_P = 0.01
+KANTIL_YUKSEK, KANTIL_ORTA = 0.99, 0.95    # yalniz aciklayici metinlerde (kategori icin kullanilmaz)
 
-DETAY_DOKU_N = 5          # detay CSV'de skor basina en yuksek kac doku
-VARSAYILAN_ADAY_UST = 400  # olgu basina en fazla kac varyant sorulsun
+DETAY_DOKU_N = 5           # detay CSV'de skor basina en yuksek kac doku
+VARSAYILAN_ADAY_UST = 1000 # olgu basina en fazla kac varyant sorulsun
+VARSAYILAN_MODEL_MAX = 100 # Atlas'in desteklemedigi (indel/MNV) varyantlardan kaci canli modele gitsin
 ISCI = 4                   # es zamanli Atlas sorgusu
 
 OZET_SUTUNLAR = ["key", "krom", "poz", "ref", "alt", "gene", "hgvsc", "hgvsp", "consequence",
-                 "kaynak", "durum", "kategori", "avi", "avi_yorum", "avi_katki",
-                 "en_yuksek_kantil", "en_yuksek_modalite", "splicing_birlesik"]
+                 "kaynak", "durum", "kategori", "avi", "avi_ham", "avi_kantil", "avi_yorum", "avi_katki",
+                 "splicing_birlesik", "duzenleyici_sinyal", "en_yuksek_kantil", "en_yuksek_modalite"]
 for _ad, _kisa, _ in MODALITELER:
-    OZET_SUTUNLAR += ["%s_ham" % _kisa, "%s_kantil" % _kisa, "%s_doku" % _kisa, "%s_gen" % _kisa]
+    OZET_SUTUNLAR += ["%s_ham" % _kisa, "%s_kantil" % _kisa, "%s_p" % _kisa, "%s_doku" % _kisa,
+                      "%s_gen" % _kisa, "%s_aktif" % _kisa]
 OZET_SUTUNLAR += ["yorum"]
 
-DETAY_SUTUNLAR = ["key", "gene", "skor", "gen_ag", "doku", "ontoloji", "ham", "kantil"]
+DETAY_SUTUNLAR = ["key", "gene", "skor", "gen_ag", "doku", "ontoloji", "ham", "kantil", "aktif"]
 
 
 # --------------------------------------------------------------------------
@@ -184,6 +200,23 @@ def _yuvarla(x, n=3):
     return round(f, n)
 
 
+def avi_phred(kantil):
+    """Kalibre kantil (0..1) -> PHRED = -10*log10(1-q). Makale: PHRED 10 = en yuksek %10,
+    20 = %1, 30 = %0,1. q >= 1 -> 60 (ust sinir). Atlas'in AVI_SCORE ham degeri (X)
+    modelin logit'idir (SHAP katkilarinin toplami), PHRED DEGILDIR."""
+    if kantil is None:
+        return None
+    try:
+        q = abs(float(kantil))
+    except (TypeError, ValueError):
+        return None
+    if q != q or q < 0:
+        return None
+    if q >= 1.0:
+        return 60.0
+    return round(-10.0 * math.log10(1.0 - q), 1)
+
+
 def avi_yorumla(avi):
     """PHRED -> Turkce okunus. PHRED p: en yuksek 10^(-p/10) dilimi."""
     if avi is None:
@@ -251,6 +284,13 @@ class Onbellek(object):
 # Atlas istemcisi
 # --------------------------------------------------------------------------
 
+def _desteklenmiyor_mu(e):
+    """Sunucu INVALID_ARGUMENT: 'Reference or alternate bases length > 1 not yet supported.'
+    Atlas (v0.9 istemcisiyle) yalniz SNV kabul ediyor; indel/MNV canli modele gider."""
+    m = str(e).lower()
+    return "not yet supported" in m or "length > 1" in m
+
+
 def _bulunamadi_mi(e):
     """atlas.handle_rpc_error NOT_FOUND -> ValueError(from grpc.Call), OUT_OF_RANGE -> IndexError.
     gRPC kodunu __cause__ uzerinden oku; kutuphane kaynakli ValueError'lar hata sayilir."""
@@ -271,7 +311,7 @@ def _bulunamadi_mi(e):
 class AtlasSorgu(object):
     """alphagenome.atlas uzerinden sorgu; skor metaverisi bir kez cekilir."""
 
-    def __init__(self, key=None, skorlar=None, doku=None, model=False, model_max=25):
+    def __init__(self, key=None, skorlar=None, doku=None, model=False, model_max=VARSAYILAN_MODEL_MAX):
         self.key = key or api_key()
         self.istenen = skorlar            # None -> otomatik secim
         self.doku = [d for d in (doku or []) if d]
@@ -332,6 +372,8 @@ class AtlasSorgu(object):
                 log("sunucuda olmayan skor(lar) atlandi: %s" % ", ".join(eksik))
             return sec
         sec = [ad for ad, _, _ in MODALITELER if ad in adlar]
+        # Aktif alel skorlari (kantil kapilamasi icin); sunucuda varsa.
+        sec += [AKTIF_ES[ad] for ad in sec if ad in AKTIF_ES and AKTIF_ES[ad] in adlar]
         # AVI ve ozellik katkilari: ad sunucuya gore degisebilir, desenle sec.
         for ad in sorted(adlar):
             u = ad.upper()
@@ -447,10 +489,13 @@ class AtlasSorgu(object):
             # handle_rpc_error: NOT_FOUND/INVALID_ARGUMENT -> ValueError, OUT_OF_RANGE -> IndexError.
             # Yalniz NOT_FOUND/OUT_OF_RANGE "kayit yok"tur; digerleri (gecersiz filtre,
             # kutuphane hatasi) gercek hatadir ve sessizce negatif sonuca donusmemeli.
-            if not _bulunamadi_mi(e):
+            if _desteklenmiyor_mu(e):
+                durum, not_ = "bulunamadi", "Atlas bu varyant tipini (indel/MNV) desteklemiyor"
+            elif not _bulunamadi_mi(e):
                 self.hatalar.append("%s: %s" % (type(e).__name__, str(e)[:160]))
                 return "hata", None, "Atlas: %s: %s" % (type(e).__name__, str(e)[:120])
-            durum, not_ = "bulunamadi", "Atlas'ta kayit yok"
+            else:
+                durum, not_ = "bulunamadi", "Atlas'ta kayit yok"
         except PermissionError as e:
             self.hatalar.append("yetki: %s" % e)
             return "hata", None, "API anahtari reddedildi: %s" % str(e)[:120]
@@ -464,7 +509,7 @@ class AtlasSorgu(object):
         if model_dene:
             try:
                 s = self._model_tek(v)
-                return "model", s, "Atlas'ta yok; canli AlphaGenome modeli (1 Mb) ile skorlandi"
+                return "model", s, "%s; canli AlphaGenome modeli (1 Mb) ile skorlandi" % not_
             except Exception as e:
                 self.hatalar.append("model %s: %s" % (type(e).__name__, str(e)[:160]))
                 return "hata", None, "model: %s: %s" % (type(e).__name__, str(e)[:120])
@@ -472,12 +517,27 @@ class AtlasSorgu(object):
 
     # -- ozetleme ---------------------------------------------------------
     def _ozetle(self, key, sonuc, avi_ad, katki_ad, durum):
-        """{skor: AnnData} -> (ozet dict, detay satirlari)."""
+        """{skor: AnnData} -> (ozet dict, detay satirlari).
+
+        Modalite basina: aktif alel (max(REF,ALT)) ile kapilanmis hucreler icinde
+        en uc kalibre kantil; Bonferroni ile duzeltilmis p (aktif hucre sayisi x (1-|q|)).
+        Birlesik splicing = makaledeki gibi tum gen/koordinatlar uzerinden max ham.
+        AVI: PHRED kalibre kantilden turetilir; ham X (logit) ayrica yazilir.
+        """
         import numpy as np
         oz, det = {}, []
-        genel = []                       # (|kantil|, modalite)
+        sinyal = []                      # (p, kantil, modalite, doku)
         hammax = {}                      # kisa ad -> max |ham| (birlesik splicing icin)
+        aktif = {}                       # temel skor adi -> aktivite matrisi
         for ad, a in sonuc.items():
+            if ad in AKTIF_TERS:
+                try:
+                    aktif[AKTIF_TERS[ad]] = np.abs(np.asarray(a.X, dtype=float))
+                except Exception:
+                    pass
+        for ad, a in sonuc.items():
+            if ad in AKTIF_TERS:
+                continue
             X = np.asarray(a.X, dtype=float)
             if X.size == 0:
                 continue
@@ -491,7 +551,10 @@ class AtlasSorgu(object):
 
             if ad == avi_ad:
                 if np.isfinite(X).any():
-                    oz["avi"] = _yuvarla(np.nanmax(X), 1)
+                    oz["avi_ham"] = _yuvarla(np.nanmax(X), 3)
+                    if q is not None and np.isfinite(q).any():
+                        oz["avi_kantil"] = _yuvarla(np.nanmax(np.abs(q)), 6)
+                        oz["avi"] = avi_phred(oz["avi_kantil"])
                 continue
             if ad == katki_ad:
                 oz["avi_katki"] = self._katki_ozet(X, doku_ad)
@@ -506,39 +569,69 @@ class AtlasSorgu(object):
             qs = q[:, sut] if q is not None else None
             if Xs.size == 0 or not np.isfinite(Xs).any():
                 continue
-            i, j = np.unravel_index(np.nanargmax(np.abs(Xs)), Xs.shape)
-            ham_max = _yuvarla(Xs[i, j])
-            kantil = None
-            if qs is not None and np.isfinite(qs).any():
-                iq, jq = np.unravel_index(np.nanargmax(np.abs(qs)), qs.shape)
-                kantil = _yuvarla(qs[iq, jq], 4)
-                i, j = iq, jq            # ham/doku/gen etiketi AYNI hucreden (kantile gore)
-            ham = _yuvarla(Xs[i, j])
+            if qs is not None and not np.isfinite(qs).any():
+                qs = None                                      # kantil katmani bos: ham degerle devam
+            ham_max = _yuvarla(np.nanmax(np.abs(Xs)))          # birlesik splicing: kapilamasiz
             kisa = MOD_KISA.get(ad, ad.lower())
             hammax[kisa] = ham_max
-            oz["%s_ham" % kisa] = ham
+
+            # aktivite kapilamasi: ayni sekilli aktif alel matrisi varsa
+            W = None
+            A = aktif.get(ad)
+            if A is not None and A.shape == X.shape:
+                As = A[:, sut]
+                amax = np.nanmax(As) if np.isfinite(As).any() else 0.0
+                if amax > 0:
+                    W = As / amax
+            gecerli = np.isfinite(Xs)
+            if qs is not None:
+                gecerli &= np.isfinite(qs)
+            if W is not None:
+                aktif_maske = gecerli & (W >= AKTIF_ORAN)
+                if aktif_maske.any():
+                    gecerli = aktif_maske
+            n_aktif = int(gecerli.sum())
+            if n_aktif == 0:
+                continue
+            skor = np.abs(qs) if qs is not None else np.abs(Xs)
+            skor = np.where(gecerli, skor, -1.0)
+            i, j = np.unravel_index(int(np.argmax(skor)), skor.shape)
+            kantil = _yuvarla(qs[i, j], 4) if qs is not None else None
+            p = None
+            if kantil is not None:
+                p = _yuvarla(min(1.0, n_aktif * (1.0 - abs(float(qs[i, j])))), 4)
+            oz["%s_ham" % kisa] = _yuvarla(Xs[i, j])
             oz["%s_kantil" % kisa] = kantil
+            oz["%s_p" % kisa] = p
             oz["%s_doku" % kisa] = doku_ad[sut[j]]
             oz["%s_gen" % kisa] = gen_ad[i]
-            if ad in MOD_KISA and not ad.endswith("_ACTIVE") and kantil is not None:
-                genel.append((abs(kantil), kantil, ad))
+            oz["%s_aktif" % kisa] = _yuvarla(W[i, j], 2) if W is not None else None
+            if ad in MOD_KISA and p is not None:
+                sinyal.append((p, kantil, ad, doku_ad[sut[j]]))
 
-            # detay: en yuksek |kantil| (yoksa |ham|) olan N hucre
-            skor = qs if (qs is not None and np.isfinite(qs).any()) else Xs
-            duz = np.abs(skor).ravel()
-            duz = np.where(np.isfinite(duz), duz, -1.0)      # NaN hucreler en sona
-            n = min(DETAY_DOKU_N, int((duz >= 0).sum()))
+            # detay: en yuksek |kantil| (yoksa |ham|) olan N aktif hucre
+            n = min(DETAY_DOKU_N, n_aktif)
+            duz = skor.ravel()
             for idx in np.argpartition(-duz, n - 1)[:n] if n else []:
                 ii, jj = np.unravel_index(idx, skor.shape)
+                if duz[idx] < 0:
+                    continue
                 det.append({"key": key, "skor": ad, "gen_ag": gen_ad[ii],
                             "doku": doku_ad[sut[jj]], "ontoloji": onto[sut[jj]],
                             "ham": _yuvarla(Xs[ii, jj]),
-                            "kantil": _yuvarla(qs[ii, jj], 4) if qs is not None else None})
+                            "kantil": _yuvarla(qs[ii, jj], 4) if qs is not None else None,
+                            "aktif": _yuvarla(W[ii, jj], 2) if W is not None else None})
 
-        if genel:
-            _, kantil, ad = max(genel)
+        if sinyal:
+            sinyal.sort(key=lambda t: (t[0], -abs(t[1])))
+            p, kantil, ad, doku = sinyal[0]
             oz["en_yuksek_kantil"] = kantil
             oz["en_yuksek_modalite"] = ad
+            # Duzenleyici sinyal: splicing disi modaliteler (splicing birlesik skorla verilir)
+            anlamli = [t for t in sinyal if t[0] <= KANTIL_P and t[2] not in SPLICE_SKORLAR]
+            if anlamli:
+                oz["duzenleyici_sinyal"] = "; ".join("%s%s (%s)" % (t[2], "-" if t[1] < 0 else "+", t[3])
+                                                     for t in anlamli)
         # Birlesik splicing makaledeki gibi gen/doku uzerinden MAX ham degerlerle
         ss = hammax.get("splice_site"); su = hammax.get("splice_usage"); sj = hammax.get("splice_junc")
         if any(x is not None for x in (ss, su, sj)):
@@ -583,6 +676,8 @@ class AtlasSorgu(object):
             r["avi_yorum"] = avi_yorumla(r.get("avi"))
             r["kategori"] = kategori(r)
             r["yorum"] = yorumla(r)
+            if durum == "model" and not_:
+                r["yorum"] = "%s; AVI yok; %s" % (not_, r["yorum"])
         else:
             r["kategori"] = "-"
             r["yorum"] = not_ or durum
@@ -590,14 +685,16 @@ class AtlasSorgu(object):
 
 
 def kategori(r):
-    """yuksek / orta / dusuk - siralama yardimcisi, klinik esik degil."""
-    avi = r.get("avi"); q = r.get("en_yuksek_kantil"); sp = r.get("splicing_birlesik")
-    q = abs(q) if q is not None else None
-    if (avi is not None and avi >= AVI_YUKSEK) or (q is not None and q >= KANTIL_YUKSEK) \
-            or (sp is not None and sp >= SPLICE_YUKSEK):
+    """yuksek / orta / dusuk - siralama yardimcisi, klinik esik degil.
+
+    Makale AVI'ye gore siralamayi onerir; AVI (PHRED) ve birlesik splicing belirler.
+    Modalite kantili yalniz aktif dokuda ve Bonferroni sonrasi anlamliysa (p <= 0,01)
+    'orta'ya tasir; tek basina 'yuksek' yapmaz.
+    """
+    avi = r.get("avi"); sp = r.get("splicing_birlesik"); sig = bool(r.get("duzenleyici_sinyal"))
+    if (avi is not None and avi >= AVI_YUKSEK) or (sp is not None and sp >= SPLICE_YUKSEK):
         return "yuksek"
-    if (avi is not None and avi >= AVI_ORTA) or (q is not None and q >= KANTIL_ORTA) \
-            or (sp is not None and sp >= SPLICE_ORTA):
+    if (avi is not None and avi >= AVI_ORTA) or (sp is not None and sp >= SPLICE_ORTA) or sig:
         return "orta"
     return "dusuk"
 
@@ -612,14 +709,20 @@ def lof_mu(consequence):
 
 
 def sinyal_anahtari(r):
-    """Siralama: kategori, sonra AlphaGenome'a ozgu sinyal (splicing, kantil), sonra AVI.
+    """Siralama: kategori, sonra AlphaGenome'a ozgu sinyal (splicing, duzenleyici), sonra AVI.
 
     Kodlayici LoF varyantlarda AVI zaten yuksektir; tabloyu gercek splicing /
     duzenleyici sinyali olan varyantlar acsin diye AVI en sona konur.
     """
     k = {"yuksek": 0, "orta": 1, "dusuk": 2}.get(r.get("kategori"), 3)
-    return (k, -(_sayi(r.get("splicing_birlesik")) or 0), -abs(_sayi(r.get("en_yuksek_kantil")) or 0),
-            -(_sayi(r.get("avi")) or 0))
+    n_sinyal = len([x for x in (r.get("duzenleyici_sinyal") or "").split(";") if x.strip()])
+    return (k, -(_sayi(r.get("splicing_birlesik")) or 0), -n_sinyal, -(_sayi(r.get("avi")) or 0))
+
+
+MOD_TR = {"ekspresyon": "ekspresyon", "atac": "ATAC", "dnase": "DNase", "tf": "TF baglanma",
+          "histon": "histon", "cage": "CAGE", "procap": "PRO-cap", "polyA": "poliadenilasyon",
+          "kontakt": "kontakt", "splice_site": "splice site", "splice_usage": "splice site kullanimi",
+          "splice_junc": "splice junction"}
 
 
 def yorumla(r):
@@ -627,6 +730,8 @@ def yorumla(r):
     p = []
     if r.get("avi") is not None:
         p.append("AVI %s" % r["avi_yorum"])
+    elif r.get("avi_ham") is not None:
+        p.append("AVI ham skor %.2f (kalibre kantil gelmedi, PHRED hesaplanamadi)" % r["avi_ham"])
     sp = r.get("splicing_birlesik")
     if sp is not None:
         if sp >= SPLICE_YUKSEK:
@@ -635,24 +740,30 @@ def yorumla(r):
             p.append("olasi splicing etkisi (birlesik %.2f)" % sp)
         else:
             p.append("splicing etkisi ongorulmuyor (birlesik %.2f)" % sp)
-    ek = r.get("ekspresyon_kantil")
-    if ek is not None and abs(ek) >= KANTIL_ORTA:
-        yon = "azalma" if ek < 0 else "artis"
-        g = r.get("ekspresyon_gen") or r.get("gene") or ""
-        p.append("%s ekspresyonunda %s (log-FC %s, kantil %s, %s)"
-                 % (g, yon, r.get("ekspresyon_ham"), ek, r.get("ekspresyon_doku")))
-    for kisa, ad in (("atac", "ATAC"), ("dnase", "DNase"), ("tf", "TF baglanma"),
-                     ("histon", "histon"), ("cage", "CAGE"), ("procap", "PRO-cap"),
-                     ("polyA", "poliadenilasyon"), ("kontakt", "kontakt")):
+    anlamli = []
+    for kisa in [k for _, k, _ in MODALITELER if k not in ("splice_site", "splice_usage", "splice_junc")]:
+        pk = r.get("%s_p" % kisa)
         q = r.get("%s_kantil" % kisa)
-        if q is not None and abs(q) >= KANTIL_YUKSEK:
-            p.append("%s kantil %s (%s)" % (ad, q, r.get("%s_doku" % kisa)))
+        if pk is None or q is None or pk > KANTIL_P:
+            continue
+        doku = r.get("%s_doku" % kisa)
+        akt = r.get("%s_aktif" % kisa)
+        akt_s = ", aktif doku" if akt is not None else ""
+        if kisa == "ekspresyon":
+            yon = "azalma" if q < 0 else "artis"
+            g = r.get("ekspresyon_gen") or r.get("gene") or ""
+            anlamli.append("%s ekspresyonunda %s (log-FC %s, kantil %s, p=%s, %s%s)"
+                           % (g, yon, r.get("ekspresyon_ham"), q, pk, doku, akt_s))
+        else:
+            anlamli.append("%s kantil %s (p=%s, %s%s)" % (MOD_TR.get(kisa, kisa), q, pk, doku, akt_s))
+    if anlamli:
+        p.extend(anlamli)
+    else:
+        p.append("modalite kantillerinde aktif doku + coklu karsilastirma duzeltmesi sonrasi anlamli sinyal yok")
     if r.get("avi_katki"):
         p.append("AVI katki: %s" % r["avi_katki"])
     if lof_mu(r.get("consequence")) and (r.get("avi") or 0) >= AVI_YUKSEK:
         p.append("LoF varyantinda yuksek AVI beklenen bulgudur, ek bilgi degildir")
-    if not p:
-        p.append("belirgin duzenleyici/splicing etkisi ongorulmuyor")
     return "; ".join(p)
 
 
@@ -762,7 +873,7 @@ def onbellek_klasoru(olgu_klasoru):
     return None
 
 
-def calistir(olgu_klasoru, adaylar=None, genome="hg38", doku=None, model=True, model_max=25,
+def calistir(olgu_klasoru, adaylar=None, genome="hg38", doku=None, model=True, model_max=VARSAYILAN_MODEL_MAX,
              ust=VARSAYILAN_ADAY_UST, skorlar=None, onbellek=True, sessiz=False):
     """Ana giris: olgu klasorune alphagenome.csv / _detay.csv / _ozet.json yazar.
 
@@ -843,6 +954,8 @@ def calistir(olgu_klasoru, adaylar=None, genome="hg38", doku=None, model=True, m
             log("UYARI: " + ozet["uyari"])
         if sorgu.avi_ad is None:
             ozet.setdefault("uyari", "AVI skoru sunucu skor listesinde bulunamadi; yalniz modalite skorlari alindi")
+        elif ozet["atlas"] and not any(r.get("avi") is not None for r in satirlar):
+            ozet.setdefault("uyari", "AVI icin kalibre kantil gelmedi; PHRED hesaplanamadi, ham AVI (logit) yazildi")
 
         # Siralama: kategori, sonra AlphaGenome'a ozgu sinyal (splicing/kantil), sonra AVI
         satirlar.sort(key=sinyal_anahtari)
@@ -924,24 +1037,28 @@ def rapor_metni(ozet, satirlar, en_fazla=15):
              "modalite bazlı etki skorları (gen ekspresyonu, splice site / "
              "splice site kullanımı / splice junction, poliadenilasyon, kromatin erişilebilirliği, TF ve "
              "histon bağlanması, TSS aktivitesi, 3B kontakt) ve bunların yaygın varyant arka planına göre "
-             "kalibre kantil değerleri (|0,99| = arka planın en uç %%1'i) alınmıştır. Birleşik splicing skoru "
-             "= max(splice site) + max(splice site kullanımı) + max(splice junction)/5; >1,0 genellikle "
-             "büyük etki. %s"
+             "kalibre kantil değerleri alınmıştır. Kantiller yalnızca genin/elemanın aktif olduğu dokularda "
+             "(aktif alel skoru ≥ en aktif dokunun %%10'u) ve çoklu karşılaştırma düzeltmesi sonrasında "
+             "(Bonferroni; p = aktif doku/gen hücresi sayısı × (1−|kantil|) ≤ 0,01) anlamlı sayılmıştır. "
+             "Birleşik splicing skoru = max(splice site) + max(splice site kullanımı) + max(splice junction)/5 "
+             "(makale tanımı); kanonik splice site varyantları tipik olarak 2,5–3,5, ≥1,0 güçlü, 0,5–1,0 "
+             "olası etki. %s"
              % (n, ozet.get("paket") or "?", avi_cumle, _sayim_cumlesi(ozet)))
     b.append("")
     if ozet.get("uyari"):
         b.append("Uyarı: %s." % ozet["uyari"])
         b.append("")
     b.append("Özet: yüksek etki kategorisi %d, orta %d, düşük %d varyant. Kategoriler sıralama yardımcısıdır "
-             "(AVI ≥ 20 veya |kantil| ≥ 0,99 veya birleşik splicing ≥ 1,0 → yüksek; AVI ≥ 10 / |kantil| ≥ 0,95 / "
-             "splicing ≥ 0,5 → orta); makale sabit eşik yerine bölgeye/uygulamaya duyarlı sıralama önerir."
+             "(AVI ≥ 20 veya birleşik splicing ≥ 1,0 → yüksek; AVI ≥ 10, splicing ≥ 0,5 ya da aktif dokuda "
+             "düzeltilmiş anlamlı bir modalite sinyali → orta); makale sabit eşik yerine bölgeye/uygulamaya "
+             "duyarlı sıralama önerir."
              % (kat.get("yuksek", 0), kat.get("orta", 0), kat.get("dusuk", 0)))
     b.append("")
     secilen = sorted([r for r in satirlar if r.get("kategori") in ("yuksek", "orta")],
                      key=sinyal_anahtari)[:en_fazla]
     if secilen:
         b.append("Öne çıkan varyantlar (AlphaGenome):")
-        b.append("Gen | Varyant | Kaynak | AVI (PHRED) | En yüksek kantil (modalite) | Birleşik splicing | "
+        b.append("Gen | Varyant | Kaynak | AVI (PHRED) | Birleşik splicing | Düzenleyici sinyal (modalite, doku) | "
                  "Ekspresyon log-FC (doku) | Kategori | Yorum")
         for r in secilen:
             var = r.get("hgvsc") or r.get("key")
@@ -950,8 +1067,8 @@ def rapor_metni(ozet, satirlar, en_fazla=15):
             b.append(" | ".join([
                 r.get("gene") or "-", var or "-", (r.get("kaynak") or "-").replace(",", ", "),
                 _fmt(r.get("avi"), 1),
-                "%s (%s)" % (_fmt(r.get("en_yuksek_kantil"), 4), r.get("en_yuksek_modalite") or "-"),
                 _fmt(r.get("splicing_birlesik"), 2),
+                r.get("duzenleyici_sinyal") or "-",
                 "%s (%s)" % (_fmt(r.get("ekspresyon_ham"), 2), r.get("ekspresyon_doku") or "-"),
                 r.get("kategori") or "-", r.get("yorum") or ""]))
         b.append("")
@@ -960,7 +1077,7 @@ def rapor_metni(ozet, satirlar, en_fazla=15):
                  "girmemiştir; bu, kodlayıcı-olmayan/düzenleyici bir mekanizma lehine ek kanıt bulunmadığı "
                  "anlamına gelir (bir genetik nedeni dışlamaz).")
         b.append("")
-    b.append("Tablo, AlphaGenome'a özgü sinyali (splicing, kantil) yüksek olan varyantları öne alır; "
+    b.append("Tablo, AlphaGenome'a özgü sinyali (splicing, düzenleyici) yüksek olan varyantları öne alır; "
              "kodlayıcı LoF (stop-gain/frameshift) varyantlarında yüksek AVI protein kesilmesinden beklenen "
              "bir bulgudur ve tek başına ek bilgi taşımaz.")
     b.append("")
@@ -975,7 +1092,8 @@ def rapor_metni(ozet, satirlar, en_fazla=15):
     b.append("Ayrıntılı tablolar: kanit/alphagenome.csv (varyant başına özet), kanit/alphagenome_detay.csv "
              "(doku/gen bazlı en yüksek skorlar).")
     yontem = ("Aday varyantların düzenleyici ve splicing etkileri Google DeepMind AlphaGenome Atlas "
-              "(AVI skoru ve modalite bazlı kalibre kantil skorları; Avsec ve ark. 2026, Cheng ve ark. 2026) "
+              "(AVI skoru, birleşik splicing skoru ve aktif dokularda modalite bazlı kalibre kantil skorları; "
+              "Avsec ve ark. 2026, Cheng ve ark. 2026) "
               "ile ayrıca değerlendirilmiştir. Bu skorlar araştırma amaçlı hesaplamalı öngörülerdir; ACMG/AMP "
               "sınıflandırmasında yalnızca destekleyici bağlamda kullanılmış, tek başına klinik karar için "
               "kullanılmamıştır.")
@@ -1031,6 +1149,64 @@ def _cmd_skorlar():
     print("\nSecilecekler:", ", ".join(s.secili_skorlar()))
 
 
+def _cmd_incele(keys):
+    """Her varyant icin sunucunun dondurdugu her skorun bicimini ve en uc hucrelerini
+    incele_<key>.txt dosyasina yazar (kalibrasyon ve hata ayiklama icin)."""
+    import numpy as np
+    s = AtlasSorgu(model=True, model_max=5)
+    s.meta()
+    s._secili = s.secili_skorlar()
+    avi_ad, katki_ad = s.avi_adlari(s._secili)
+    for key in keys:
+        v = varyant_ayristir(key)
+        if v is None:
+            print("ayristirilamadi:", key)
+            continue
+        durum, sonuc, not_ = s._sorgu_guvenli(v)
+        yol = "incele_%s.txt" % re.sub(r"[^A-Za-z0-9]+", "_", key)
+        sat = ["varyant: %s  durum: %s  not: %s" % (key, durum, not_), ""]
+        if sonuc:
+            for ad in sorted(sonuc):
+                a = sonuc[ad]
+                X = np.asarray(a.X, dtype=float)
+                q = np.asarray(a.layers["quantiles"], dtype=float) if "quantiles" in a.layers else None
+                adlar = s._doku_adlari(a.var)
+                genler = list(a.obs["gene_name"]) if "gene_name" in a.obs else [None] * X.shape[0]
+                sat.append("== %-30s sekil=%s kantil=%s obs=%s var=%s" % (
+                    ad, X.shape, "var" if q is not None else "yok", list(a.obs.columns)[:6], list(a.var.columns)[:8]))
+                if X.size <= 40:
+                    for i in range(X.shape[0]):
+                        for j in range(X.shape[1]):
+                            sat.append("   %-28s gen=%-12s X=%10.4f  q=%s" % (
+                                adlar[j], genler[i], X[i, j], ("%.6f" % q[i, j]) if q is not None else "-"))
+                else:
+                    duz = np.where(np.isfinite(X), np.abs(X), -1).ravel()
+                    for idx in np.argsort(-duz)[:5]:
+                        i, j = np.unravel_index(idx, X.shape)
+                        sat.append("   |X| top: %-28s gen=%-12s X=%10.4f  q=%s" % (
+                            adlar[j], genler[i], X[i, j], ("%.6f" % q[i, j]) if q is not None else "-"))
+                    if q is not None:
+                        dq = np.where(np.isfinite(q), np.abs(q), -1).ravel()
+                        sat.append("   |q|>=0.99 hucre sayisi: %d / %d ; |q|==1.0: %d" % (
+                            int((dq >= 0.99).sum()), int((dq >= 0).sum()), int((dq >= 0.99995).sum())))
+                        for idx in np.argsort(-dq)[:5]:
+                            i, j = np.unravel_index(idx, q.shape)
+                            sat.append("   |q| top: %-28s gen=%-12s X=%10.4f  q=%.6f" % (adlar[j], genler[i], X[i, j], q[i, j]))
+                sat.append("")
+            try:
+                oz, _ = s._ozetle(key, sonuc, avi_ad, katki_ad, durum)
+                sat.append("OZET: " + json.dumps(oz, ensure_ascii=False))
+            except Exception as e:
+                sat.append("OZET HATA: %s: %s" % (type(e).__name__, e))
+        with open(yol, "w", encoding="utf-8") as f:
+            f.write("\n".join(sat) + "\n")
+        print("\n".join(sat[:2]))
+        for l in sat:
+            if l.startswith("== AVI") or l.startswith("   ") and ("AVI" in l or "MERGED" in l):
+                print(l)
+        print("-> %s (%d satir)" % (yol, len(sat)))
+
+
 def main():
     p = argparse.ArgumentParser(description="AlphaGenome Atlas varyant skorlari")
     p.add_argument("klasor", nargs="?", help="olgu klasoru (eksen CSV'lerinin oldugu yer)")
@@ -1043,13 +1219,18 @@ def main():
     p.add_argument("--model", dest="model", action="store_true", default=True,
                    help="Atlas'ta olmayanlari canli modelle skorla (varsayilan acik)")
     p.add_argument("--model-yok", dest="model", action="store_false")
-    p.add_argument("--model-max", type=int, default=25)
+    p.add_argument("--model-max", type=int, default=VARSAYILAN_MODEL_MAX)
+    p.add_argument("--incele", action="append", metavar="KEY",
+                   help="tek varyant icin ham Atlas yanitini dosyaya dok (kalibrasyon/tani)")
     p.add_argument("--onbellek-yok", dest="onbellek", action="store_false", default=True)
     p.add_argument("--skorlar-listele", dest="listele", action="store_true", help="sunucudaki skor adlari")
     a = p.parse_args()
 
     if a.listele:
         _cmd_skorlar()
+        return
+    if a.incele:
+        _cmd_incele(a.incele)
         return
     doku = [d.strip() for d in (a.doku or "").split(",") if d.strip()]
     skorlar = [s.strip() for s in (a.skorlar or "").split(",") if s.strip()]
