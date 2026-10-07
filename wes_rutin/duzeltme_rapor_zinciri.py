@@ -12,8 +12,8 @@ Bu betik eksik halkayi kurar:
        - Claude Code kuruluysa rapor_gorevi.py'deki gorevi calistirir
          (VERI_HAZIR olgulara vaka_*.py surucusu yazar),
        - sonra raporla.py ile belgeleri uretip olgulari TAMAMLANDI yapar.
-       Claude Code yoksa yorum adimi atlanir, bulut gorevi onu yazar;
-       raporla.py yine de calisir ve hazir surucüleri isler.
+       Claude Code yoksa ya da kimlik dogrulanamazsa yorum adimi atlanir;
+       raporla.py yine calisir ve hazir surucüleri isler.
   2) BASLAT'a bu adimi ekler (kilit hala tutulurken calisir, boylece
      rapor yazimi sirasinda ikinci bir kosu baslayamaz).
 
@@ -59,7 +59,11 @@ if errorlevel 1 (
   echo   Surucüleri bulut gorevi yazacak; sonra bu dosyaya cift tiklayin.
 ) else (
   echo   Claude Code bulundu; VERI_HAZIR olgulara bakiliyor...
-  claude -p "{ISTEM}" --permission-mode acceptEdits
+  REM "call" SART: claude Windows'ta .cmd sarmalayicidir; call olmadan
+  REM cagrilirsa denetim bu dosyaya GERI DONMEZ ve asagidaki raporla.py
+  REM hic calismaz (parantezli blok bellekte oldugu icin yalnizca blok ici
+  REM echo satirlari gorunur - 07.10.2026 kosusunda boyle oldu).
+  call claude -p "{ISTEM}" --permission-mode acceptEdits
   if errorlevel 1 echo   UYARI: yorum adimi hata verdi - hazir surucüler yine islenecek.
 )
 
