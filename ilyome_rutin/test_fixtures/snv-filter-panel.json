@@ -1,0 +1,4258 @@
+{
+"id": 505,
+"is_center": false,
+"last_used_by": {
+"id": 561,
+"first_name": "Selman",
+"last_name": "koral"
+},
+"name": "koral_new",
+"panels": [
+[
+{
+"id": 1,
+"description": "Quality",
+"typeof": "quality",
+"checkbox_disabled": false,
+"order_number": 1,
+"terms": [
+[
+{
+"id": 2,
+"filter": "dp",
+"term": "dp",
+"display": "Depth",
+"description": "Depth of variant in bam file",
+"type": "int",
+"value": {
+"id": 77953,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 3,
+"filter": "qual",
+"term": "qual",
+"display": "Qual",
+"description": "Quality of variant",
+"type": "int",
+"value": {
+"id": 77954,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 4,
+"filter": "filter",
+"term": "pass",
+"display": "Filter PASS",
+"description": "Selects only variants that passed the filters",
+"type": "checkbox",
+"value": {
+"id": 77955,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 1,
+"filter": "allelefraction",
+"term": "allelefraction",
+"display": "Allele fraction",
+"description": "Allele fraction in the databases",
+"type": "int",
+"value": {
+"id": 77952,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 5,
+"filter": "filter",
+"term": "notpass",
+"display": "Filter NOT PASS",
+"description": "Selects only variants that not passed the filters",
+"type": "checkbox",
+"value": {
+"id": 77912,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 2,
+"description": "Allele Frequency",
+"typeof": "Allelefrequency",
+"checkbox_disabled": false,
+"order_number": 2,
+"terms": [
+[
+{
+"id": 6,
+"filter": "genoks_af",
+"term": "genoks_af",
+"display": "Allele frequency",
+"description": "Allele frequency in Genoks database",
+"type": "int",
+"value": {
+"id": 77913,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 7,
+"filter": "genoks_ac",
+"term": "genoks_ac",
+"display": "Allele count",
+"description": "Allele count in Genoks database",
+"type": "int",
+"value": {
+"id": 77914,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 384,
+"filter": "inhouse_snv_db",
+"term": "total_Het",
+"display": "Inhouse N. of heterozygotes",
+"description": "Total number of heterozygous individuals in the inhouse SNV database",
+"type": "int",
+"value": {
+"id": 101958,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 385,
+"filter": "inhouse_snv_db",
+"term": "total_Hom",
+"display": "Inhouse N. of homozygotes",
+"description": "Total number of homozygous individuals in the inhouse SNV database",
+"type": "int",
+"value": {
+"id": 101959,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 386,
+"filter": "inhouse_snv_db",
+"term": "total_Hem",
+"display": "Inhouse N. of hemizygotes",
+"description": "Total number of hemizygous individuals in the inhouse SNV database",
+"type": "int",
+"value": {
+"id": 101960,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 387,
+"filter": "inhouse_snv_db",
+"term": "avg_dp",
+"display": "Inhouse average depth of coverage",
+"description": "Average depth of coverage in the inhouse SNV database",
+"type": "int",
+"value": {
+"id": 101961,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 8,
+"filter": "genoks_homo",
+"term": "genoks_homo",
+"display": "N. of homozygotes",
+"description": "Number of homozygous individuals in Genoks database",
+"type": "int",
+"value": {
+"id": 77915,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 240,
+"filter": "cohort_af",
+"term": "cohort_af",
+"display": "Allele frequency",
+"description": "Allele frequency in the current Cohort",
+"type": "int",
+"value": {
+"id": 78043,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 241,
+"filter": "cohort_ac",
+"term": "cohort_ac",
+"display": "Allele count",
+"description": "Allele count in the current Cohort",
+"type": "int",
+"value": {
+"id": 78044,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 9,
+"filter": "af_exomes",
+"term": "af_exomes",
+"display": "Allele frequency",
+"description": "Allele frequency in Genoks database",
+"type": "int",
+"value": {
+"id": 77916,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 10,
+"filter": "ac_exomes",
+"term": "ac_exomes",
+"display": "Allele count",
+"description": "Allele count in gnomad Exome database",
+"type": "int",
+"value": {
+"id": 77917,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 11,
+"filter": "nhomalt_exomes",
+"term": "nhomalt_exomes",
+"display": "N. of homozygotes",
+"description": "Number of homozygous individuals in gnomad Exome database",
+"type": "int",
+"value": {
+"id": 77918,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 12,
+"filter": "af_genomes",
+"term": "af_genomes",
+"display": "Allele frequency",
+"description": "Allele frequency in Genoks database",
+"type": "int",
+"value": {
+"id": 77919,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 13,
+"filter": "ac_genomes",
+"term": "ac_genomes",
+"display": "Allele count",
+"description": "Allele count in gnomad Genome database",
+"type": "int",
+"value": {
+"id": 77920,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 15,
+"filter": "af",
+"term": "af",
+"display": "Allele frequency",
+"description": "Allele frequency in 1000 Genome database",
+"type": "int",
+"value": {
+"id": 77921,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 242,
+"filter": "ilyome_snv_db",
+"term": "total_Het",
+"display": "Total number of Het individuals",
+"description": "Total number of Het individuals in the Ilyome SNV DB",
+"type": "int",
+"value": {
+"id": 99560,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 243,
+"filter": "ilyome_snv_db",
+"term": "total_Hom",
+"display": "Total number of Hom individuals",
+"description": "Total number of Hom individuals in the Ilyome SNV DB",
+"type": "int",
+"value": {
+"id": 99561,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 244,
+"filter": "ilyome_snv_db",
+"term": "total_Hem",
+"display": "Total number of Hem individuals",
+"description": "Total number of Hem individuals in the Ilyome SNV DB",
+"type": "int",
+"value": {
+"id": 99562,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 245,
+"filter": "ilyome_snv_db",
+"term": "avg_dp",
+"display": "Average depth of coverage",
+"description": "Average depth of coverage in the Ilyome SNV DB",
+"type": "int",
+"value": {
+"id": 99563,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 14,
+"filter": "nhomalt_genomes",
+"term": "nhomalt_genomes",
+"display": "N. of homozygotes",
+"description": "Number of homozygous individuals in gnomad Genome database",
+"type": "int",
+"value": {
+"id": 78042,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 3,
+"description": "Zygosity",
+"typeof": "Zygosity",
+"checkbox_disabled": false,
+"order_number": 3,
+"terms": [
+[
+{
+"id": 16,
+"filter": "zyg",
+"term": "HOM",
+"display": "Homozygote",
+"description": "A homozygote variant is when an individual has two identical gene copies for a specific trait or gene, either both normal or both mutated.",
+"type": "checkbox",
+"value": {
+"id": 77922,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 17,
+"filter": "zyg",
+"term": "HET",
+"display": "Heterozygote",
+"description": "A heterozygote is an individual with two different gene copies for a specific trait or gene, typically one normal and one mutated.",
+"type": "checkbox",
+"value": {
+"id": 77923,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 218,
+"filter": "zyg",
+"term": "WT",
+"display": "Wilde type",
+"description": "a wildetype variant.",
+"type": "checkbox",
+"value": {
+"id": 77924,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 219,
+"filter": "zyg",
+"term": "HEM",
+"display": "hemizygote",
+"description": "A hemizygote is an individual with only one copy of a gene in a diploid organism, typically found in sex chromosomes (e.g., males having one X and one Y chromosome).",
+"type": "checkbox",
+"value": {
+"id": 82650,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 4,
+"description": "Consequence",
+"typeof": "Consequence",
+"checkbox_disabled": false,
+"order_number": 4,
+"terms": [
+[
+{
+"id": 37,
+"filter": "consequence",
+"term": "start_retained_variant",
+"display": "Start retained variant",
+"description": "A sequence variant where at least one base in the start codon is changed, but the start remains",
+"type": "checkbox",
+"value": {
+"id": 78046,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 38,
+"filter": "consequence",
+"term": "stop_retained_variant",
+"display": "Stop retained variant",
+"description": "A sequence variant where at least one base in the terminator codon is changed, but the terminator remains",
+"type": "checkbox",
+"value": {
+"id": 77992,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 39,
+"filter": "consequence",
+"term": "synonymous_variant",
+"display": "Synonymous variant",
+"description": "A sequence variant where there is no resulting change to the encoded amino acid",
+"type": "checkbox",
+"value": {
+"id": 77993,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 40,
+"filter": "consequence",
+"term": "coding_sequence_variant",
+"display": "Coding sequence variant",
+"description": "A sequence variant that changes the coding sequence",
+"type": "checkbox",
+"value": {
+"id": 77994,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 41,
+"filter": "consequence",
+"term": "mature_miRNA_variant",
+"display": "Mature miRNA variant",
+"description": "A transcript variant located with the sequence of the mature miRNA",
+"type": "checkbox",
+"value": {
+"id": 77995,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 18,
+"filter": "consequence",
+"term": "transcript_ablation",
+"display": "Transcript ablation",
+"description": "A feature ablation whereby the deleted region includes a transcript feature",
+"type": "checkbox",
+"value": {
+"id": 77925,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 19,
+"filter": "consequence",
+"term": "splice_acceptor_variant",
+"display": "Splice acceptor variant",
+"description": "A splice variant that changes the 2 base region at the 3' end of an intron",
+"type": "checkbox",
+"value": {
+"id": 77926,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 20,
+"filter": "consequence",
+"term": "splice_donor_variant",
+"display": "Splice donor variant",
+"description": "A splice variant that changes the 2 base region at the 5' end of an intron",
+"type": "checkbox",
+"value": {
+"id": 77927,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 24,
+"filter": "consequence",
+"term": "start_lost",
+"display": "Start lost",
+"description": "A codon variant that changes at least one base of the canonical start codon",
+"type": "checkbox",
+"value": {
+"id": 77931,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 25,
+"filter": "consequence",
+"term": "transcript_amplification",
+"display": "Transcript amplification",
+"description": "A feature amplification of a region containing a transcript",
+"type": "checkbox",
+"value": {
+"id": 77932,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 26,
+"filter": "consequence",
+"term": "feature_elongation",
+"display": "Feature elongation",
+"description": "A sequence variant that causes the extension of a genomic feature, with regard to the reference sequence",
+"type": "checkbox",
+"value": {
+"id": 77933,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 27,
+"filter": "consequence",
+"term": "feature_truncation",
+"display": "Feature truncation",
+"description": "A sequence variant that causes the reduction of a genomic feature, with regard to the reference sequence",
+"type": "checkbox",
+"value": {
+"id": 77934,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 28,
+"filter": "consequence",
+"term": "inframe_insertion",
+"display": "Inframe insertion",
+"description": "An inframe non synonymous variant that inserts bases into in the coding sequence",
+"type": "checkbox",
+"value": {
+"id": 77935,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 29,
+"filter": "consequence",
+"term": "inframe_deletion",
+"display": "Inframe deletion",
+"description": "An inframe non synonymous variant that deletes bases from the coding sequence",
+"type": "checkbox",
+"value": {
+"id": 77936,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 43,
+"filter": "consequence",
+"term": "3_prime_UTR_variant",
+"display": "3 prime UTR variant",
+"description": "A UTR variant of the 3' UTR",
+"type": "checkbox",
+"value": {
+"id": 77957,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 44,
+"filter": "consequence",
+"term": "non_coding_transcript_exon_variant",
+"display": "Non coding transcript exon variant",
+"description": "A sequence variant that changes non-coding exon sequence in a non-coding transcript",
+"type": "checkbox",
+"value": {
+"id": 77958,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 45,
+"filter": "consequence",
+"term": "intron_variant",
+"display": "Intron variant",
+"description": "A transcript variant occurring within an intron",
+"type": "checkbox",
+"value": {
+"id": 77943,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 46,
+"filter": "consequence",
+"term": "NMD_transcript_variant",
+"display": "NMD transcript variant",
+"description": "A variant in a transcript that is the target of NMD",
+"type": "checkbox",
+"value": {
+"id": 77944,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 47,
+"filter": "consequence",
+"term": "non_coding_transcript_variant",
+"display": "Non coding transcript variant",
+"description": "A transcript variant of a non coding RNA gene",
+"type": "checkbox",
+"value": {
+"id": 77945,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 49,
+"filter": "consequence",
+"term": "upstream_gene_variant",
+"display": "Upstream gene variant",
+"description": "A sequence variant located 5' of a gene",
+"type": "checkbox",
+"value": {
+"id": 77960,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 50,
+"filter": "consequence",
+"term": "downstream_gene_variant",
+"display": "Downstream gene variant",
+"description": "A sequence variant located 3' of a gene",
+"type": "checkbox",
+"value": {
+"id": 77961,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 51,
+"filter": "consequence",
+"term": "TFBS_ablation",
+"display": "TFBS ablation",
+"description": "A feature ablation whereby the deleted region includes a transcription factor binding site",
+"type": "checkbox",
+"value": {
+"id": 77962,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 52,
+"filter": "consequence",
+"term": "TFBS_amplification",
+"display": "TFBS amplification",
+"description": "A feature amplification of a region containing a transcription factor binding site",
+"type": "checkbox",
+"value": {
+"id": 77963,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 53,
+"filter": "consequence",
+"term": "TF_binding_site_variant",
+"display": "TF binding site variant",
+"description": "A sequence variant located within a transcription factor binding site",
+"type": "checkbox",
+"value": {
+"id": 77964,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 54,
+"filter": "consequence",
+"term": "regulatory_region_ablation",
+"display": "Regulatory region ablation",
+"description": "A feature ablation whereby the deleted region includes a regulatory region",
+"type": "checkbox",
+"value": {
+"id": 77965,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 55,
+"filter": "consequence",
+"term": "regulatory_region_amplification",
+"display": "Regulatory region amplification",
+"description": "A feature amplification of a region containing a regulatory region",
+"type": "checkbox",
+"value": {
+"id": 77966,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 56,
+"filter": "consequence",
+"term": "regulatory_region_variant",
+"display": "Regulatory region variant",
+"description": "A sequence variant located within a regulatory region",
+"type": "checkbox",
+"value": {
+"id": 77967,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 57,
+"filter": "consequence",
+"term": "intergenic_variant",
+"display": "Intergenic variant",
+"description": "A sequence variant located in the intergenic region, between genes",
+"type": "checkbox",
+"value": {
+"id": 77968,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 58,
+"filter": "consequence",
+"term": "sequence_variant",
+"display": "Sequence variant",
+"description": "A sequence_variant is a non exact copy of a sequence_feature or genome exhibiting one or more sequence_alteration",
+"type": "checkbox",
+"value": {
+"id": 77969,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 23,
+"filter": "consequence",
+"term": "stop_lost",
+"display": "Stop lost",
+"description": "A sequence variant where at least one base of the terminator codon (stop) is changed, resulting in an elongated transcript",
+"type": "checkbox",
+"value": {
+"id": 77930,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 21,
+"filter": "consequence",
+"term": "stop_gained",
+"display": "Stop gained",
+"description": "A sequence variant whereby at least one base of a codon is changed, resulting in a premature stop codon, leading to a shortened transcript",
+"type": "checkbox",
+"value": {
+"id": 77928,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 30,
+"filter": "consequence",
+"term": "missense_variant",
+"display": "Missense variant",
+"description": "A sequence variant, that changes one or more bases, resulting in a different amino acid sequence but where the length is preserved",
+"type": "checkbox",
+"value": {
+"id": 77937,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 31,
+"filter": "consequence",
+"term": "protein_altering_variant",
+"display": "Protein altering variant",
+"description": "A sequence_variant which is predicted to change the protein encoded in the coding sequence",
+"type": "checkbox",
+"value": {
+"id": 77938,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 33,
+"filter": "consequence",
+"term": "splice_region_variant",
+"display": "Splice region variant",
+"description": "A sequence variant in which a change has occurred within the region of the splice site, either within 1-3 bases of the exon or 3-8 bases of the intron",
+"type": "checkbox",
+"value": {
+"id": 77939,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 34,
+"filter": "consequence",
+"term": "splice_donor_region_variant",
+"display": "Splice donor region variant",
+"description": "A sequence variant that falls in the region between the 3rd and 6th base after splice junction (5' end of intron)",
+"type": "checkbox",
+"value": {
+"id": 77940,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 35,
+"filter": "consequence",
+"term": "splice_polypyrimidine_tract_variant",
+"display": "Splice polypyrimidine tract variant",
+"description": "A sequence variant that falls in the polypyrimidine tract at 3' end of intron between 17 and 3 bases from the end (acceptor -3 to acceptor -17)",
+"type": "checkbox",
+"value": {
+"id": 77941,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 36,
+"filter": "consequence",
+"term": "incomplete_terminal_codon_variant",
+"display": "Incomplete terminal codon variant",
+"description": "A sequence variant where at least one base of the final codon of an incompletely annotated transcript is changed",
+"type": "checkbox",
+"value": {
+"id": 77942,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 48,
+"filter": "consequence",
+"term": "coding_transcript_variant",
+"display": "Coding transcript variant",
+"description": "A transcript variant of a protein coding gene",
+"type": "checkbox",
+"value": {
+"id": 77959,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 42,
+"filter": "consequence",
+"term": "5_prime_UTR_variant",
+"display": "5 prime UTR variant",
+"description": "A UTR variant of the 5' UTR",
+"type": "checkbox",
+"value": {
+"id": 77956,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 22,
+"filter": "consequence",
+"term": "frameshift_variant",
+"display": "Frameshift variant",
+"description": "A sequence variant which causes a disruption of the translational reading frame, because the number of nucleotides inserted or deleted is not a multiple of three",
+"type": "checkbox",
+"value": {
+"id": 77929,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 32,
+"filter": "consequence",
+"term": "splice_donor_5th_base_variant",
+"display": "Splice donor 5th base variant",
+"description": "A sequence variant that causes a change at the 5th base pair after the start of the intron in the orientation of the transcript",
+"type": "checkbox",
+"value": {
+"id": 78045,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 5,
+"description": "Inheritance",
+"typeof": "Inheritance",
+"checkbox_disabled": false,
+"order_number": 5,
+"terms": [
+[
+{
+"id": 59,
+"filter": "inheritance",
+"term": "MI",
+"display": "No Inheritance",
+"description": "Genes without any known inheritance",
+"type": "checkbox",
+"value": {
+"id": 77970,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 60,
+"filter": "inheritance",
+"term": "AR",
+"display": "Autosomal recessive inheritance",
+"description": "Disease manifests when an individual has two pathogenic alleles",
+"type": "checkbox",
+"value": {
+"id": 77946,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 61,
+"filter": "inheritance",
+"term": "AD",
+"display": "Autosomal dominant inheritance",
+"description": "Disease occurs with a single mutant allele, affects both genders equally",
+"type": "checkbox",
+"value": {
+"id": 77947,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 62,
+"filter": "inheritance",
+"term": "XL",
+"display": "X-linked inheritance",
+"description": "A mode of inheritance that is observed for traits related to a gene encoded on the X chromosome",
+"type": "checkbox",
+"value": {
+"id": 77948,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 63,
+"filter": "inheritance",
+"term": "XLR",
+"display": "X-linked recessive inheritance",
+"description": "Manifests in males, rarely in female carriers",
+"type": "checkbox",
+"value": {
+"id": 77949,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 64,
+"filter": "inheritance",
+"term": "XLD",
+"display": "X-linked dominant inheritance",
+"description": "Severe in affected males; manifestation in females varies",
+"type": "checkbox",
+"value": {
+"id": 77971,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 65,
+"filter": "inheritance",
+"term": "YL",
+"display": "Y-linked inheritance",
+"description": "Traits linked to the Y chromosome",
+"type": "checkbox",
+"value": {
+"id": 77972,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 66,
+"filter": "inheritance",
+"term": "MITI",
+"display": "Mitochondrial inheritance",
+"description": "Passed through females, affects both genders",
+"type": "checkbox",
+"value": {
+"id": 77973,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 67,
+"filter": "inheritance",
+"term": "PSI",
+"display": "Pseudoautosomal inheritance",
+"description": "Alleles in X-Y regions resemble autosomal patterns",
+"type": "checkbox",
+"value": {
+"id": 77974,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 68,
+"filter": "inheritance",
+"term": "PSRI",
+"display": "Pseudoautosomal recessive inheritance",
+"description": "Both genders show disease in biallelic state",
+"type": "checkbox",
+"value": {
+"id": 77975,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 69,
+"filter": "inheritance",
+"term": "PSDI",
+"display": "Pseudoautosomal dominant inheritance",
+"description": "Disease in heterozygous state in both genders",
+"type": "checkbox",
+"value": {
+"id": 77976,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 70,
+"filter": "inheritance",
+"term": "TIP",
+"display": "Typified by incomplete penetrance",
+"description": "Not all individuals with a genotype of pathogenic state show the disease given a lifespan of 80 years",
+"type": "checkbox",
+"value": {
+"id": 77977,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 89,
+"filter": "inheritance",
+"term": "TSM",
+"display": "Typified by somatic mosaicism",
+"description": "Genetically distinct cell populations in one organism",
+"type": "checkbox",
+"value": {
+"id": 78030,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 90,
+"filter": "inheritance",
+"term": "RH",
+"display": "Requires heterozygosity",
+"description": "Rare disorders severe in heterozygous state, often X-linked.",
+"type": "checkbox",
+"value": {
+"id": 77996,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 91,
+"filter": "inheritance",
+"term": "THVAO",
+"display": "Typified by highly variable age of onset",
+"description": "Description of conditions in which age of onset is highly variable even in family members who share the same disease-associated variant or variants.",
+"type": "checkbox",
+"value": {
+"id": 77997,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 92,
+"filter": "inheritance",
+"term": "SI",
+"display": "Semidominant inheritance",
+"description": "A mode of inheritance that is observed for traits related to a gene encoded on chromosomes in which a trait can manifest in a monoallelic (e.g. heterozygotes) and biallelic (e.g. homozygotes, compound heterozygotes) state, with similar or differing phenotype severity present dependent on the number of alleles affected.",
+"type": "checkbox",
+"value": {
+"id": 77998,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 93,
+"filter": "inheritance",
+"term": "NMI",
+"display": "Non-Mendelian inheritance",
+"description": "A mode of inheritance that depends on genetic determinants in more than one gene",
+"type": "checkbox",
+"value": {
+"id": 77999,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 94,
+"filter": "inheritance",
+"term": "DI",
+"display": "Digenic inheritance",
+"description": "A type of multifactorial inheritance governed by the simultaneous action of two gene loci",
+"type": "checkbox",
+"value": {
+"id": 78000,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 95,
+"filter": "inheritance",
+"term": "PI",
+"display": "Polygenic inheritance",
+"description": "A mode of inheritance that depends on a mixture of major and minor genetic determinants possibly together with environmental factors. Diseases inherited in this manner are termed complex diseases",
+"type": "checkbox",
+"value": {
+"id": 78001,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 96,
+"filter": "inheritance",
+"term": "OI",
+"display": "Oligogenic inheritance",
+"description": "A type of multifactorial inheritance governed by the simultaneous action of a few gene loci. It is recommended this term be used for traits governed by three loci, although it is noted that usage of this term in the literature is not uniform",
+"type": "checkbox",
+"value": {
+"id": 78002,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 97,
+"filter": "inheritance",
+"term": "SPO",
+"display": "Sporadic",
+"description": "Cases of the disease in question occur without a previous family history, i.e., as isolated cases without being transmitted from a parent and without other siblings being affected",
+"type": "checkbox",
+"value": {
+"id": 78003,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 98,
+"filter": "inheritance",
+"term": "Unknown",
+"display": "Unknown",
+"description": "Genes with indeterminate inheritance patterns",
+"type": "checkbox",
+"value": {
+"id": 78004,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 71,
+"filter": "inheritance",
+"term": "TMP",
+"display": "Typified by moderate penetrance",
+"description": "Moderate proportion of individuals exhibit the disease (20-80%)",
+"type": "checkbox",
+"value": {
+"id": 77978,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 72,
+"filter": "inheritance",
+"term": "TLP",
+"display": "Typified by low penetrance",
+"description": "Low proportion of individuals exhibit the disease (less than 20%)",
+"type": "checkbox",
+"value": {
+"id": 77979,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 73,
+"filter": "inheritance",
+"term": "THP",
+"display": "Typified by high penetrance",
+"description": "Hight proportion of individuals exhibit the disease (80-100%)",
+"type": "checkbox",
+"value": {
+"id": 77980,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 74,
+"filter": "inheritance",
+"term": "IMP",
+"display": "Imprinted",
+"description": "Imprinting is a natural process where one parent's gene copy is silenced during development, leaving only one active. In diseases linked to imprinting, the disorder usually appears when a harmful variant is inherited from the normally active parent, but not when it's from the silenced parent.",
+"type": "checkbox",
+"value": {
+"id": 78047,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 75,
+"filter": "inheritance",
+"term": "ADMIMP",
+"display": "Autosomal dominant inheritance with maternal imprinting",
+"description": "A type of autosomal dominant inheritance involving a gene that is imprinted with maternal silencing",
+"type": "checkbox",
+"value": {
+"id": 77981,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 76,
+"filter": "inheritance",
+"term": "ADPIMP",
+"display": "Autosomal dominant inheritance with paternal imprinting",
+"description": "A type of autosomal dominant inheritance involving a gene that is imprinted with paternal silencing",
+"type": "checkbox",
+"value": {
+"id": 77982,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 77,
+"filter": "inheritance",
+"term": "SLE",
+"display": "Sex-limited expression",
+"description": "Sex limitation is used to refer to a monogenic trait linked to an autosomal locus in which the phenotypic effects of allelic differences are expressed only in one sex",
+"type": "checkbox",
+"value": {
+"id": 77983,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 78,
+"filter": "inheritance",
+"term": "MLE",
+"display": "Male-limited expression",
+"description": "Used to refer to a monogenic trait linked to an autosomal locus in which the phenotypic effects of allelic differences are expressed only in the male sex",
+"type": "checkbox",
+"value": {
+"id": 77984,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 79,
+"filter": "inheritance",
+"term": "FLE",
+"display": "Female-limited expression",
+"description": "Used to refer to a monogenic trait linked to an autosomal locus in which the phenotypic effects of allelic differences are expressed only in the female sex",
+"type": "checkbox",
+"value": {
+"id": 77985,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 80,
+"filter": "inheritance",
+"term": "UDIS",
+"display": "Uniparental disomy",
+"description": "Inheritance of both homologues of a chromosome pair from the same parent",
+"type": "checkbox",
+"value": {
+"id": 77986,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 81,
+"filter": "inheritance",
+"term": "UHDIS",
+"display": "Uniparental heterodisomy",
+"description": "A type of uniparental disomy in which the two different chromosomes (or chromosome segments) of the same parent are transmitted",
+"type": "checkbox",
+"value": {
+"id": 77987,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 82,
+"filter": "inheritance",
+"term": "UIDIS",
+"display": "Uniparental isodisomy",
+"description": "A type of uniparental disomy in which the two identical chromosomes (or chromosome segments) of the same parent are transmitted",
+"type": "checkbox",
+"value": {
+"id": 77988,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 83,
+"filter": "inheritance",
+"term": "GANT",
+"display": "Genetic anticipation",
+"description": "A type of autosomal dominant inheritance involving a gene that exhibits anticipation, the increase in severity and/or an earlier age of onset in subsequent generations",
+"type": "checkbox",
+"value": {
+"id": 77989,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 84,
+"filter": "inheritance",
+"term": "GANTPAB",
+"display": "Genetic anticipation with paternal anticipation bias",
+"description": "A type of genetic anticipation observed predominantly upon transmission from affected males",
+"type": "checkbox",
+"value": {
+"id": 77990,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 85,
+"filter": "inheritance",
+"term": "TDN",
+"display": "Typically de novo",
+"description": "Description of conditions that are exclusively or predominantly observed to display de novo variants. In some cases, this may be due to the limited reproductive fitness of affected individuals",
+"type": "checkbox",
+"value": {
+"id": 78048,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 86,
+"filter": "inheritance",
+"term": "TARDO",
+"display": "Typified by age-related disease onset",
+"description": "Description of conditions in which age of onset is typically later in life and in which penetrance is dependent on the age of the subject.",
+"type": "checkbox",
+"value": {
+"id": 78027,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 87,
+"filter": "inheritance",
+"term": "CGS",
+"display": "Contiguous gene syndrome",
+"description": "A syndrome caused by the effects of abnormality (typically a deletion or duplication) of 2 or more adjacent genes",
+"type": "checkbox",
+"value": {
+"id": 78028,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 88,
+"filter": "inheritance",
+"term": "TCP",
+"display": "Typified by complete penetrance",
+"description": "Penetrance describes the proportion of genotype positive individuals that develop disease given a lifespan of 80 years. For example, penetrance of Neurofibromatosis type 1 is close to 100%",
+"type": "checkbox",
+"value": {
+"id": 78029,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 6,
+"description": "Clinvar",
+"typeof": "Clinvar",
+"checkbox_disabled": false,
+"order_number": 6,
+"terms": [
+[
+{
+"id": 100,
+"filter": "clinvar_clnsig",
+"term": "Pathogenic",
+"display": "Pathogenic",
+"description": "The variant is known to cause a disease or health condition",
+"type": "checkbox",
+"value": {
+"id": 78005,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 101,
+"filter": "clinvar_clnsig",
+"term": "Likely_pathogenic",
+"display": "Likely pathogenic",
+"description": "The variant is likely to cause a disease or health condition",
+"type": "checkbox",
+"value": {
+"id": 78006,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 102,
+"filter": "clinvar_clnsig",
+"term": "Conflicting",
+"display": "Pathogenic submissions in conflicting interpretations",
+"description": "Different sources or experts disagree on whether the variant is pathogenic or not",
+"type": "checkbox",
+"value": {
+"id": 78007,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 103,
+"filter": "clinvar_clnsig",
+"term": "Uncertain_significance",
+"display": "Uncertain significance",
+"description": "Genetic variant's clinical impact is not definitively known, requiring further evaluation.",
+"type": "checkbox",
+"value": {
+"id": 78008,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 104,
+"filter": "clinvar_clnsig",
+"term": "Likely_benign",
+"display": "Likely benign",
+"description": "The variant is likely harmless and not associated with a significant health risk.",
+"type": "checkbox",
+"value": {
+"id": 78009,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 105,
+"filter": "clinvar_clnsig",
+"term": "Benign",
+"display": "Benign",
+"description": "The variant is confirmed to have no adverse health effects",
+"type": "checkbox",
+"value": {
+"id": 78010,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 106,
+"filter": "clinvar_clnsig",
+"term": "not_provided",
+"display": "not provided",
+"description": "Insufficient information to determine the clinical significance of the variant",
+"type": "checkbox",
+"value": {
+"id": 78011,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 107,
+"filter": "clinvar_clnsig",
+"term": "drug_response",
+"display": "drug response",
+"description": "A general term for a variant that affects a drug response, not a disease",
+"type": "checkbox",
+"value": {
+"id": 78012,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 108,
+"filter": "clinvar_clnsig",
+"term": "other",
+"display": "other",
+"description": "The clinical significance of the variant does not fit into the listed categories",
+"type": "checkbox",
+"value": {
+"id": 78013,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 109,
+"filter": "clinvar_clnsig",
+"term": "risk_factor",
+"display": "risk factor",
+"description": "The variant increases the risk of a disease but does not guarantee it will occur",
+"type": "checkbox",
+"value": {
+"id": 78014,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 110,
+"filter": "clinvar_clnsig",
+"term": "association",
+"display": "association",
+"description": "For variants identified in a GWAS study and further interpreted for their clinical significance",
+"type": "checkbox",
+"value": {
+"id": 78015,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 111,
+"filter": "clinvar_clnsig",
+"term": "Affects",
+"display": "Affects",
+"description": "For variants that cause a non-disease phenotype, such as lactose intolerance",
+"type": "checkbox",
+"value": {
+"id": 78016,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 112,
+"filter": "clinvar_clnsig",
+"term": "Likely_risk_allele",
+"display": "Likely risk allele",
+"description": "The variant is likely to increase the risk of a specific condition",
+"type": "checkbox",
+"value": {
+"id": 78017,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 113,
+"filter": "clinvar_clnsig",
+"term": "protective",
+"display": "protective",
+"description": "For variants that decrease the risk of a disorder, including infections",
+"type": "checkbox",
+"value": {
+"id": 78018,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 114,
+"filter": "clinvar_clnsig",
+"term": "Uncertain_risk_allele",
+"display": "Uncertain risk allele",
+"description": "The risk level associated with the variant is uncertain",
+"type": "checkbox",
+"value": {
+"id": 78019,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 115,
+"filter": "clinvar_clnsig",
+"term": "confers_sensitivity",
+"display": "confers sensitivity",
+"description": "The variant makes an individual more sensitive or susceptible to a specific factor or condition",
+"type": "checkbox",
+"value": {
+"id": 78020,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 116,
+"filter": "clinvar_clnsig",
+"term": "association_not_found",
+"display": "association not found",
+"description": "Despite initial expectations, no association between the variant and a specific trait or condition was discovered",
+"type": "checkbox",
+"value": {
+"id": 78021,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 117,
+"filter": "clinvar_clnsig",
+"term": "noclinvar",
+"display": "Not reported in Clinvar",
+"description": "Variants lacking ClinVar records.",
+"type": "checkbox",
+"value": {
+"id": 78022,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 118,
+"filter": "clinvar_clnsig",
+"term": "_low_penetrance",
+"display": "Low penetrance",
+"description": "Low penetrance ",
+"type": "checkbox",
+"value": {
+"id": 78023,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 119,
+"filter": "clinvar_clnsig",
+"term": "no_classification_for_the_single_variant",
+"display": "No classification for the single variant",
+"description": "for the single variant",
+"type": "checkbox",
+"value": {
+"id": 78024,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 203,
+"filter": "clinvar_clnsig",
+"term": "Established_risk_allele",
+"display": "Established risk allele",
+"description": "Established risk allele",
+"type": "checkbox",
+"value": {
+"id": 78025,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 7,
+"description": "ACMG",
+"typeof": "ACMG",
+"checkbox_disabled": false,
+"order_number": 7,
+"terms": [
+[
+{
+"id": 121,
+"filter": "acmg_class",
+"term": "Likely pathogenic",
+"display": "Likely pathogenic",
+"description": "A likely pathogenic variant, as per the American College of Medical Genetics and Genomics (ACMG) guidelines, is a genetic alteration with a strong probability of causing a specific disease or condition. While not confirmed as definitively pathogenic, these variants are strongly associated with the observed clinical symptoms and play a significant role in medical genetics for diagnosis and treatment considerations.",
+"type": "checkbox",
+"value": {
+"id": 78049,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 122,
+"filter": "acmg_class",
+"term": "Uncertain significance",
+"display": "Uncertain significance",
+"description": "An uncertain significance variant, following the American College of Medical Genetics and Genomics (ACMG) guidelines, is a genetic alteration for which the potential impact on health is not definitively determined.",
+"type": "checkbox",
+"value": {
+"id": 78050,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 123,
+"filter": "acmg_class",
+"term": "Likely benign",
+"display": "Likely benign",
+"description": "A likely benign variant, in accordance with the American College of Medical Genetics and Genomics (ACMG) guidelines, is a genetic alteration with a high probability of being non-pathogenic and not causing a specific disease or condition.",
+"type": "checkbox",
+"value": {
+"id": 78051,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 124,
+"filter": "acmg_class",
+"term": "Benign",
+"display": "Benign",
+"description": "A benign variant, following the American College of Medical Genetics and Genomics (ACMG) guidelines, is a genetic alteration that has been determined to have no adverse impact on an individual's health.",
+"type": "checkbox",
+"value": {
+"id": 78052,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 120,
+"filter": "acmg_class",
+"term": "Pathogenic",
+"display": "Pathogenic",
+"description": "A pathogenic variant, as defined by the American College of Medical Genetics and Genomics (ACMG) guidelines, is a genetic alteration that is associated with a high likelihood of causing a specific disease or condition.",
+"type": "checkbox",
+"value": {
+"id": 78026,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 8,
+"description": "Phenotype",
+"typeof": "Phenotype",
+"checkbox_disabled": true,
+"order_number": 8,
+"terms": [
+[]
+],
+"logic": "and"
+},
+{
+"id": 9,
+"description": "Gene",
+"typeof": "Gene",
+"checkbox_disabled": true,
+"order_number": 9,
+"terms": [
+[]
+],
+"logic": "and"
+},
+{
+"id": 10,
+"description": "Gene panels",
+"typeof": "GenePanels",
+"checkbox_disabled": true,
+"order_number": 10,
+"terms": [
+[]
+],
+"logic": "and"
+},
+{
+"id": 11,
+"description": "Disorder",
+"typeof": "Disorder",
+"checkbox_disabled": true,
+"order_number": 11,
+"terms": [
+[]
+],
+"logic": "and"
+},
+{
+"id": 12,
+"description": "Location",
+"typeof": "Location",
+"checkbox_disabled": false,
+"order_number": 12,
+"terms": [
+[
+{
+"id": 161,
+"filter": "chrom",
+"term": "chr2",
+"display": "chr2",
+"description": "Human chromosome 2",
+"type": "checkbox",
+"value": {
+"id": 78053,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 162,
+"filter": "chrom",
+"term": "chr3",
+"display": "chr3",
+"description": "Human chromosome 3",
+"type": "checkbox",
+"value": {
+"id": 78054,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 163,
+"filter": "chrom",
+"term": "chr4",
+"display": "chr4",
+"description": "Human chromosome 4",
+"type": "checkbox",
+"value": {
+"id": 78055,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 164,
+"filter": "chrom",
+"term": "chr5",
+"display": "chr5",
+"description": "Human chromosome 5",
+"type": "checkbox",
+"value": {
+"id": 78056,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 165,
+"filter": "chrom",
+"term": "chr6",
+"display": "chr6",
+"description": "Human chromosome 6",
+"type": "checkbox",
+"value": {
+"id": 78057,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 166,
+"filter": "chrom",
+"term": "chr7",
+"display": "chr7",
+"description": "Human chromosome 7",
+"type": "checkbox",
+"value": {
+"id": 78058,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 167,
+"filter": "chrom",
+"term": "chr8",
+"display": "chr8",
+"description": "Human chromosome 8",
+"type": "checkbox",
+"value": {
+"id": 78059,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 168,
+"filter": "chrom",
+"term": "chr9",
+"display": "chr9",
+"description": "Human chromosome 9",
+"type": "checkbox",
+"value": {
+"id": 78060,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 169,
+"filter": "chrom",
+"term": "chr10",
+"display": "chr10",
+"description": "Human chromosome 10",
+"type": "checkbox",
+"value": {
+"id": 78061,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 170,
+"filter": "chrom",
+"term": "chr11",
+"display": "chr11",
+"description": "Human chromosome 11",
+"type": "checkbox",
+"value": {
+"id": 78062,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 171,
+"filter": "chrom",
+"term": "chr12",
+"display": "chr12",
+"description": "Human chromosome 12",
+"type": "checkbox",
+"value": {
+"id": 78031,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 172,
+"filter": "chrom",
+"term": "chr13",
+"display": "chr13",
+"description": "Human chromosome 13",
+"type": "checkbox",
+"value": {
+"id": 78063,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 173,
+"filter": "chrom",
+"term": "chr14",
+"display": "chr14",
+"description": "Human chromosome 14",
+"type": "checkbox",
+"value": {
+"id": 78064,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 174,
+"filter": "chrom",
+"term": "chr15",
+"display": "chr15",
+"description": "Human chromosome 15",
+"type": "checkbox",
+"value": {
+"id": 78065,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 175,
+"filter": "chrom",
+"term": "chr16",
+"display": "chr16",
+"description": "Human chromosome 16",
+"type": "checkbox",
+"value": {
+"id": 78066,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 176,
+"filter": "chrom",
+"term": "chr17",
+"display": "chr17",
+"description": "Human chromosome 17",
+"type": "checkbox",
+"value": {
+"id": 78067,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 177,
+"filter": "chrom",
+"term": "chr18",
+"display": "chr18",
+"description": "Human chromosome 18",
+"type": "checkbox",
+"value": {
+"id": 78068,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 178,
+"filter": "chrom",
+"term": "chr19",
+"display": "chr19",
+"description": "Human chromosome 19",
+"type": "checkbox",
+"value": {
+"id": 78069,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 179,
+"filter": "chrom",
+"term": "chr20",
+"display": "chr20",
+"description": "Human chromosome 20",
+"type": "checkbox",
+"value": {
+"id": 78032,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 180,
+"filter": "chrom",
+"term": "chr21",
+"display": "chr21",
+"description": "Human chromosome 21",
+"type": "checkbox",
+"value": {
+"id": 78070,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 181,
+"filter": "chrom",
+"term": "chr22",
+"display": "chr22",
+"description": "Human chromosome 22",
+"type": "checkbox",
+"value": {
+"id": 78033,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 182,
+"filter": "chrom",
+"term": "chrX",
+"display": "chrX",
+"description": "Human chromosome X",
+"type": "checkbox",
+"value": {
+"id": 78034,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 183,
+"filter": "chrom",
+"term": "chrY",
+"display": "chrY",
+"description": "Human chromosome Y",
+"type": "checkbox",
+"value": {
+"id": 78035,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 184,
+"filter": "chrom",
+"term": "chrM",
+"display": "chrM",
+"description": "Human chromosome M",
+"type": "checkbox",
+"value": {
+"id": 78036,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 185,
+"filter": "pos",
+"term": "pos",
+"display": "Genomic location",
+"description": "Start and end positions of genomic location",
+"type": "int",
+"value": {
+"id": 78071,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 186,
+"filter": "distance",
+"term": "distance",
+"display": "Distance from Exon",
+"description": "Distance of variant from begining or end of the exon",
+"type": "int",
+"value": {
+"id": 78072,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 160,
+"filter": "chrom",
+"term": "chr1",
+"display": "chr1",
+"description": "Human chromosome 1",
+"type": "checkbox",
+"value": {
+"id": 77950,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 13,
+"description": "General",
+"typeof": "General",
+"checkbox_disabled": false,
+"order_number": 13,
+"terms": [
+[
+{
+"id": 195,
+"filter": "impact",
+"term": "MODIFIER",
+"display": "Modifier",
+"description": "Human chromosome 6",
+"type": "checkbox",
+"value": {
+"id": 77991,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 190,
+"filter": "variantclass",
+"term": "SNV",
+"display": "SNV",
+"description": "Human chromosome 1",
+"type": "checkbox",
+"value": {
+"id": 78037,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 191,
+"filter": "variantclass",
+"term": "deletion",
+"display": "Deletion",
+"description": "Human chromosome 2",
+"type": "checkbox",
+"value": {
+"id": 78073,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 192,
+"filter": "variantclass",
+"term": "insertion",
+"display": "Insertion",
+"description": "Human chromosome 3",
+"type": "checkbox",
+"value": {
+"id": 78038,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 193,
+"filter": "impact",
+"term": "HIGH",
+"display": "High",
+"description": "Human chromosome 4",
+"type": "checkbox",
+"value": {
+"id": 78039,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 194,
+"filter": "impact",
+"term": "MODERATE",
+"display": "Moderate",
+"description": "Human chromosome 5",
+"type": "checkbox",
+"value": {
+"id": 78040,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 196,
+"filter": "impact",
+"term": "LOW",
+"display": "Low",
+"description": "Human chromosome 7",
+"type": "checkbox",
+"value": {
+"id": 77951,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 382,
+"filter": "color",
+"term": "success",
+"display": "Green",
+"description": " ",
+"type": "checkbox",
+"value": {
+"id": 97957,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 383,
+"filter": "color",
+"term": "warning",
+"display": "Yellow",
+"description": " ",
+"type": "checkbox",
+"value": {
+"id": 97958,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 381,
+"filter": "color",
+"term": "danger",
+"display": "Red",
+"description": " ",
+"type": "checkbox",
+"value": {
+"id": 97956,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 14,
+"description": "Stand alones",
+"typeof": "Standalones",
+"checkbox_disabled": false,
+"order_number": 14,
+"terms": [
+[
+{
+"id": 200,
+"filter": "comphet",
+"term": "comphet",
+"display": " Compound heterozygous",
+"description": "When 'Compound Heterozygote' is chosen, Ilyome disregards all the previously applied filters. This filter stands alone and excludes variants with a frequency exceeding 5% in Gnomad, while retaining genes containing more than one variant within.",
+"type": "checkbox",
+"value": {
+"id": 78074,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 201,
+"filter": "ba1",
+"term": "ba1",
+"display": "BA1 exception variants",
+"description": "Pathogenic variants with high allele frequency in databases",
+"type": "checkbox",
+"value": {
+"id": 78075,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 15,
+"description": "Samples",
+"typeof": "Sample",
+"checkbox_disabled": true,
+"order_number": 16,
+"terms": [
+[]
+],
+"logic": "and"
+},
+{
+"id": 16,
+"description": "Ordering",
+"typeof": "Ordering",
+"checkbox_disabled": false,
+"order_number": 17,
+"terms": [
+[
+{
+"id": 235,
+"filter": "score",
+"term": "score",
+"display": "Ilyome Score",
+"description": "Ilyome displays the variants with the highest scores and priority at the top, making it easier to identify causal mutations.",
+"type": "radiobox",
+"value": {
+"id": 78041,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": true,
+"logic": "and"
+}
+},
+{
+"id": 236,
+"filter": "symbol",
+"term": "symbol",
+"display": "Gene Symbol",
+"description": "Ilyome orders variants according to gene symbols in ascending alphabetical order.",
+"type": "radiobox",
+"value": {
+"id": 78076,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 237,
+"filter": "location",
+"term": "location",
+"display": "Genomic location",
+"description": "Ilyome orders variants according to genomic location in ascending numerical order.",
+"type": "radiobox",
+"value": {
+"id": 78077,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 17,
+"description": "Biotype",
+"typeof": "Biotype",
+"checkbox_disabled": false,
+"order_number": 18,
+"terms": [
+[
+{
+"id": 312,
+"filter": "biotype",
+"term": "IG_D_gene",
+"display": "Immunoglobulin Diversity Gene",
+"description": "Diversity segment of immunoglobulin genes.",
+"type": "checkbox",
+"value": {
+"id": 82644,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 318,
+"filter": "biotype",
+"term": "miRNA",
+"display": "MicroRNA",
+"description": "MicroRNA genes involved in RNA silencing.",
+"type": "checkbox",
+"value": {
+"id": 82658,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 301,
+"filter": "biotype",
+"term": "protein_coding",
+"display": "Protein Coding",
+"description": "Genes that code for proteins.",
+"type": "checkbox",
+"value": {
+"id": 82646,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 302,
+"filter": "biotype",
+"term": "lncRNA",
+"display": "Long Non-Coding RNA",
+"description": "Long non-coding RNAs, which do not code for proteins.",
+"type": "checkbox",
+"value": {
+"id": 82647,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 303,
+"filter": "biotype",
+"term": "nonsense_mediated_decay",
+"display": "Nonsense-Mediated Decay",
+"description": "Transcripts targeted for degradation due to premature stop codons.",
+"type": "checkbox",
+"value": {
+"id": 82648,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 304,
+"filter": "biotype",
+"term": "retained_intron",
+"display": "Retained Intron",
+"description": "Non-coding transcripts that retain introns.",
+"type": "checkbox",
+"value": {
+"id": 82649,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 305,
+"filter": "biotype",
+"term": "processed_pseudogene",
+"display": "Processed Pseudogene",
+"description": "Pseudogene formed by retrotransposition.",
+"type": "checkbox",
+"value": {
+"id": 82651,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 306,
+"filter": "biotype",
+"term": "processed_transcript",
+"display": "Processed Transcript",
+"description": "Non-coding transcripts with introns removed.",
+"type": "checkbox",
+"value": {
+"id": 82652,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 307,
+"filter": "biotype",
+"term": "protein_coding_LoF",
+"display": "Protein Coding (Loss of Function)",
+"description": "Protein-coding genes with loss-of-function variants.",
+"type": "checkbox",
+"value": {
+"id": 82653,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 308,
+"filter": "biotype",
+"term": "pseudogene",
+"display": "Pseudogene",
+"description": "Non-functional copies of genes.",
+"type": "checkbox",
+"value": {
+"id": 82640,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 309,
+"filter": "biotype",
+"term": "artifact",
+"display": "Artifact",
+"description": "Artifacts observed during sequencing or analysis.",
+"type": "checkbox",
+"value": {
+"id": 82641,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 310,
+"filter": "biotype",
+"term": "IG_C_gene",
+"display": "Immunoglobulin Constant Gene",
+"description": "Constant region immunoglobulin genes.",
+"type": "checkbox",
+"value": {
+"id": 82642,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 311,
+"filter": "biotype",
+"term": "IG_C_pseudogene",
+"display": "Immunoglobulin Constant Pseudogene",
+"description": "Pseudogenes derived from immunoglobulin constant genes.",
+"type": "checkbox",
+"value": {
+"id": 82643,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 313,
+"filter": "biotype",
+"term": "IG_J_gene",
+"display": "Immunoglobulin Joining Gene",
+"description": "Joining segment of immunoglobulin genes.",
+"type": "checkbox",
+"value": {
+"id": 82645,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 314,
+"filter": "biotype",
+"term": "IG_J_pseudogene",
+"display": "Immunoglobulin Joining Pseudogene",
+"description": "Pseudogenes derived from immunoglobulin joining genes.",
+"type": "checkbox",
+"value": {
+"id": 82654,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 315,
+"filter": "biotype",
+"term": "IG_pseudogene",
+"display": "Immunoglobulin Pseudogene",
+"description": "Pseudogenes derived from immunoglobulin genes.",
+"type": "checkbox",
+"value": {
+"id": 82655,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 316,
+"filter": "biotype",
+"term": "IG_V_gene",
+"display": "Immunoglobulin Variable Gene",
+"description": "Variable region immunoglobulin genes.",
+"type": "checkbox",
+"value": {
+"id": 82656,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 317,
+"filter": "biotype",
+"term": "IG_V_pseudogene",
+"display": "Immunoglobulin Variable Pseudogene",
+"description": "Pseudogenes derived from immunoglobulin variable genes.",
+"type": "checkbox",
+"value": {
+"id": 82657,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 319,
+"filter": "biotype",
+"term": "misc_RNA",
+"display": "Miscellaneous RNA",
+"description": "Miscellaneous RNA genes with diverse functions.",
+"type": "checkbox",
+"value": {
+"id": 82659,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 320,
+"filter": "biotype",
+"term": "Mt_rRNA",
+"display": "Mitochondrial rRNA",
+"description": "Mitochondrial ribosomal RNA genes.",
+"type": "checkbox",
+"value": {
+"id": 82660,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 321,
+"filter": "biotype",
+"term": "Mt_tRNA",
+"display": "Mitochondrial tRNA",
+"description": "Mitochondrial transfer RNA genes.",
+"type": "checkbox",
+"value": {
+"id": 82661,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 322,
+"filter": "biotype",
+"term": "non_stop_decay",
+"display": "Non-Stop Decay",
+"description": "Transcripts targeted for degradation due to lacking stop codons.",
+"type": "checkbox",
+"value": {
+"id": 82662,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 323,
+"filter": "biotype",
+"term": "ribozyme",
+"display": "Ribozyme",
+"description": "RNA molecules with catalytic activity.",
+"type": "checkbox",
+"value": {
+"id": 82663,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 324,
+"filter": "biotype",
+"term": "rRNA",
+"display": "Ribosomal RNA",
+"description": "Ribosomal RNA genes forming part of the ribosome.",
+"type": "checkbox",
+"value": {
+"id": 82664,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 325,
+"filter": "biotype",
+"term": "rRNA_pseudogene",
+"display": "Ribosomal RNA Pseudogene",
+"description": "Pseudogenes derived from ribosomal RNA genes.",
+"type": "checkbox",
+"value": {
+"id": 82665,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 326,
+"filter": "biotype",
+"term": "scaRNA",
+"display": "Small Cajal RNA",
+"description": "Small RNA genes localized in Cajal bodies.",
+"type": "checkbox",
+"value": {
+"id": 82666,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 327,
+"filter": "biotype",
+"term": "scRNA",
+"display": "Small Cytoplasmic RNA",
+"description": "Small cytoplasmic RNA genes.",
+"type": "checkbox",
+"value": {
+"id": 82667,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 328,
+"filter": "biotype",
+"term": "snoRNA",
+"display": "Small Nucleolar RNA",
+"description": "Small nucleolar RNA genes involved in RNA modification.",
+"type": "checkbox",
+"value": {
+"id": 82668,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 329,
+"filter": "biotype",
+"term": "snRNA",
+"display": "Small Nuclear RNA",
+"description": "Small nuclear RNA genes involved in splicing.",
+"type": "checkbox",
+"value": {
+"id": 82669,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 330,
+"filter": "biotype",
+"term": "sRNA",
+"display": "Small RNA",
+"description": "Small RNA genes with diverse functions.",
+"type": "checkbox",
+"value": {
+"id": 82670,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 331,
+"filter": "biotype",
+"term": "TEC",
+"display": "To Be Experimentally Confirmed",
+"description": "Genes to be experimentally confirmed.",
+"type": "checkbox",
+"value": {
+"id": 82671,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 332,
+"filter": "biotype",
+"term": "protein_coding_CDS_not_defined",
+"display": "Protein Coding (CDS Not Defined)",
+"description": "Protein-coding genes without a defined CDS.",
+"type": "checkbox",
+"value": {
+"id": 82672,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 333,
+"filter": "biotype",
+"term": "transcribed_processed_pseudogene",
+"display": "Transcribed Processed Pseudogene",
+"description": "Pseudogene that is transcribed and processed.",
+"type": "checkbox",
+"value": {
+"id": 82673,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 334,
+"filter": "biotype",
+"term": "transcribed_unitary_pseudogene",
+"display": "Transcribed Unitary Pseudogene",
+"description": "Transcribed pseudogene lacking homologs.",
+"type": "checkbox",
+"value": {
+"id": 82674,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 335,
+"filter": "biotype",
+"term": "transcribed_unprocessed_pseudogene",
+"display": "Transcribed Unprocessed Pseudogene",
+"description": "Unprocessed pseudogene that is transcribed.",
+"type": "checkbox",
+"value": {
+"id": 82675,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 336,
+"filter": "biotype",
+"term": "translated_processed_pseudogene",
+"display": "Translated Processed Pseudogene",
+"description": "Processed pseudogene that is translated.",
+"type": "checkbox",
+"value": {
+"id": 82676,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 337,
+"filter": "biotype",
+"term": "TR_C_gene",
+"display": "T-Cell Receptor Constant Gene",
+"description": "Constant region T-cell receptor genes.",
+"type": "checkbox",
+"value": {
+"id": 82677,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 338,
+"filter": "biotype",
+"term": "TR_D_gene",
+"display": "T-Cell Receptor Diversity Gene",
+"description": "Diversity segment of T-cell receptor genes.",
+"type": "checkbox",
+"value": {
+"id": 82678,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 339,
+"filter": "biotype",
+"term": "TR_J_gene",
+"display": "T-Cell Receptor Joining Gene",
+"description": "Joining segment of T-cell receptor genes.",
+"type": "checkbox",
+"value": {
+"id": 82679,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 340,
+"filter": "biotype",
+"term": "TR_J_pseudogene",
+"display": "T-Cell Receptor Joining Pseudogene",
+"description": "Pseudogenes derived from T-cell receptor joining genes.",
+"type": "checkbox",
+"value": {
+"id": 82680,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 341,
+"filter": "biotype",
+"term": "TR_V_gene",
+"display": "T-Cell Receptor Variable Gene",
+"description": "Variable region T-cell receptor genes.",
+"type": "checkbox",
+"value": {
+"id": 82681,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 342,
+"filter": "biotype",
+"term": "TR_V_pseudogene",
+"display": "T-Cell Receptor Variable Pseudogene",
+"description": "Pseudogenes derived from T-cell receptor variable genes.",
+"type": "checkbox",
+"value": {
+"id": 82682,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 343,
+"filter": "biotype",
+"term": "unitary_pseudogene",
+"display": "Unitary Pseudogene",
+"description": "Non-functional ortholog of a gene in another species.",
+"type": "checkbox",
+"value": {
+"id": 82683,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 344,
+"filter": "biotype",
+"term": "unprocessed_pseudogene",
+"display": "Unprocessed Pseudogene",
+"description": "Pseudogene formed without retrotransposition.",
+"type": "checkbox",
+"value": {
+"id": 82684,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 18,
+"description": "In silico predictions",
+"typeof": "predictions",
+"checkbox_disabled": false,
+"order_number": 19,
+"terms": [
+[
+{
+"id": 362,
+"filter": "polyphen2_hdiv_score",
+"term": "polyphen2_hdiv_score",
+"display": "PolyPhen-2 HDIV Score",
+"description": "Predicting variant's effect on protein structure.",
+"type": "int",
+"value": {
+"id": 82686,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 361,
+"filter": "sift_score",
+"term": "sift_score",
+"display": "SIFT Score",
+"description": "Predicting the effect of the variant on protein function.",
+"type": "int",
+"value": {
+"id": 82685,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 363,
+"filter": "mutationtaster_score",
+"term": "mutationtaster_score",
+"display": "MutationTaster Score",
+"description": "Predicting variant pathogenicity.",
+"type": "int",
+"value": {
+"id": 82687,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 364,
+"filter": "cadd_raw",
+"term": "cadd_raw",
+"display": "CADD Raw Score",
+"description": "Raw deleteriousness score for the variant.",
+"type": "int",
+"value": {
+"id": 82688,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 365,
+"filter": "cadd_phred",
+"term": "cadd_phred",
+"display": "CADD Phred Score",
+"description": "Measuring the deleteriousness of the variant.",
+"type": "int",
+"value": {
+"id": 82689,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 366,
+"filter": "revel_score",
+"term": "revel_score",
+"display": "REVEL Score",
+"description": "Predicting variant pathogenicity using ensemble methods.",
+"type": "int",
+"value": {
+"id": 82690,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 367,
+"filter": "mpc",
+"term": "mpc",
+"display": "MPC Score",
+"description": "Predicting the pathogenicity of a variant based on multiple prediction algorithms.",
+"type": "int",
+"value": {
+"id": 82691,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 368,
+"filter": "eve_score",
+"term": "eve_score",
+"display": "EVE Score",
+"description": "Evaluating the potential functional impact of a variant in the exome.",
+"type": "int",
+"value": {
+"id": 82692,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 369,
+"filter": "primate_ai",
+"term": "primate_ai",
+"display": "PrimateAI Score",
+"description": "Assessing the impact of a variant in non-coding regions using primate conservation.",
+"type": "int",
+"value": {
+"id": 82693,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 370,
+"filter": "alphamissense_score",
+"term": "alphamissense_score",
+"display": "AlphaMissense Score",
+"description": "Predicting the functional impact of missense variants.",
+"type": "int",
+"value": {
+"id": 82694,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 371,
+"filter": "dann_score",
+"term": "dann_score",
+"display": "DANN Score",
+"description": "Predicting the functional consequences of a variant.",
+"type": "int",
+"value": {
+"id": 82695,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 372,
+"filter": "splice_ai",
+"term": "splice_ai",
+"display": "SpliceAI Score",
+"description": "Evaluating the potential effect of a variant on splicing.",
+"type": "int",
+"value": {
+"id": 82696,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 373,
+"filter": "gerp_rs",
+"term": "gerp_rs",
+"display": "GERP++ Score",
+"description": "Measuring evolutionary conservation at the variant site.",
+"type": "int",
+"value": {
+"id": 82697,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 374,
+"filter": "phylop100way",
+"term": "phylop100way",
+"display": "PhyloP Score (100-way)",
+"description": "Conservation across 100 vertebrate species.",
+"type": "int",
+"value": {
+"id": 82698,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 375,
+"filter": "phastcons100way",
+"term": "phastcons100way",
+"display": "PhastCons Score (100-way)",
+"description": "Conservation across 100 vertebrate species.",
+"type": "int",
+"value": {
+"id": 82699,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 376,
+"filter": "metasvm_score",
+"term": "metasvm_score",
+"display": "MetaSVM Score",
+"description": "Predicting variant pathogenicity using SVM methods.",
+"type": "int",
+"value": {
+"id": 82700,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 377,
+"filter": "metalr_score",
+"term": "metalr_score",
+"display": "MetaLR Score",
+"description": "Predicting variant pathogenicity using logistic regression.",
+"type": "int",
+"value": {
+"id": 82701,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 378,
+"filter": "clinpred_score",
+"term": "clinpred_score",
+"display": "ClinPred Score",
+"description": "Quantifying the pathogenic potential of a variant.",
+"type": "int",
+"value": {
+"id": 82702,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 379,
+"filter": "loeuf",
+"term": "loeuf",
+"display": "LOEUF Score",
+"description": "Measuring gene intolerance to loss-of-function mutations.",
+"type": "int",
+"value": {
+"id": 82703,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 380,
+"filter": "pli",
+"term": "pli",
+"display": "pLI Score",
+"description": "Indicating a gene's intolerance to loss-of-function variants.",
+"type": "int",
+"value": {
+"id": 82704,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+},
+{
+"id": 21,
+"description": "Family",
+"typeof": "Family",
+"checkbox_disabled": false,
+"order_number": 15,
+"terms": [
+[
+{
+"id": 501,
+"filter": "family_analysis_type",
+"term": "none",
+"display": "None",
+"description": "No family-based analysis will be applied.",
+"type": "radiobox",
+"value": {
+"id": 103832,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 502,
+"filter": "family_analysis_type",
+"term": "duo",
+"display": "Duo Analysis",
+"description": "Add one partner sample (e.g., spouse/sibling) for duo-based analysis.",
+"type": "radiobox",
+"value": {
+"id": 103833,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 503,
+"filter": "family_analysis_type",
+"term": "trio",
+"display": "Trio Analysis",
+"description": "Current open sample is proband (child); add father and mother samples for trio-based analysis.",
+"type": "radiobox",
+"value": {
+"id": 103834,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 504,
+"filter": "family_inheritance_pattern",
+"term": "both_carrier",
+"display": "Both Carrier",
+"description": "Same variant in both duo samples.",
+"type": "radiobox",
+"value": {
+"id": 103835,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 507,
+"filter": "family_inheritance_pattern",
+"term": "compound_heterozygous",
+"display": "Compound Heterozygous",
+"description": "Inheritance pattern for duo analysis.",
+"type": "radiobox",
+"value": {
+"id": 103836,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 508,
+"filter": "family_analysis_method",
+"term": "de_novo",
+"display": "De Novo Analysis",
+"description": "Variants in child absent in both parents.",
+"type": "radiobox",
+"value": {
+"id": 103837,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 509,
+"filter": "family_analysis_method",
+"term": "autosomal_recessive_compound_het",
+"display": "Compound Het",
+"description": "Two different mutations—one from each parent.",
+"type": "radiobox",
+"value": {
+"id": 103838,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 510,
+"filter": "family_analysis_method",
+"term": "homozygosity_mapping",
+"display": "Homozygosity Mapping",
+"description": "Both parents carry same recessive mutation.",
+"type": "radiobox",
+"value": {
+"id": 103839,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+},
+{
+"id": 511,
+"filter": "family_analysis_method",
+"term": "x_linked",
+"display": "X-Linked Analysis",
+"description": "X chromosome variants from carrier mother.",
+"type": "radiobox",
+"value": {
+"id": 103840,
+"min": null,
+"max": null,
+"isnull": false,
+"selected": false,
+"logic": "and"
+}
+}
+]
+],
+"logic": "and"
+}
+]
+],
+"user": {
+"id": 561,
+"first_name": "Selman",
+"last_name": "koral"
+}
+}

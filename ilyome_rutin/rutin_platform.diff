@@ -1,0 +1,350 @@
+--- rutin_orig.py	2026-10-15 10:31:08.070192876 +0000
++++ rutin.py	2026-10-15 10:32:58.250200299 +0000
+@@ -3,7 +3,8 @@
+ WES / CES analiz rutini - veri toplama motoru.
+ 
+ olgular.xlsx icindeki Durum sutunu BEKLIYOR olan satirlari isler:
+-  olguyu Genomize'da bulur -> isitir (warmup) -> tarama eksenlerini calistirir
++  olguyu platformda (Genomize ya da Ilyome; 'Platform' sutunu) bulur -> isitir
++  (warmup) -> tarama eksenlerini calistirir
+   -> raporlar\<Olgu Kodu>\ klasorunu acar -> kanit tablolarini (CSV) yazar
+   -> satiri VERI_HAZIR yapar.
+ 
+@@ -30,6 +31,11 @@
+ 
+ from openpyxl import load_workbook          # noqa: E402
+ import genomize_seq as G                    # noqa: E402
++try:
++    import ilyome_seq as I                  # noqa: E402  (Ilyome platformu; istege bagli)
++    I_HATA = None
++except Exception as _e:                     # ilyome_seq.py yoksa Genomize olgulari etkilenmesin
++    I, I_HATA = None, "%s: %s" % (type(_e).__name__, _e)
+ import akrabalik as AK                      # noqa: E402
+ import yollar as Y                          # noqa: E402
+ try:
+@@ -139,6 +145,41 @@
+ 
+ 
+ RUN_SUTUNU = "Genomize Run"
++PLATFORM_SUTUNU = "Platform"      # bos / Genomize -> Genomize SEQ ; Ilyome -> ilyome.com
++ISTEMCI = {}                      # platform -> oturum (her platforma bir kez giris)
++
++
++def platform_oku(ws, r):
++    v = str(hucre(ws, r, PLATFORM_SUTUNU) or "").strip().lower()
++    return "ILYOME" if v.startswith("ily") else "GENOMIZE"
++
++
++def platform_modulu(platform):
++    if platform == "ILYOME":
++        if I is None:
++            raise RuntimeError("ilyome_seq.py yuklenemedi: %s" % I_HATA)
++        return I
++    return G
++
++
++def platform_adi(platform):
++    return "Ilyome" if platform == "ILYOME" else "Genomize"
++
++
++def istemci(platform):
++    """Platform oturumu; ilk kullanimda acilir (parola o anda sorulur/ortamdan okunur)."""
++    if platform not in ISTEMCI:
++        ISTEMCI[platform] = platform_modulu(platform).Seq()
++    return ISTEMCI[platform]
++
++
++def kimlik_var(platform):
++    """Ortamda bu platformun giris bilgisi var mi? (BASLAT yalniz gerekeni sorar.)"""
++    if platform == "ILYOME":
++        return bool(os.environ.get("ILYOME_USER") and os.environ.get("ILYOME_PASS"))
++    return bool(os.environ.get("GENOMIZE_USER") and os.environ.get("GENOMIZE_PASS"))
++
++
+ BASLIK_STIL = {}   # sutun -> stil kaynagi sutunu (yeni baslik hucresi icin)
+ 
+ 
+@@ -170,14 +211,23 @@
+     return "; ".join("%s: %s" % (k, v or "?") for k, v in kisi_run.items())
+ 
+ 
+-def run_doldur(seq, ws):
+-    """Genomize Run hucresi bos olan TUM satirlari (durumdan bagimsiz) doldur.
+-    Isitma gerektirmez; kisi basina tek arama istegi."""
++def run_doldur(ws):
++    """Run hucresi bos olan TUM satirlari (durumdan bagimsiz) doldur.
++    Isitma gerektirmez; kisi basina tek arama istegi. Giris bilgisi ortamda
++    olmayan platformun satirlari atlanir (parola sorusu beklenmedik yerde cikmasin)."""
+     dolan = 0
+     for r in range(BASLIK_SATIRI + 1, ws.max_row + 1):
+         kod = str(hucre(ws, r, "Olgu Kodu") or "").strip()
+         if not kod or str(hucre(ws, r, RUN_SUTUNU) or "").strip():
+             continue
++        platform = platform_oku(ws, r)
++        if platform not in ISTEMCI and not kimlik_var(platform):
++            continue
++        try:
++            seq = istemci(platform)
++        except (SystemExit, Exception) as e:
++            log("  %s oturumu acilamadi, run doldurma atlandi: %s" % (platform_adi(platform), str(e)[:80]))
++            continue
+         kisiler = kodlar(hucre(ws, r, "Proband No"), hucre(ws, r, "Anne No"),
+                          hucre(ws, r, "Baba No"), hucre(ws, r, "Diger Bireyler"))
+         kisi_run = {}
+@@ -192,7 +242,7 @@
+             yaz(ws, r, RUN_SUTUNU, metin)
+             dolan += 1
+     if dolan:
+-        log("  Genomize Run: %d satir dolduruldu" % dolan)
++        log("  Run sutunu: %d satir dolduruldu" % dolan)
+         excel_kaydet(None)
+     return dolan
+ 
+@@ -295,7 +345,7 @@
+                      else {"durum": "tam"})
+ 
+ 
+-def _eksenleri_yaz(seq, an, kk, ham, ozet, kanit):
++def _eksenleri_yaz(seq, an, kk, ham, ozet, kanit, P=G):
+     """Standart eksen sonuclarini denetle ve kanit CSV'lerine yaz."""
+     if getattr(seq, "skipped_axes", None):
+         ozet.setdefault("atlanan_eksenler", {})[kk] = dict(seq.skipped_axes)
+@@ -312,19 +362,21 @@
+             "olgu RAPORLANMAMALIDIR. Analizi tekrar calistirin."
+             % (kk, an["sample_name"], ham_sayi))
+     for eksen, satirlar in ham[kk].items():
+-        temiz = [x for x in satirlar if not G.is_artifact(x, 0.02)]
+-        art = [x for x in satirlar if G.is_artifact(x, 0.02)]
+-        G.write_csv(os.path.join(kanit, "%s_%s.csv" % (kk, eksen)), temiz)
++        temiz = [x for x in satirlar if not P.is_artifact(x, 0.02)]
++        art = [x for x in satirlar if P.is_artifact(x, 0.02)]
++        P.write_csv(os.path.join(kanit, "%s_%s.csv" % (kk, eksen)), temiz)
+         if art:
+-            G.write_csv(os.path.join(kanit, "%s_%s_ARTEFAKT.csv" % (kk, eksen)), art)
++            P.write_csv(os.path.join(kanit, "%s_%s_ARTEFAKT.csv" % (kk, eksen)), art)
+         ozet["eksenler"].setdefault(kk, {})[eksen] = {
+             "toplam": len(satirlar), "temiz": len(temiz), "artefakt": len(art)}
+ 
+ 
+-def qc_doldur(seq, zorla=False):
++def qc_doldur(zorla=False):
+     """Tamamlanmis olgularin ozet.json'una eksik kalite/kapsama verisini ekle.
+ 
+-    Isinma gerektirmez; birey basina tek dashboard istegi.
++    Isinma gerektirmez; birey basina tek dashboard istegi. Platform ozet.json'daki
++    "platform" alanindan okunur (yoksa Genomize); giris bilgisi ortamda olmayan
++    platformun olgulari atlanir.
+     """
+     n, atlanan = 0, 0
+     for klasor in sorted(os.listdir(RAPOR)):
+@@ -334,6 +386,14 @@
+         with open(yol, encoding="utf-8") as f:
+             ozet = json.load(f)
+         degisti = False
++        platform = "ILYOME" if str(ozet.get("platform") or "").lower().startswith("ily") else "GENOMIZE"
++        if platform not in ISTEMCI and not kimlik_var(platform):
++            continue
++        try:
++            seq = istemci(platform)
++        except (SystemExit, Exception) as e:
++            log("  %s oturumu acilamadi, QC atlandi: %s" % (platform_adi(platform), str(e)[:80]))
++            continue
+         for kk, b in (ozet.get("bireyler") or {}).items():
+             if b.get("kapsama") and not zorla:
+                 atlanan += 1
+@@ -468,8 +528,10 @@
+     return k[0] if k else None
+ 
+ 
+-def olgu_isle(seq, ws, r):
++def olgu_isle(seq, ws, r, P=G):
++    """P: platform modulu (genomize_seq ya da ilyome_seq); ikisi de ayni arayuzu sunar."""
+     kod = str(hucre(ws, r, "Olgu Kodu")).strip()
++    platform = platform_oku(ws, r)
+     test = (str(hucre(ws, r, "Test") or "WES")).strip().upper()
+     tip = (str(hucre(ws, r, "Analiz Tipi") or "solo")).strip().lower()
+     klinik = str(hucre(ws, r, "Klinik Bilgi") or "").strip()
+@@ -489,7 +551,7 @@
+     tum = kodlar(*(proband + anne + baba + diger))
+ 
+     log("")
+-    log("=== %s  (%s, %s)  bireyler: %s" % (kod, test, tip, ", ".join(tum)))
++    log("=== %s  (%s, %s, %s)  bireyler: %s" % (kod, test, tip, platform_adi(platform), ", ".join(tum)))
+ 
+     out = os.path.join(RAPOR, kod)
+     kanit = os.path.join(out, "kanit")
+@@ -497,6 +559,7 @@
+ 
+     with open(os.path.join(out, "KLINIK.txt"), "w", encoding="utf-8") as f:
+         f.write("Olgu Kodu   : %s\n" % kod)
++        f.write("Platform    : %s\n" % platform_adi(platform))
+         f.write("Test        : %s\n" % test)
+         f.write("Analiz Tipi : %s\n" % tip)
+         f.write("Proband     : %s\n" % ", ".join(proband))
+@@ -532,6 +595,7 @@
+                     + ", ".join(hpo_durum["bilinmeyen"]) + NL)
+ 
+     ozet = {"olgu": kod, "test": test, "tip": tip, "hpo": hpo,
++            "platform": platform_adi(platform),
+             "hpo_dogrulama": hpo_durum,
+             "etkilenen": etkilenen or proband, "bireyler": {}, "eksenler": {},
+             "genomize_run": ozet_run,
+@@ -546,7 +610,9 @@
+             "kit": an.get("kit"), "varyant": an.get("numberofmutations"),
+             "ortalama_derinlik": d.get("average_depth"), "toplam_anotasyon": d.get("total_annotation"),
+             "okuma": an.get("raw_total_read_count"), "on_target": an.get("ontarget_percent"),
+-            "kapsama": G.Seq.kapsama(seq, an)[0],   # 5x/20x/50x/100x, target covered ...
++            "kapsama": seq.kapsama(an)[0],   # 5x/20x/50x/100x, target covered ...
++            "platform": platform_adi(platform),
++            "dizileme_tipi": an.get("sequencing_type"), "pipeline": an.get("workers"),
+         }
+         log("  eksenler: %s" % kk)
+         if hedef_gen:
+@@ -556,14 +622,14 @@
+             # TUM varyantlar (intronik/UTR dahil) tek dosyaya yazilir; artefakt
+             # ayrimi yapilmaz (internal_freq sutunu dosyada durur).
+             log("  HEDEFE YONELIK analiz - yalniz: %s" % ", ".join(hedef_gen))
+-            hrows, hbilgi = G.run_hedef(seq, an, hedef_gen)
++            hrows, hbilgi = P.run_hedef(seq, an, hedef_gen)
+             if not hrows:
+                 ham_sayi = seq.sanity(an)
+                 raise RuntimeError(
+                     "%s: hedef gen ekseni 0 satir dondu (filtresiz sorgu %s kayit). Bu bir "
+                     "negatif sonuc degil, veri toplama hatasidir - olgu RAPORLANMAMALIDIR."
+                     % (kk, ham_sayi))
+-            G.write_csv(os.path.join(kanit, "%s_hedef_gen.csv" % kk), hrows)
++            P.write_csv(os.path.join(kanit, "%s_hedef_gen.csv" % kk), hrows)
+             ozet.setdefault("hedef_gen", {})[kk] = hbilgi
+             ozet["mod"] = "hedefe_yonelik"
+             ham[kk] = {}
+@@ -575,20 +641,21 @@
+                 log("  UYARI: WGS olgusu ama 'Hedef Genler' bos - standart eksenler "
+                     "(kodlayan/splays odakli) calisacak; derin intronik tarama YAPILMAZ.")
+                 ozet.setdefault("uyarilar", []).append("WGS: hedef gen verilmedi")
+-            ham[kk] = G.run_axes(seq, an, hpo, 0.02, 1.0)
++            ham[kk] = P.run_axes(seq, an, hpo, 0.02, 1.0)
+         if not hedef_gen:
+-            _eksenleri_yaz(seq, an, kk, ham, ozet, kanit)
++            _eksenleri_yaz(seq, an, kk, ham, ozet, kanit, P)
+ 
+         b = seq.cnv_batch(an)
+         if b:
+             items, _ = seq.cnvs(an, b)
+-            rows = G.cnv_rows(items)
++            rows = P.cnv_rows(items)
+             if hedef_gen:
+                 tum = len(rows)
+-                rows = [x for x in rows if G.cnv_hedefte(x, hedef_gen)]
++                rows = [x for x in rows if P.cnv_hedefte(x, hedef_gen)]
+                 ozet["bireyler"][kk]["cnv_hedef_filtresi"] = (
+                     "%d/%d CNV cagrisi hedef genlerde/F8 bolgesinde" % (len(rows), tum))
+-            G.write_csv(os.path.join(kanit, "%s_cnv.csv" % kk), rows, G.CNV_COLUMNS)
++            P.write_csv(os.path.join(kanit, "%s_cnv.csv" % kk), rows,
++                        getattr(P, "ILYOME_CNV_COLUMNS", P.CNV_COLUMNS))
+             ozet["bireyler"][kk]["cnv"] = {
+                 "toplam": len(rows),
+                 "50kb_uzeri_temiz": len([x for x in rows
+@@ -603,8 +670,8 @@
+             kumeler = [set(x["key"] for x in ham[k].get(eksen, [])) for k in etk]
+             ortak_key = set.intersection(*kumeler) if kumeler else set()
+             ortak = [x for x in ham[etk[0]][eksen]
+-                     if x["key"] in ortak_key and not G.is_artifact(x, 0.02)]
+-            G.write_csv(os.path.join(kanit, "ORTAK_%s.csv" % eksen), ortak)
++                     if x["key"] in ortak_key and not P.is_artifact(x, 0.02)]
++            P.write_csv(os.path.join(kanit, "ORTAK_%s.csv" % eksen), ortak)
+             ozet["ortak"][eksen] = len(ortak)
+ 
+     ebeveyn = [k for k in (anne + baba) if k in ham]
+@@ -617,8 +684,8 @@
+             for k in ebeveyn:
+                 eb |= set(x["key"] for x in ham[k].get(eksen, []))
+             dn = [x for x in ham[p][eksen]
+-                  if x["key"] not in eb and not G.is_artifact(x, 0.02)]
+-            G.write_csv(os.path.join(kanit, "DENOVO_%s.csv" % eksen), dn)
++                  if x["key"] not in eb and not P.is_artifact(x, 0.02)]
++            P.write_csv(os.path.join(kanit, "DENOVO_%s.csv" % eksen), dn)
+             ozet["de_novo"][eksen] = len(dn)
+         ozet["de_novo_uyari"] = ("Ebeveyn export'unda yokluk de novo KANITI DEGILDIR; "
+                                  "kapsama ve filtre farklari yalanci de novo uretir. "
+@@ -686,7 +753,7 @@
+ 
+ # --------------------------------------------------------------------------
+ def komut_liste(ws):
+-    print("\n%-24s %-6s %-8s %-12s %s" % ("OLGU", "TEST", "TIP", "DURUM", "PROBAND"))
++    print("\n%-24s %-6s %-8s %-9s %-12s %s" % ("OLGU", "TEST", "TIP", "PLATFORM", "DURUM", "PROBAND"))
+     print("-" * 78)
+     n = 0
+     for r in range(BASLIK_SATIRI + 1, ws.max_row + 1):
+@@ -694,9 +761,9 @@
+         if not kod:
+             continue
+         d = (hucre(ws, r, "Durum") or "").strip().upper()
+-        print("%-24s %-6s %-8s %-12s %s" % (
++        print("%-24s %-6s %-8s %-9s %-12s %s" % (
+             str(kod)[:24], hucre(ws, r, "Test") or "", hucre(ws, r, "Analiz Tipi") or "",
+-            d, hucre(ws, r, "Proband No") or ""))
++            platform_adi(platform_oku(ws, r)), d, hucre(ws, r, "Proband No") or ""))
+         if d == ISLENECEK:
+             n += 1
+     print("-" * 78)
+@@ -728,6 +795,8 @@
+                     help="yalnizca bos 'Genomize Run' hucrelerini doldur")
+     ap.add_argument("--qc-doldur", action="store_true",
+                     help="eski olgularin ozet.json'una kalite/kapsama verisini ekle")
++    ap.add_argument("--platformlar", action="store_true",
++                    help="BEKLIYOR olgularin platformlarini yaz (BASLAT yalniz gerekli parolayi sorar)")
+     ap.add_argument("--alphagenome", nargs="+", metavar="OLGU",
+                     help="var olan olgu(lar) icin yalniz AlphaGenome Atlas adimini calistir "
+                          "(Genomize gerekmez; 'TUMU' = kanit klasoru olan tum olgular)")
+@@ -739,6 +808,12 @@
+         return komut_alphagenome(a.alphagenome)
+     wb, ws = excel_ac()
+ 
++    if a.platformlar:
++        pl = sorted({platform_oku(ws, r) for r in range(BASLIK_SATIRI + 1, ws.max_row + 1)
++                     if str(hucre(ws, r, "Olgu Kodu") or "").strip()
++                     and str(hucre(ws, r, "Durum") or "").strip().upper() in (ISLENECEK, HPO_BEKLENIYOR)})
++        print(" ".join(pl))
++        return 0
+     if a.liste:
+         return komut_liste(ws)
+     if a.tamamla:
+@@ -750,7 +825,7 @@
+     # QC adimi da 15 dk HPO bekliyor, kullanici ayni soruyu iki kez
+     # goruyordu (once QC adiminda, sonra asil taramada).
+     if a.qc_doldur:
+-        return qc_doldur(G.Seq())
++        return qc_doldur()
+ 
+     # --- HPO'yu ONCE klinik bilgiden otomatik uret (hpo_otomatik.py).
+     # Eslesen olgu el sikismaya hic girmez; eslesmeyen olgu eskisi gibi
+@@ -781,6 +856,7 @@
+             log("!! HPO otomatik uretimi atlandi: %s" % _e)
+ 
+     sutun_garanti(ws, RUN_SUTUNU)
++    sutun_garanti(ws, PLATFORM_SUTUNU)
+     işler = bekleyenler(ws)
+ 
+     # HPO_BEKLIYOR'da kalmis ve HPO'su HALA bos satirlar hicbir listeye girmez.
+@@ -872,9 +948,8 @@
+         komut_liste(ws)
+         return
+ 
+-    seq = G.Seq()
+     if bos_run or a.run_doldur:
+-        run_doldur(seq, ws)
++        run_doldur(ws)
+     if a.run_doldur or not işler:
+         excel_kaydet(wb)
+         if not işler:
+@@ -894,7 +969,9 @@
+             log("!! %s atlandi - eksik alan: %s" % (kod, ", ".join(eksik)))
+             continue
+         try:
+-            klasor, ozet = olgu_isle(seq, ws, r)
++            platform = platform_oku(ws, r)
++            seq = istemci(platform)                 # ilk olguda giris yapilir
++            klasor, ozet = olgu_isle(seq, ws, r, platform_modulu(platform))
+             yaz(ws, r, "Durum", "VERI_HAZIR")
+             yaz(ws, r, "Rapor Klasoru", os.path.relpath(klasor, RAPOR))
+             yaz(ws, r, "Sonuc Ozeti", ozet)
