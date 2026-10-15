@@ -53,14 +53,15 @@ Ilyome'a ait her şey artık yalnızca `Ilyome_Rutin_Raporlar/` altında.
 3. **Google Drive for Desktop** açık; Finder'da `Ilyome_Rutin_Raporlar` klasörü görünüyor olmalı.
 4. Başlatıcıyı çalıştırılabilir yapın ve masaüstüne kısayol koyun (bir kez):
    ```bash
-   cd ~/Library/CloudStorage/GoogleDrive-*/My\ Drive/Ilyome_Rutin_Raporlar/_sistem
-   chmod +x ILYOME_BASLAT_mac.command
-   printf '#!/bin/bash\nopen -a Terminal "%s/ILYOME_BASLAT_mac.command"\n' "$PWD" > ~/Desktop/ILYOME_BASLAT.command
+   K="$(find ~/Library/CloudStorage -maxdepth 3 -type d -name Ilyome_Rutin_Raporlar | head -1)"
+   echo "Bulunan klasor: $K"
+   printf '#!/bin/bash\nexec bash "%s/_sistem/ILYOME_BASLAT_mac.command"\n' "$K" > ~/Desktop/ILYOME_BASLAT.command
    chmod +x ~/Desktop/ILYOME_BASLAT.command
    ```
+   (Kısayol Drive'daki dosyayı `bash` ile çalıştırır; Drive dosyayı güncellese de çalıştırma izni gerekmez.)
 5. **Keşif** (gerçek hesapla, bir örnek üzerinde; filtre mantığını doğrulamak için):
    ```bash
-   cd ~/Library/CloudStorage/GoogleDrive-*/My\ Drive/Ilyome_Rutin_Raporlar/_sistem
+   cd "$(find ~/Library/CloudStorage -maxdepth 3 -type d -name Ilyome_Rutin_Raporlar | head -1)/_sistem"
    python3 ilyome_seq.py kesfet "<Ilyome'daki bir örnek adı>"
    ```
    E-posta ve parola sorulur (hesap tek kullanımlık kod istiyorsa o da). Çıktı
