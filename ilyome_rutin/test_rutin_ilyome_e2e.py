@@ -95,11 +95,9 @@ def main():
     for f in ("rutin.py", "ilyome_seq.py"):
         shutil.copy(os.path.join(HERE, f), sistem)
     # genomize_seq.py bu repoda yok (Drive'da); COLUMNS icin yoksa ilyome_seq kendi listesini kullanir.
-    g = os.path.join(HERE, "genomize_seq.py")
-    if os.path.exists(g):
-        shutil.copy(g, sistem)
+    g = os.path.join(HERE, "genomize_seq.py")   # ayri Ilyome kurulumunda BULUNMAZ; kopyalanmaz
     with open(os.path.join(sistem, "yollar.py"), "w") as f:
-        f.write("import os\nK=os.environ['WES_DRIVE_KOKU']\n"
+        f.write("import os\nPLATFORM='ILYOME'\nK=os.environ['WES_DRIVE_KOKU']\n"
                 "def olgular_xlsx(): return os.path.join(K,'olgular.xlsx')\n"
                 "def rapor_koku(): return K\n"
                 "def sistem_klasoru(): return os.path.join(K,'_sistem')\n")
@@ -107,8 +105,8 @@ def main():
         f.write("def kontrol(out, p, a, b): return ['(stub) aile kontrolu'], []\n")
     with open(os.path.join(sistem, "sitecustomize.py"), "w") as f:   # sahte sunucu her python'da yuklensin
         f.write(SAHTE_SUNUCU)
-    if not os.path.exists(g):
-        with open(os.path.join(sistem, "genomize_seq.py"), "w") as f:  # Genomize istemcisi stub
+    if False:
+        with open(os.path.join(sistem, "genomize_seq.py"), "w") as f:  # (ayri kurulum: genomize_seq YOK)
             f.write("COLUMNS=%r\nCNV_COLUMNS=%r\nHEDEF_PENCERE={}\n"
                     "def cnv_hedefte(r,g): return False\n"
                     "def is_artifact(r,m): return False\n"
@@ -122,12 +120,12 @@ def main():
     ws.append(["Olgu Kodu", "Test", "Analiz Tipi", "Proband No", "Anne No", "Baba No", "Diger Bireyler",
                "Etkilenen Bireyler", "Akrabalik", "Klinik Bilgi", "HPO (istege bagli)", "Oncelik", "Durum",
                "Rapor Klasoru", "Sonuc Ozeti", "Tamamlanma", "Not", "Hedef Genler (istege bagli)",
-               "Genomize Run", "Platform"])
+               "Ilyome Run"])
     ws.append(["2308-TEST-TRIO", "WES", "trio", "2308-26-ZBS", "2308-27", "2308-28", None, None, "Yok",
                "Retinitis pigmentosa, gece korlugu", "HP:0000510, HP:0000662", None, "BEKLIYOR",
-               None, None, None, None, None, None, "Ilyome"])
+               None, None, None, None, None, None])
     ws.append(["2308-TEST-HEDEF", "WES", "solo", "2308-26-ZBS", None, None, None, None, "Yok",
-               "Hemofili A", "HP:0001892", None, "BEKLIYOR", None, None, None, None, "F8, VWF", None, "Ilyome"])
+               "Hemofili A", "HP:0001892", None, "BEKLIYOR", None, None, None, None, "F8, VWF", None])
     wb.save(os.path.join(drive, "olgular.xlsx"))
 
     env = dict(os.environ, WES_DRIVE_KOKU=drive, ILYOME_USER="test@ege.edu.tr", ILYOME_PASS="dogru",

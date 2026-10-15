@@ -30,11 +30,18 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 from openpyxl import load_workbook          # noqa: E402
-import genomize_seq as G                    # noqa: E402
+# Platform istemcileri: ayri kurulumlarda yalniz biri bulunur (Genomize kokunde
+# genomize_seq.py, Ilyome kokunde ilyome_seq.py). Eksik olan platformun olgusu
+# gelirse acik hata verilir; diger platform etkilenmez.
 try:
-    import ilyome_seq as I                  # noqa: E402  (Ilyome platformu; istege bagli)
+    import genomize_seq as G                # noqa: E402
+    G_HATA = None
+except Exception as _e:
+    G, G_HATA = None, "%s: %s" % (type(_e).__name__, _e)
+try:
+    import ilyome_seq as I                  # noqa: E402
     I_HATA = None
-except Exception as _e:                     # ilyome_seq.py yoksa Genomize olgulari etkilenmesin
+except Exception as _e:
     I, I_HATA = None, "%s: %s" % (type(_e).__name__, _e)
 import akrabalik as AK                      # noqa: E402
 import yollar as Y                          # noqa: E402
@@ -144,14 +151,23 @@ def yaz(ws, r, ad, deger):
         PENDING[(r, c)] = deger                 # diske yalnizca bu hucre yazilir
 
 
-RUN_SUTUNU = "Genomize Run"
-PLATFORM_SUTUNU = "Platform"      # bos / Genomize -> Genomize SEQ ; Ilyome -> ilyome.com
+# Kurulumun varsayilan platformu yollar.py'den gelir (Genomize koku: yok/GENOMIZE,
+# Ilyome koku: PLATFORM = "ILYOME"). Iki sistem AYRI Drive klasorlerinde calisir;
+# olgular karismaz. 'Platform' sutunu yalniz Genomize kokunde, istege bagli, satir
+# bazinda ayrica tanimlanmak istenirse kullanilir.
+VARSAYILAN_PLATFORM = str(getattr(Y, "PLATFORM", "GENOMIZE") or "GENOMIZE").upper()
+RUN_SUTUNU = "Ilyome Run" if VARSAYILAN_PLATFORM == "ILYOME" else "Genomize Run"
+PLATFORM_SUTUNU = "Platform"      # bos -> varsayilan ; Genomize / Ilyome
 ISTEMCI = {}                      # platform -> oturum (her platforma bir kez giris)
 
 
 def platform_oku(ws, r):
-    v = str(hucre(ws, r, PLATFORM_SUTUNU) or "").strip().lower()
-    return "ILYOME" if v.startswith("ily") else "GENOMIZE"
+    v = str(hucre(ws, r, PLATFORM_SUTUNU) or "").strip().lower() if PLATFORM_SUTUNU in SUT else ""
+    if v.startswith("ily"):
+        return "ILYOME"
+    if v.startswith("gen"):
+        return "GENOMIZE"
+    return VARSAYILAN_PLATFORM
 
 
 def platform_modulu(platform):
@@ -159,6 +175,8 @@ def platform_modulu(platform):
         if I is None:
             raise RuntimeError("ilyome_seq.py yuklenemedi: %s" % I_HATA)
         return I
+    if G is None:
+        raise RuntimeError("genomize_seq.py yuklenemedi: %s" % G_HATA)
     return G
 
 
@@ -345,7 +363,8 @@ def hpo_dogrula(seq, hpo):
                      else {"durum": "tam"})
 
 
-def _eksenleri_yaz(seq, an, kk, ham, ozet, kanit, P=G):
+def _eksenleri_yaz(seq, an, kk, ham, ozet, kanit, P=None):
+    P = P or platform_modulu(VARSAYILAN_PLATFORM)
     """Standart eksen sonuclarini denetle ve kanit CSV'lerine yaz."""
     if getattr(seq, "skipped_axes", None):
         ozet.setdefault("atlanan_eksenler", {})[kk] = dict(seq.skipped_axes)
@@ -386,7 +405,8 @@ def qc_doldur(zorla=False):
         with open(yol, encoding="utf-8") as f:
             ozet = json.load(f)
         degisti = False
-        platform = "ILYOME" if str(ozet.get("platform") or "").lower().startswith("ily") else "GENOMIZE"
+        pz = str(ozet.get("platform") or "").lower()
+        platform = "ILYOME" if pz.startswith("ily") else ("GENOMIZE" if pz.startswith("gen") else VARSAYILAN_PLATFORM)
         if platform not in ISTEMCI and not kimlik_var(platform):
             continue
         try:
@@ -528,10 +548,11 @@ def kodlar_ilk(metin):
     return k[0] if k else None
 
 
-def olgu_isle(seq, ws, r, P=G):
+def olgu_isle(seq, ws, r, P=None):
     """P: platform modulu (genomize_seq ya da ilyome_seq); ikisi de ayni arayuzu sunar."""
     kod = str(hucre(ws, r, "Olgu Kodu")).strip()
     platform = platform_oku(ws, r)
+    P = P or platform_modulu(platform)
     test = (str(hucre(ws, r, "Test") or "WES")).strip().upper()
     tip = (str(hucre(ws, r, "Analiz Tipi") or "solo")).strip().lower()
     klinik = str(hucre(ws, r, "Klinik Bilgi") or "").strip()
@@ -856,7 +877,6 @@ def main():
             log("!! HPO otomatik uretimi atlandi: %s" % _e)
 
     sutun_garanti(ws, RUN_SUTUNU)
-    sutun_garanti(ws, PLATFORM_SUTUNU)
     işler = bekleyenler(ws)
 
     # HPO_BEKLIYOR'da kalmis ve HPO'su HALA bos satirlar hicbir listeye girmez.
