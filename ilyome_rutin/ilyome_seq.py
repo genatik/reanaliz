@@ -109,6 +109,29 @@ class IlyomeHata(RuntimeError):
     pass
 
 
+ZARF_ANAHTARLARI = {"data", "message", "status", "success", "code", "detail", "errors"}
+
+
+def zarf_ac(j):
+    """Ilyome bazi yanitlari {"data": {...}} zarfina sarar (ornek: giris -> {"data": {"access": ..}}).
+
+    Zarf, yalniz data + mesaj alanlarindan olusan bir sozlukse icindeki nesne dondurulur.
+    {"total": N, "data": [...]} gibi liste yanitlari (total anahtari zarfta yok) oldugu gibi kalir.
+    """
+    while isinstance(j, dict) and "data" in j and isinstance(j["data"], dict) \
+            and set(j.keys()) <= ZARF_ANAHTARLARI:
+        j = j["data"]
+    return j
+
+
+def _gizli_metin(r, n=200):
+    """Hata mesajinda token/parola gorunmesin (log ve Excel'e yazilir)."""
+    t = r.text or ""
+    if any(k in t for k in ("access", "refresh", "token", "password")):
+        return "<gizli: %d bayt yanit>" % len(t)
+    return t[:n]
+
+
 # --------------------------------------------------------------------------
 class Seq(object):
     """Ilyome oturumu. Arayuz genomize_seq.Seq ile uyumludur."""
@@ -150,11 +173,12 @@ class Seq(object):
             if r.status_code in (400, 403) and "otp" in r.text.lower():
                 return self._login_otp(email)
             sys.exit("Ilyome girisi basarisiz (%s): %s" % (r.status_code, r.text[:200]))
-        j = r.json()
-        if not (j.get("access") and j.get("refresh")):
+        j = zarf_ac(r.json())
+        if not (isinstance(j, dict) and j.get("access") and j.get("refresh")):
             if "otp" in json.dumps(j).lower():
                 return self._login_otp(email)
-            sys.exit("Ilyome girisi: beklenmeyen yanit: %s" % json.dumps(j)[:200])
+            sys.exit("Ilyome girisi: beklenmeyen yanit (anahtarlar: %s)"
+                     % ", ".join(sorted(j.keys())[:8]) if isinstance(j, dict) else "Ilyome girisi: beklenmeyen yanit")
         self._token_al(j)
 
     def _login_otp(self, email):
@@ -167,7 +191,7 @@ class Seq(object):
                         timeout=60)
         if r.status_code != 200:
             sys.exit("OTP dogrulama basarisiz (%s): %s" % (r.status_code, r.text[:160]))
-        self._token_al(r.json())
+        self._token_al(zarf_ac(r.json()))
 
     def _token_al(self, j):
         self.access, self.refresh = j["access"], j.get("refresh") or self.refresh
@@ -185,14 +209,15 @@ class Seq(object):
         if not self.refresh:
             return False
         r = self.s.post(BASE + "/api/users/login/refresh/", json={"refresh": self.refresh}, timeout=60)
-        if r.status_code == 200 and r.json().get("access"):
-            self.access = r.json()["access"]
+        j = zarf_ac(r.json()) if r.status_code == 200 else {}
+        if isinstance(j, dict) and j.get("access"):
+            self.access = j["access"]
             self.s.headers["Authorization"] = "Bearer " + self.access
             return True
         return False
 
     def whoami(self):
-        return self.get("/api/users/whoami/").json()
+        return zarf_ac(self.get("/api/users/whoami/").json())
 
     # -- istek ------------------------------------------------------------
     def url(self, path):
@@ -228,11 +253,11 @@ class Seq(object):
 
     def _json(self, r, ne):
         if r.status_code >= 400:
-            raise IlyomeHata("%s basarisiz (%s): %s" % (ne, r.status_code, r.text[:200]))
+            raise IlyomeHata("%s basarisiz (%s): %s" % (ne, r.status_code, _gizli_metin(r)))
         try:
-            return r.json()
+            return zarf_ac(r.json())
         except ValueError:
-            raise IlyomeHata("%s: JSON degil: %s" % (ne, r.text[:120]))
+            raise IlyomeHata("%s: JSON degil: %s" % (ne, _gizli_metin(r, 120)))
 
     # -- ornek ------------------------------------------------------------
     def samples(self, arama=None, page=1, page_size=50):
@@ -300,7 +325,7 @@ class Seq(object):
 
     def dashboard(self, an):
         r = self.get("/api/sample-run/samples/%s/overview/" % an["id"])
-        d = r.json() if r.status_code == 200 else {}
+        d = zarf_ac(r.json()) if r.status_code == 200 else {}
         if isinstance(d, dict):
             d.setdefault("average_depth", d.get("quality_score_mean_coverage"))
             d.setdefault("total_annotation", d.get("total_variants"))
@@ -313,7 +338,7 @@ class Seq(object):
     def kapsama(self, an):
         """Dragen metriklerini duzlestir; anahtar adi eslesmesiyle QC alanlarini sec."""
         r = self.get("/api/ilcore/samples/%s/d-metrics/" % an["id"])
-        d = r.json() if r.status_code == 200 else {}
+        d = zarf_ac(r.json()) if r.status_code == 200 else {}
         out, m = {}, (d.get("metrics") if isinstance(d, dict) else None) or {}
         for bolum in ("coverages", "mapping_metrics", "vcf_metrics", "hethom_metrics"):
             for kv in m.get(bolum) or []:
@@ -338,7 +363,7 @@ class Seq(object):
         r = self.get("/api/db/hpo/search/", params={"search": keyword, "page_size": 20})
         if r.status_code != 200:
             return []
-        j = r.json()
+        j = zarf_ac(r.json())
         items = j.get("data") if isinstance(j, dict) else j
         return [{"id": x.get("term_id") or x.get("hpo_id") or x.get("id"), "name": x.get("name")}
                 for x in (items or [])]
@@ -349,7 +374,8 @@ class Seq(object):
         for sym in symbols:
             r = self.get("/api/db/genes/ncbi/", params={"search": sym, "symbol_i": sym.upper(),
                                                         "length": "true", "page_size": 20})
-            data = (r.json().get("data") if r.status_code == 200 else None) or []
+            jj = zarf_ac(r.json()) if r.status_code == 200 else {}
+            data = (jj.get("data") if isinstance(jj, dict) else jj) or []
             hit = [g for g in data if str(g.get("Symbol") or g.get("symbol") or "").upper() == sym.upper()]
             if hit:
                 out[sym.upper()] = hit[0].get("id")
@@ -387,7 +413,7 @@ class Seq(object):
         if r.status_code == 405:
             r = self.post("/api/ilcore/search-theme/%s/reset/" % tema_id, {})
         if r.status_code >= 400:
-            raise IlyomeHata("sablon sifirlama basarisiz (%s): %s" % (r.status_code, r.text[:160]))
+            raise IlyomeHata("sablon sifirlama basarisiz (%s): %s" % (r.status_code, _gizli_metin(r, 160)))
         for yol in ("phenotype/clear-all", "gene/clear-all", "sample/clear-all", "genepanel/clear-all",
                     "disease/clear-all"):
             self.delete("/api/ilcore/search-theme/%s/%s/" % (tema_id, yol))
@@ -398,7 +424,7 @@ class Seq(object):
                 "selected": bool(selected), "logic": "and"}
         r = self.put("/api/ilcore/search-theme/update-value/%s/" % value_id, body)
         if r.status_code >= 400:
-            raise IlyomeHata("filtre degeri yazilamadi (%s %s): %s" % (value_id, r.status_code, r.text[:160]))
+            raise IlyomeHata("filtre degeri yazilamadi (%s %s): %s" % (value_id, r.status_code, _gizli_metin(r, 160)))
 
     def filtre_uygula(self, tema_id, spec, variant_type="snv"):
         """spec = {"checkbox": [(filter, term), ...],
@@ -433,7 +459,7 @@ class Seq(object):
             for sym, gid in ids.items():
                 r = self.put("/api/ilcore/search-theme/%s/gene/%s/" % (tema_id, gid))
                 if r.status_code >= 400:
-                    raise IlyomeHata("gen eklenemedi %s: %s" % (sym, r.text[:120]))
+                    raise IlyomeHata("gen eklenemedi %s: %s" % (sym, _gizli_metin(r, 120)))
             if yok:
                 _log("  UYARI: Ilyome gen veritabaninda bulunmadi: %s" % ", ".join(yok))
             spec["_gen_bulunamayan"] = yok
@@ -443,8 +469,8 @@ class Seq(object):
         r = self.put("/api/ilcore/search-theme/%s/phenotype/bulk-add/" % tema_id,
                      {"search": ",".join(hpo_ids)})
         if r.status_code >= 400:
-            raise IlyomeHata("HPO eklenemedi (%s): %s" % (r.status_code, r.text[:160]))
-        j = r.json() if r.text else {}
+            raise IlyomeHata("HPO eklenemedi (%s): %s" % (r.status_code, _gizli_metin(r, 160)))
+        j = zarf_ac(r.json()) if r.text else {}
         n = j.get("count") if isinstance(j, dict) else None
         if n is not None and n < len(hpo_ids):
             _log("  UYARI: %d HPO teriminden %s eklendi" % (len(hpo_ids), n))
@@ -452,7 +478,8 @@ class Seq(object):
 
     def fenotipler(self, tema_id):
         r = self.get("/api/ilcore/search-theme/%s/phenotype/" % tema_id, params={"page_size": 200})
-        return (r.json().get("data") if r.status_code == 200 else None) or []
+        jj = zarf_ac(r.json()) if r.status_code == 200 else {}
+        return (jj.get("data") if isinstance(jj, dict) else jj) or []
 
     # -- aile iliskisi (trio sablonu; simdilik yalniz kesif/ileri kullanim) --
     def iliski_ayarla(self, tema_id, rol, sample_id):

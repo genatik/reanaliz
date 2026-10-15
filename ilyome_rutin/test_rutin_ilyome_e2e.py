@@ -46,8 +46,8 @@ def sahte(self, method, url, **kw):
     p = re.sub(r"^https://ilyome\.com", "", url)
     if p.endswith("/api/users/login/"):
         if body.get("password") == "dogru":
-            return Y(200, {"access": "A", "refresh": "R", "user": {"id": 1, "email": body["email"],
-                     "role": "user", "center": "ege"}}, url)
+            return Y(200, {"data": {"access": "A", "refresh": "R", "user": {"id": 1, "email": body["email"],
+                     "role": "user", "center": "ege"}}}, url)   # gercek Ilyome: zarfli
         return Y(401, {"detail": "Invalid credentials"}, url)
     if p.endswith("/api/users/whoami/"): return Y(200, {"id": 1, "email": "x@y"}, url)
     assert p.startswith("/api/c/ege/") or p.startswith("/api/db/"), "merkez on-eki eksik: " + p
@@ -61,7 +61,7 @@ def sahte(self, method, url, **kw):
         return Y(200, {"total": len(data), "data": data}, url)
     if re.search(r"/sample-run/samples/\d+/overview/snv/top-reportable/", p):
         return Y(200, fx("snv-top-reportable.json"), url)
-    if re.search(r"/sample-run/samples/\d+/overview/$", p): return Y(200, fx("samples-overview.json"), url)
+    if re.search(r"/sample-run/samples/\d+/overview/$", p): return Y(200, {"data": fx("samples-overview.json")}, url)
     if re.search(r"/ilcore/samples/\d+/d-metrics/", p): return Y(200, fx("metrics-d-metrics.json"), url)
     if re.search(r"/ilcore/samples/\d+/snv/count/", p): return Y(200, {"total": 97966}, url)
     if p.endswith("/ilcore/search-theme/") and method == "GET": return Y(200, {"total": 0, "data": []}, url)
