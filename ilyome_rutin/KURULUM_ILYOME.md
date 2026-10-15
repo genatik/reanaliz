@@ -24,12 +24,13 @@ Rapor adımı (indeks olgu için kapsamlı analiz + sonuç + EÜTF resmi rapor; 
 
 ```
 Ilyome_Rutin_Raporlar/
-    olgular.xlsx                 <- boş liste (Genomize listesinin biçimi, 'Ilyome Run' sütunu, ÖRNEK satırı)
+    olgular.xlsx                 <- İLK ÇALIŞTIRMADA otomatik oluşur (Genomize listesinin biçimi, 'Ilyome Run' sütunu, ÖRNEK satırı)
     _sistem/
         rutin.py                 <- rutin (yollar.PLATFORM = ILYOME -> yalnız Ilyome)
         ilyome_seq.py            <- Ilyome API istemcisi
         yollar.py                <- Ilyome köküne göre yollar + kendi kilidi
         ILYOME_BASLAT_mac.command
+        olgular_olustur.py       <- olgu listesi yoksa boş liste üretir (var olana dokunmaz)
         README_OKU.txt, KURULUM_ILYOME.md
         akrabalik.py, alphagenome_sorgu.py, hpo_otomatik.py, hpo_yaz.py, hpo_toplu.py,
         raporla.py, rapor_gorevi.py, drive_esitle.py ...   <- Genomize _sistem'den kopya (aynı kod)
@@ -70,6 +71,8 @@ Ilyome'a ait her şey artık yalnızca `Ilyome_Rutin_Raporlar/` altında.
 
 ## Aşama 2 — Rutin kullanım
 
+0. **İlk kez:** `ILYOME_BASLAT.command`'a çift tıklayın. Liste yoksa boş `olgular.xlsx` oluşturulur ve
+   pencere durur (parola sorulmaz). Elle oluşturmak isterseniz `_sistem` içinde: `python3 olgular_olustur.py`.
 1. `Ilyome_Rutin_Raporlar/olgular.xlsx` → OLGULAR sayfasına olguyu girin. Zorunlu alanlar: Olgu Kodu,
    Test, Analiz Tipi, Proband No, Klinik Bilgi. **Proband/Anne/Baba No** = Ilyome'daki `sampleid`
    (örnek adı). HPO sütununu boş bırakabilirsiniz (klinik bilgiden otomatik üretilir / Claude planlar).

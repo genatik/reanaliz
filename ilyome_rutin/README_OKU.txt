@@ -21,6 +21,8 @@ duser; hemen kaldirmak icin _sistem icinde:  python3 yollar.py --kilit-birak
 -----------------------------------------------------------------
 NASIL KULLANILIR
 -----------------------------------------------------------------
+0) Ilk kez: ILYOME_BASLAT.command'a cift tiklayin; olgular.xlsx yoksa
+   bos liste olusturulur ve pencere durur (python3 olgular_olustur.py).
 1) olgular.xlsx (Drive) > OLGULAR sayfasina olguyu girin.
    Zorunlu: Olgu Kodu, Test (WES/CES), Analiz Tipi (solo/duo/trio/kuartet),
             Proband No, Klinik Bilgi

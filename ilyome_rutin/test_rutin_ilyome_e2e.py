@@ -114,18 +114,21 @@ def main():
                     "class Seq:\n    def __init__(self,*a,**k): raise SystemExit('Genomize cagrilmamali')\n"
                     % (__import__("ilyome_seq").COLUMNS, __import__("ilyome_seq").CNV_COLUMNS))
 
-    from openpyxl import Workbook
-    wb = Workbook(); ws = wb.active; ws.title = "OLGULAR"
-    ws.append(["OLGULAR"]); ws.append(["aciklama"])
-    ws.append(["Olgu Kodu", "Test", "Analiz Tipi", "Proband No", "Anne No", "Baba No", "Diger Bireyler",
-               "Etkilenen Bireyler", "Akrabalik", "Klinik Bilgi", "HPO (istege bagli)", "Oncelik", "Durum",
-               "Rapor Klasoru", "Sonuc Ozeti", "Tamamlanma", "Not", "Hedef Genler (istege bagli)",
-               "Ilyome Run"])
-    ws.append(["2308-TEST-TRIO", "WES", "trio", "2308-26-ZBS", "2308-27", "2308-28", None, None, "Yok",
-               "Retinitis pigmentosa, gece korlugu", "HP:0000510, HP:0000662", None, "BEKLIYOR",
-               None, None, None, None, None, None])
-    ws.append(["2308-TEST-HEDEF", "WES", "solo", "2308-26-ZBS", None, None, None, None, "Yok",
-               "Hemofili A", "HP:0001892", None, "BEKLIYOR", None, None, None, None, "F8, VWF", None])
+    # Gercek bos sablonu olgular_olustur.py ile uret; ORNEK satiri (4) atlanmali.
+    sys.path.insert(0, HERE)
+    import olgular_olustur
+    olgular_olustur.olustur(os.path.join(drive, "olgular.xlsx"))
+    from openpyxl import load_workbook as _lw
+    wb = _lw(os.path.join(drive, "olgular.xlsx")); ws = wb["OLGULAR"]
+    satirlar = [
+        ["2308-TEST-TRIO", "WES", "trio", "2308-26-ZBS", "2308-27", "2308-28", None, None, "Yok",
+         "Retinitis pigmentosa, gece korlugu", "HP:0000510, HP:0000662", None, "BEKLIYOR"],
+        ["2308-TEST-HEDEF", "WES", "solo", "2308-26-ZBS", None, None, None, None, "Yok",
+         "Hemofili A", "HP:0001892", None, "BEKLIYOR", None, None, None, None, "F8, VWF"],
+    ]
+    for i, sat in enumerate(satirlar):
+        for c, v in enumerate(sat, 1):
+            ws.cell(5 + i, c, v)
     wb.save(os.path.join(drive, "olgular.xlsx"))
 
     env = dict(os.environ, WES_DRIVE_KOKU=drive, ILYOME_USER="test@ege.edu.tr", ILYOME_PASS="dogru",
@@ -138,11 +141,12 @@ def main():
 
     from openpyxl import load_workbook
     ws = load_workbook(os.path.join(drive, "olgular.xlsx"))["OLGULAR"]
-    durumlar = {ws.cell(r, 1).value: ws.cell(r, 13).value for r in (4, 5)}
+    durumlar = {ws.cell(r, 1).value: ws.cell(r, 13).value for r in (4, 5, 6)}
     print("Durumlar:", durumlar)
     assert durumlar["2308-TEST-TRIO"] == "VERI_HAZIR", durumlar
     assert durumlar["2308-TEST-HEDEF"] == "VERI_HAZIR", durumlar
-    assert ws.cell(4, 19).value == "R325-Twist", ws.cell(4, 19).value     # Run sutunu Ilyome run adi
+    assert durumlar["ORNEK-001"] == "ÖRNEK", durumlar                       # ornek satir atlandi
+    assert ws.cell(5, 19).value == "R325-Twist", ws.cell(5, 19).value     # 'Ilyome Run' sutunu
 
     kanit = os.path.join(drive, "2308-TEST-TRIO", "kanit")
     dosyalar = sorted(os.listdir(kanit))

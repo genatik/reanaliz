@@ -48,6 +48,12 @@ else
   echo "  UYARI: alphagenome paketi yok - AlphaGenome adimi atlanacak (pip install --user alphagenome)."
 fi
 
+# --- Ilk calistirma: olgu listesi yoksa bos liste olustur ve dur (once olgulari girin)
+if ! "$PY" -c "import os, sys, yollar as Y; sys.exit(0 if os.path.exists(Y.olgular_xlsx()) else 3)"; then
+  "$PY" olgular_olustur.py || bitir 1
+  bitir 0
+fi
+
 # --- Veri klasoru (Drive > Ilyome_Rutin_Raporlar) ve ikinci kopya kontrolu
 "$PY" -c "import sys, yollar as Y; sys.exit(Y.durum_yaz())" || bitir 1
 
