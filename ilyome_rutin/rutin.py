@@ -368,6 +368,10 @@ def _eksenleri_yaz(seq, an, kk, ham, ozet, kanit, P=None):
     """Standart eksen sonuclarini denetle ve kanit CSV'lerine yaz."""
     if getattr(seq, "skipped_axes", None):
         ozet.setdefault("atlanan_eksenler", {})[kk] = dict(seq.skipped_axes)
+    if getattr(seq, "kesilen_eksenler", None):
+        ozet.setdefault("kesilen_eksenler", {})[kk] = dict(seq.kesilen_eksenler)
+    if getattr(seq, "frekans_elenen", None):
+        ozet.setdefault("frekans_elenen", {})[kk] = dict(seq.frekans_elenen)
     # SESSIZ BOS SONUC KONTROLU
     # Motor sicak gorunup (probe 200) tum filtreli sorgular 0 satir
     # donebiliyor. Bu bir negatif sonuc DEGIL, veri toplama hatasidir.

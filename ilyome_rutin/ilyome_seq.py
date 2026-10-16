@@ -449,7 +449,9 @@ class Seq(object):
                 continue
             # isnull=True: alani BOS olan varyantlar da gelsin (gnomAD'de hic gorulmemis =
             # en nadir); yoksa frekans filtresi 'populasyonda yok' varyantlari sessizce eler.
-            self.deger_ayarla(v["id"], min_=mn, max_=mx, isnull=isnull)
+            # Ilyome arayuzu aralik girildiginde selected=True gonderir; selected=False olursa
+            # sunucu araligi yok sayar (ilk gercek kosuda frekans filtresi bu yuzden uygulanmadi).
+            self.deger_ayarla(v["id"], min_=mn, max_=mx, isnull=isnull, selected=True)
         if eksik:
             raise IlyomeHata("Ilyome filtre panelinde bulunmayan terimler: %s" % ", ".join(eksik))
         if spec.get("hpo"):
@@ -717,11 +719,36 @@ def axes(hpo_ids=None, max_freq=1.0):
     return out
 
 
+def _pop_af(r):
+    """slim() satiri icin populasyon frekansi (gnomAD ekzom/genom ve max_af'in en buyugu); yoksa None."""
+    v = [r.get(k) for k in ("af_max", "gnomad_exome", "gnomad_genome")]
+    v = [x for x in v if isinstance(x, (int, float))]
+    return max(v) if v else None
+
+
+def frekans_suz(rows, max_freq):
+    """Istemci tarafi son kontrol: populasyon frekansi > esik (yuzde) olan satirlari ele.
+    Sunucu filtresi uygulanmazsa (ya da baska bir alan uzerinden calisirsa) eksenler sik
+    varyantla dolmasin diye; frekansi bilinmeyen (gnomAD'de yok) satirlar KALIR."""
+    esik = max_freq / 100.0
+    kalan = [r for r in rows if (_pop_af(r) is None or _pop_af(r) <= esik)]
+    return kalan, len(rows) - len(kalan)
+
+
+AXIS_CAP = int(os.environ.get("ILYOME_EKSEN_CAP", "20000"))
+
+
 def run_axes(seq, an, hpo_ids, internal_max, max_freq):
-    """Tum eksenleri calistir -> {eksen: [satir]} (satirlar slim() ile duzlestirilmis)."""
+    """Tum eksenleri calistir -> {eksen: [satir]} (satirlar slim() ile duzlestirilmis).
+
+    seq.skipped_axes: atlanan eksen -> neden.  seq.kesilen_eksenler: cap'e takilan eksen -> cap.
+    seq.frekans_elenen: eksen -> istemci tarafinda frekans nedeniyle elenen satir sayisi."""
     seq.skipped_axes = {}
+    seq.kesilen_eksenler = {}
+    seq.frekans_elenen = {}
     tema = seq.tema()
     res = {}
+    esikler = {"fenotip_iliskili": max_freq, "nadir_lof": 0.1, "homozigot_nadir": 0.5}
     for name, spec in axes(hpo_ids, max_freq).items():
         _log("  eksen: %s" % name)
         try:
@@ -729,12 +756,22 @@ def run_axes(seq, an, hpo_ids, internal_max, max_freq):
                 ham = seq.top_reportable(an)
             else:
                 seq.filtre_uygula(tema, spec)
-                ham = seq.snv_list(an, tema)
+                ham = seq.snv_list(an, tema, cap=AXIS_CAP)
         except IlyomeHata as e:
             seq.skipped_axes[name] = str(e)[:160]
             _log("  eksen: %s ATLANDI (%s)" % (name, str(e)[:120]))
             continue
-        res[name] = [slim(x) for x in ham]
+        rows = [slim(x) for x in ham]
+        if name in esikler:
+            rows, elenen = frekans_suz(rows, esikler[name])
+            if elenen:
+                seq.frekans_elenen[name] = elenen
+                _log("  eksen: %s - istemci frekans kontrolu %d satir eledi (>%%%s); sunucu filtresi "
+                     "uygulanmamis olabilir" % (name, elenen, esikler[name]))
+        if len(ham) >= AXIS_CAP:
+            seq.kesilen_eksenler[name] = AXIS_CAP
+            _log("  eksen: %s %d kayitta KESILDI; liste eksik olabilir" % (name, AXIS_CAP))
+        res[name] = rows
     return res
 
 

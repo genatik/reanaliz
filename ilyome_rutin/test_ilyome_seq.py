@@ -137,5 +137,32 @@ class SampleTest(unittest.TestCase):
         self.assertTrue(any("Average alignment coverage" in k for k in sec), sec)
 
 
+class FiltreTest(unittest.TestCase):
+    def test_aralik_selected_true(self):
+        """Ilyome, aralik degerini yalnizca selected=True ile uygular (arayuz davranisi)."""
+        class Sahte(I.Seq):
+            def __init__(self):
+                self.cagrilar = []
+            def tema_sifirla(self, t): pass
+            def panel(self, t, vt="snv", taze=False): return fx("snv-filter-panel.json")
+            def deger_ayarla(self, value_id, min_=None, max_=None, isnull=False, selected=False):
+                self.cagrilar.append((value_id, min_, max_, isnull, selected))
+        s = Sahte()
+        s.filtre_uygula(1, {"range": I.pop_frekans(1.0)})
+        self.assertEqual(len(s.cagrilar), 2)
+        for (_, mn, mx, isnull, selected) in s.cagrilar:
+            self.assertIsNone(mn); self.assertAlmostEqual(mx, 0.01)
+            self.assertTrue(isnull); self.assertTrue(selected)
+
+    def test_frekans_suz(self):
+        rows = [{"af_max": 0.5, "gnomad_exome": None, "gnomad_genome": None},
+                {"af_max": None, "gnomad_exome": 0.0001, "gnomad_genome": 0.02},
+                {"af_max": None, "gnomad_exome": None, "gnomad_genome": None},
+                {"af_max": 0.0005, "gnomad_exome": 0.0004, "gnomad_genome": None}]
+        kalan, elenen = I.frekans_suz(rows, 1.0)
+        self.assertEqual(elenen, 2)
+        self.assertEqual(len(kalan), 2)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
