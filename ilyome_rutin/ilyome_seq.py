@@ -253,6 +253,11 @@ class Seq(object):
 
     def _json(self, r, ne):
         if r.status_code >= 400:
+            if r.status_code == 403 and "legal_consent_required" in (r.text or ""):
+                raise IlyomeHata(
+                    "Ilyome yeni Kullanim Kosullari / Gizlilik Politikasi onayi istiyor "
+                    "(legal_consent_required). Tarayicida ilyome.com'a girip kosullari kabul edin, "
+                    "sonra olguyu yeniden BEKLIYOR yapip rutini tekrar calistirin.")
             raise IlyomeHata("%s basarisiz (%s): %s" % (ne, r.status_code, _gizli_metin(r)))
         try:
             return zarf_ac(r.json())
