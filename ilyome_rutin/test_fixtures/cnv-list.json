@@ -1,0 +1,524 @@
+{
+"total": 233,
+"data": [
+{
+"id": 8021117,
+"is_reported": false,
+"disease": [
+{
+"id": 273717,
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+},
+"gene_symbol": "NDP",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:310600",
+"disease_name": "Norrie disease",
+"ncbi_gene": 4693
+},
+{
+"id": 289456,
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+},
+"gene_symbol": "NDP",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:180100",
+"disease_name": "Retinitis pigmentosa 1",
+"ncbi_gene": 4693
+},
+{
+"id": 283964,
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+},
+"gene_symbol": "NDP",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:190",
+"disease_name": "Coats disease",
+"ncbi_gene": 4693
+},
+{
+"id": 284788,
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+},
+"gene_symbol": "NDP",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:90050",
+"disease_name": "Retinopathy of prematurity",
+"ncbi_gene": 4693
+},
+{
+"id": 279985,
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+},
+"gene_symbol": "NDP",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:305390",
+"disease_name": "Exudative vitreoretinopathy 2, X-linked",
+"ncbi_gene": 4693
+},
+{
+"id": 285924,
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+},
+"gene_symbol": "NDP",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:91495",
+"disease_name": "Persistent hyperplastic primary vitreous",
+"ncbi_gene": 4693
+},
+{
+"id": 284418,
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+},
+"gene_symbol": "NDP",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:891",
+"disease_name": "Familial exudative vitreoretinopathy",
+"ncbi_gene": 4693
+},
+{
+"id": 286604,
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+},
+"gene_symbol": "NDP",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:649",
+"disease_name": "Norrie disease",
+"ncbi_gene": 4693
+},
+{
+"id": 35320,
+"ncbi_gene": 4693,
+"gene_symbol": "NDP",
+"disease_id": "MONDO:0010588",
+"disease_name": "exudative vitreoretinopathy 2, X-linked",
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+}
+},
+{
+"id": 35576,
+"ncbi_gene": 4693,
+"gene_symbol": "NDP",
+"disease_id": "MONDO:0010691",
+"disease_name": "Norrie disease",
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+}
+}
+],
+"inheritance": {
+"hpo": [
+"XLR"
+],
+"monarch": [
+"XLR"
+]
+},
+"classification": [
+"Definitive"
+],
+"variant": "chrX_43949698_43958745_DUP",
+"chrom": "chrX",
+"start": 43949698,
+"end": 43958745,
+"cnvtype": "DUP",
+"copy_number": 3,
+"filter": "cnvQual",
+"acmg_class": "Pathogenic",
+"protein_coding_genes": "NDP",
+"dosage_sensitive_genes": "NDP,NDP-AS1",
+"total_score": 1,
+"cnv_size": 9.05,
+"color": null,
+"ilyomedb_total": 16,
+"ilyomedb_total_filter": 145,
+"sample": 29445,
+"ncbi_gene": [
+4693
+]
+},
+{
+"id": 8021124,
+"is_reported": false,
+"disease": [
+{
+"id": 275922,
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"gene_symbol": "SOX3",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:312000",
+"disease_name": "Panhypopituitarism, X-linked",
+"ncbi_gene": 6658
+},
+{
+"id": 277984,
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"gene_symbol": "SOX3",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:300123",
+"disease_name": "Intellectual developmental disorder, X-linked, with isolated growth hormone deficiency",
+"ncbi_gene": 6658
+},
+{
+"id": 290215,
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"gene_symbol": "SOX3",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:615777",
+"disease_name": "Desbuquois dysplasia 2",
+"ncbi_gene": 6658
+},
+{
+"id": 290849,
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"gene_symbol": "SOX3",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:131300",
+"disease_name": "Camurati-Engelmann disease",
+"ncbi_gene": 6658
+},
+{
+"id": 280772,
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"gene_symbol": "SOX3",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:393",
+"disease_name": "46,XX testicular difference of sex development",
+"ncbi_gene": 6658
+},
+{
+"id": 281058,
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"gene_symbol": "SOX3",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:90695",
+"disease_name": "Non-acquired panhypopituitarism",
+"ncbi_gene": 6658
+},
+{
+"id": 281608,
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"gene_symbol": "SOX3",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:3157",
+"disease_name": "Septo-optic dysplasia spectrum",
+"ncbi_gene": 6658
+},
+{
+"id": 283045,
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"gene_symbol": "SOX3",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:79495",
+"disease_name": "-",
+"ncbi_gene": 6658
+},
+{
+"id": 286921,
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"gene_symbol": "SOX3",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:67045",
+"disease_name": "X-linked intellectual disability with isolated growth hormone deficiency",
+"ncbi_gene": 6658
+},
+{
+"id": 31705,
+"ncbi_gene": 6658,
+"gene_symbol": "SOX3",
+"disease_id": "MONDO:0010252",
+"disease_name": "intellectual disability, X-linked, with panhypopituitarism",
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+}
+},
+{
+"id": 35102,
+"ncbi_gene": 6658,
+"gene_symbol": "SOX3",
+"disease_id": "MONDO:0010712",
+"disease_name": "panhypopituitarism, X-linked",
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+}
+}
+],
+"inheritance": {
+"hpo": [
+"XL"
+],
+"monarch": [
+"XL"
+]
+},
+"classification": [
+"Moderate"
+],
+"variant": "chrX_140503619_140505119_DUP",
+"chrom": "chrX",
+"start": 140503619,
+"end": 140505119,
+"cnvtype": "DUP",
+"copy_number": 3,
+"filter": "cnvQual",
+"acmg_class": "Pathogenic",
+"protein_coding_genes": "SOX3",
+"dosage_sensitive_genes": "SOX3,ENSG00000303910.1",
+"total_score": 1,
+"cnv_size": 1.5,
+"color": null,
+"ilyomedb_total": 57,
+"ilyomedb_total_filter": 441,
+"sample": 29445,
+"ncbi_gene": [
+6658
+]
+},
+{
+"id": 8021039,
+"is_reported": false,
+"disease": [
+{
+"id": 275716,
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"gene_symbol": "SOX5",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:616803",
+"disease_name": "Lamb-Shaffer syndrome",
+"ncbi_gene": 6660
+},
+{
+"id": 284115,
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"gene_symbol": "SOX5",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:313892",
+"disease_name": "Developmental and speech delay due to SOX5 deficiency",
+"ncbi_gene": 6660
+},
+{
+"id": 284142,
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"gene_symbol": "SOX5",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:313884",
+"disease_name": "-",
+"ncbi_gene": 6660
+},
+{
+"id": 286513,
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"gene_symbol": "SOX5",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:626",
+"disease_name": "Large/giant congenital melanocytic nevus",
+"ncbi_gene": 6660
+},
+{
+"id": 34402,
+"ncbi_gene": 6660,
+"gene_symbol": "SOX5",
+"disease_id": "MONDO:0014778",
+"disease_name": "Lamb-Shaffer syndrome",
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+}
+}
+],
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"classification": [
+"Definitive"
+],
+"variant": "chr12_23845882_23846293_DUP",
+"chrom": "chr12",
+"start": 23845882,
+"end": 23846293,
+"cnvtype": "DUP",
+"copy_number": 3,
+"filter": "cnvQual",
+"acmg_class": "Likely pathogenic",
+"protein_coding_genes": "SOX5",
+"dosage_sensitive_genes": "SOX5",
+"total_score": 0.9,
+"cnv_size": 0.41,
+"color": null,
+"ilyomedb_total": 1,
+"ilyomedb_total_filter": 65,
+"sample": 29445,
+"ncbi_gene": [
+6660
+]
+}
+]
+}

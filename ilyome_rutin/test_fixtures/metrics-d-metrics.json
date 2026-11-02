@@ -1,0 +1,1074 @@
+{
+"created_at": "2026-09-17T07:54:42.195736Z",
+"id": 56,
+"metrics": {
+"coverages": [
+{
+"key": "Aligned bases",
+"value": "7666013447.0"
+},
+{
+"key": "Aligned bases in QC coverage region",
+"value": "6447627781.0"
+},
+{
+"key": "Average alignment coverage over QC coverage region",
+"value": "104.54"
+},
+{
+"key": "Uniformity of coverage (PCT > 0.2*mean) over QC coverage region",
+"value": "95.3"
+},
+{
+"key": "Uniformity of coverage (PCT > 0.4*mean) over QC coverage region",
+"value": "85.07"
+},
+{
+"key": "PCT of QC coverage region with coverage [1500x: inf)",
+"value": "0.0"
+},
+{
+"key": "PCT of QC coverage region with coverage [1000x: inf)",
+"value": "0.0"
+},
+{
+"key": "PCT of QC coverage region with coverage [ 500x: inf)",
+"value": "0.02"
+},
+{
+"key": "PCT of QC coverage region with coverage [ 100x: inf)",
+"value": "47.54"
+},
+{
+"key": "PCT of QC coverage region with coverage [  50x: inf)",
+"value": "79.9"
+},
+{
+"key": "PCT of QC coverage region with coverage [  20x: inf)",
+"value": "95.58"
+},
+{
+"key": "PCT of QC coverage region with coverage [  15x: inf)",
+"value": "96.7"
+},
+{
+"key": "PCT of QC coverage region with coverage [  10x: inf)",
+"value": "97.45"
+},
+{
+"key": "PCT of QC coverage region with coverage [   3x: inf)",
+"value": "98.21"
+},
+{
+"key": "PCT of QC coverage region with coverage [   1x: inf)",
+"value": "98.48"
+},
+{
+"key": "PCT of QC coverage region with coverage [   0x: inf)",
+"value": "100.0"
+},
+{
+"key": "PCT of QC coverage region with coverage [1000x:1500x)",
+"value": "0.0"
+},
+{
+"key": "PCT of QC coverage region with coverage [ 500x:1000x)",
+"value": "0.02"
+},
+{
+"key": "PCT of QC coverage region with coverage [ 100x: 500x)",
+"value": "47.52"
+},
+{
+"key": "PCT of QC coverage region with coverage [  50x: 100x)",
+"value": "32.35"
+},
+{
+"key": "PCT of QC coverage region with coverage [  20x:  50x)",
+"value": "15.69"
+},
+{
+"key": "PCT of QC coverage region with coverage [  15x:  20x)",
+"value": "1.11"
+},
+{
+"key": "PCT of QC coverage region with coverage [  10x:  15x)",
+"value": "0.75"
+},
+{
+"key": "PCT of QC coverage region with coverage [   3x:  10x)",
+"value": "0.76"
+},
+{
+"key": "PCT of QC coverage region with coverage [   1x:   3x)",
+"value": "0.28"
+}
+],
+"roh_regions": [
+{
+"chr": "chr1",
+"end": "1482094",
+"start": "69270",
+"size(Mb)": "1.41",
+"nb_variants": "90",
+"percentage_homozygosity": "92.22"
+},
+{
+"chr": "chr1",
+"end": "10654379",
+"start": "9356287",
+"size(Mb)": "1.3",
+"nb_variants": "37",
+"percentage_homozygosity": "91.89"
+},
+{
+"chr": "chr1",
+"end": "101238976",
+"start": "99686887",
+"size(Mb)": "1.55",
+"nb_variants": "28",
+"percentage_homozygosity": "89.29"
+},
+{
+"chr": "chr2",
+"end": "86456416",
+"start": "85349328",
+"size(Mb)": "1.11",
+"nb_variants": "37",
+"percentage_homozygosity": "91.89"
+},
+{
+"chr": "chr2",
+"end": "186622433",
+"start": "184937516",
+"size(Mb)": "1.68",
+"nb_variants": "33",
+"percentage_homozygosity": "90.91"
+},
+{
+"chr": "chr3",
+"end": "38726756",
+"start": "37629188",
+"size(Mb)": "1.1",
+"nb_variants": "46",
+"percentage_homozygosity": "91.30"
+},
+{
+"chr": "chr3",
+"end": "48468965",
+"start": "46898085",
+"size(Mb)": "1.57",
+"nb_variants": "70",
+"percentage_homozygosity": "92.86"
+},
+{
+"chr": "chr3",
+"end": "138314339",
+"start": "135259394",
+"size(Mb)": "3.05",
+"nb_variants": "30",
+"percentage_homozygosity": "93.33"
+},
+{
+"chr": "chr5",
+"end": "10649672",
+"start": "7695915",
+"size(Mb)": "2.95",
+"nb_variants": "44",
+"percentage_homozygosity": "88.64"
+},
+{
+"chr": "chr6",
+"end": "48879947",
+"start": "46756114",
+"size(Mb)": "2.12",
+"nb_variants": "64",
+"percentage_homozygosity": "90.62"
+},
+{
+"chr": "chr11",
+"end": "56542746",
+"start": "48120976",
+"size(Mb)": "8.42",
+"nb_variants": "101",
+"percentage_homozygosity": "93.07"
+},
+{
+"chr": "chr11",
+"end": "89825323",
+"start": "88335161",
+"size(Mb)": "1.49",
+"nb_variants": "34",
+"percentage_homozygosity": "100.00"
+},
+{
+"chr": "chr11",
+"end": "114402951",
+"start": "113323254",
+"size(Mb)": "1.08",
+"nb_variants": "51",
+"percentage_homozygosity": "88.24"
+},
+{
+"chr": "chr14",
+"end": "75579019",
+"start": "74097902",
+"size(Mb)": "1.48",
+"nb_variants": "42",
+"percentage_homozygosity": "88.10"
+},
+{
+"chr": "Total number",
+"end": "",
+"start": "",
+"size(Mb)": "28.9",
+"nb_variants": "",
+"percentage_homozygosity": ""
+}
+],
+"vcf_metrics": [
+{
+"key": "Total",
+"value": "73939"
+},
+{
+"key": "Biallelic",
+"value": "73048"
+},
+{
+"key": "Multiallelic",
+"value": "891"
+},
+{
+"key": "SNPs",
+"value": "65016"
+},
+{
+"key": "Insertions (Hom)",
+"value": "1502"
+},
+{
+"key": "Insertions (Het)",
+"value": "2523"
+},
+{
+"key": "Deletions (Hom)",
+"value": "1437"
+},
+{
+"key": "Deletions (Het)",
+"value": "3235"
+},
+{
+"key": "Indels (Het)",
+"value": "226"
+},
+{
+"key": "Chr X number of SNPs over target region",
+"value": "1292"
+},
+{
+"key": "Chr Y number of SNPs over target region",
+"value": "0"
+},
+{
+"key": "(Chr X SNPs)/(chr Y SNPs) ratio over target region",
+"value": "NA"
+},
+{
+"key": "SNP Transitions",
+"value": "63677"
+},
+{
+"key": "SNP Transversions",
+"value": "26503"
+},
+{
+"key": "Ti/Tv ratio",
+"value": "2.40"
+},
+{
+"key": "Heterozygous",
+"value": "45868"
+},
+{
+"key": "Homozygous",
+"value": "28071"
+},
+{
+"key": "Het/Hom ratio",
+"value": "1.63"
+}
+],
+"ploy_metrics": [
+{
+"key": "1 median / Autosomal median",
+"value": "1.11"
+},
+{
+"key": "2 median / Autosomal median",
+"value": "1.12"
+},
+{
+"key": "3 median / Autosomal median",
+"value": "1.00"
+},
+{
+"key": "4 median / Autosomal median",
+"value": "1.00"
+},
+{
+"key": "5 median / Autosomal median",
+"value": "1.00"
+},
+{
+"key": "6 median / Autosomal median",
+"value": "1.04"
+},
+{
+"key": "7 median / Autosomal median",
+"value": "1.00"
+},
+{
+"key": "8 median / Autosomal median",
+"value": "0.91"
+},
+{
+"key": "9 median / Autosomal median",
+"value": "0.97"
+},
+{
+"key": "10 median / Autosomal median",
+"value": "1.02"
+},
+{
+"key": "11 median / Autosomal median",
+"value": "1.06"
+},
+{
+"key": "12 median / Autosomal median",
+"value": "1.12"
+},
+{
+"key": "13 median / Autosomal median",
+"value": "0.93"
+},
+{
+"key": "14 median / Autosomal median",
+"value": "1.08"
+},
+{
+"key": "15 median / Autosomal median",
+"value": "1.12"
+},
+{
+"key": "16 median / Autosomal median",
+"value": "0.97"
+},
+{
+"key": "17 median / Autosomal median",
+"value": "1.10"
+},
+{
+"key": "18 median / Autosomal median",
+"value": "0.89"
+},
+{
+"key": "19 median / Autosomal median",
+"value": "1.05"
+},
+{
+"key": "20 median / Autosomal median",
+"value": "0.89"
+},
+{
+"key": "21 median / Autosomal median",
+"value": "0.87"
+},
+{
+"key": "22 median / Autosomal median",
+"value": "0.91"
+},
+{
+"key": "X median / Autosomal median",
+"value": "0.93"
+},
+{
+"key": "Y median / Autosomal median",
+"value": "0.00"
+},
+{
+"key": "Coverage skewness",
+"value": "1.00"
+},
+{
+"key": "Ploidy estimation",
+"value": "XX"
+}
+],
+"hethom_metrics": [
+{
+"key": "1 Heterozygous",
+"value": "4255.0"
+},
+{
+"key": "1 Homozygous",
+"value": "2705.0"
+},
+{
+"key": "1 Het/Hom ratio",
+"value": "1.573"
+},
+{
+"key": "2 Heterozygous",
+"value": "3130.0"
+},
+{
+"key": "2 Homozygous",
+"value": "1946.0"
+},
+{
+"key": "2 Het/Hom ratio",
+"value": "1.608"
+},
+{
+"key": "3 Heterozygous",
+"value": "2346.0"
+},
+{
+"key": "3 Homozygous",
+"value": "1569.0"
+},
+{
+"key": "3 Het/Hom ratio",
+"value": "1.495"
+},
+{
+"key": "4 Heterozygous",
+"value": "1945.0"
+},
+{
+"key": "4 Homozygous",
+"value": "1186.0"
+},
+{
+"key": "4 Het/Hom ratio",
+"value": "1.64"
+},
+{
+"key": "5 Heterozygous",
+"value": "2136.0"
+},
+{
+"key": "5 Homozygous",
+"value": "1067.0"
+},
+{
+"key": "5 Het/Hom ratio",
+"value": "2.002"
+},
+{
+"key": "6 Heterozygous",
+"value": "2739.0"
+},
+{
+"key": "6 Homozygous",
+"value": "1548.0"
+},
+{
+"key": "6 Het/Hom ratio",
+"value": "1.769"
+},
+{
+"key": "7 Heterozygous",
+"value": "2369.0"
+},
+{
+"key": "7 Homozygous",
+"value": "1312.0"
+},
+{
+"key": "7 Het/Hom ratio",
+"value": "1.806"
+},
+{
+"key": "8 Heterozygous",
+"value": "1816.0"
+},
+{
+"key": "8 Homozygous",
+"value": "966.0"
+},
+{
+"key": "8 Het/Hom ratio",
+"value": "1.88"
+},
+{
+"key": "9 Heterozygous",
+"value": "1957.0"
+},
+{
+"key": "9 Homozygous",
+"value": "1145.0"
+},
+{
+"key": "9 Het/Hom ratio",
+"value": "1.709"
+},
+{
+"key": "10 Heterozygous",
+"value": "1937.0"
+},
+{
+"key": "10 Homozygous",
+"value": "1233.0"
+},
+{
+"key": "10 Het/Hom ratio",
+"value": "1.571"
+},
+{
+"key": "11 Heterozygous",
+"value": "2650.0"
+},
+{
+"key": "11 Homozygous",
+"value": "1878.0"
+},
+{
+"key": "11 Het/Hom ratio",
+"value": "1.411"
+},
+{
+"key": "12 Heterozygous",
+"value": "2487.0"
+},
+{
+"key": "12 Homozygous",
+"value": "1594.0"
+},
+{
+"key": "12 Het/Hom ratio",
+"value": "1.56"
+},
+{
+"key": "13 Heterozygous",
+"value": "870.0"
+},
+{
+"key": "13 Homozygous",
+"value": "639.0"
+},
+{
+"key": "13 Het/Hom ratio",
+"value": "1.362"
+},
+{
+"key": "14 Heterozygous",
+"value": "1434.0"
+},
+{
+"key": "14 Homozygous",
+"value": "1001.0"
+},
+{
+"key": "14 Het/Hom ratio",
+"value": "1.433"
+},
+{
+"key": "15 Heterozygous",
+"value": "1508.0"
+},
+{
+"key": "15 Homozygous",
+"value": "978.0"
+},
+{
+"key": "15 Het/Hom ratio",
+"value": "1.542"
+},
+{
+"key": "16 Heterozygous",
+"value": "1991.0"
+},
+{
+"key": "16 Homozygous",
+"value": "1299.0"
+},
+{
+"key": "16 Het/Hom ratio",
+"value": "1.533"
+},
+{
+"key": "17 Heterozygous",
+"value": "2531.0"
+},
+{
+"key": "17 Homozygous",
+"value": "1709.0"
+},
+{
+"key": "17 Het/Hom ratio",
+"value": "1.481"
+},
+{
+"key": "18 Heterozygous",
+"value": "783.0"
+},
+{
+"key": "18 Homozygous",
+"value": "433.0"
+},
+{
+"key": "18 Het/Hom ratio",
+"value": "1.808"
+},
+{
+"key": "19 Heterozygous",
+"value": "3266.0"
+},
+{
+"key": "19 Homozygous",
+"value": "1818.0"
+},
+{
+"key": "19 Het/Hom ratio",
+"value": "1.796"
+},
+{
+"key": "20 Heterozygous",
+"value": "1100.0"
+},
+{
+"key": "20 Homozygous",
+"value": "563.0"
+},
+{
+"key": "20 Het/Hom ratio",
+"value": "1.954"
+},
+{
+"key": "21 Heterozygous",
+"value": "583.0"
+},
+{
+"key": "21 Homozygous",
+"value": "352.0"
+},
+{
+"key": "21 Het/Hom ratio",
+"value": "1.656"
+},
+{
+"key": "22 Heterozygous",
+"value": "1139.0"
+},
+{
+"key": "22 Homozygous",
+"value": "539.0"
+},
+{
+"key": "22 Het/Hom ratio",
+"value": "2.113"
+},
+{
+"key": "X Heterozygous",
+"value": "896.0"
+},
+{
+"key": "X Homozygous",
+"value": "591.0"
+},
+{
+"key": "X Het/Hom ratio",
+"value": "1.516"
+},
+{
+"key": "Y Heterozygous",
+"value": "0.0"
+},
+{
+"key": "Y Homozygous",
+"value": "0.0"
+},
+{
+"key": "Y Het/Hom ratio",
+"value": ""
+}
+],
+"mapping_metrics": [
+{
+"key": "Total reads in RG",
+"value": "59836070.0"
+},
+{
+"key": "Number of duplicate marked reads",
+"value": "5868987.0"
+},
+{
+"key": "Duplication ratio",
+"value": "9.81 %"
+},
+{
+"key": "Number of duplicate marked and mate reads removed",
+"value": "5870522.0"
+},
+{
+"key": "Number of unique reads (excl. duplicate marked reads)",
+"value": "53967083.0"
+},
+{
+"key": "Reads with mate sequenced",
+"value": "59836070.0"
+},
+{
+"key": "Reads without mate sequenced",
+"value": "0.0"
+},
+{
+"key": "QC-failed reads",
+"value": "0.0"
+},
+{
+"key": "Mapped reads",
+"value": "59765575.0"
+},
+{
+"key": "Mapped reads adjusted for excluded mapping",
+"value": "59765575.0"
+},
+{
+"key": "Mapped reads with filtered mapping (non-ref decoys + rRNA filter)",
+"value": "59830976.0"
+},
+{
+"key": "Mapped reads adjusted for filtered and excluded mapping",
+"value": "59830976.0"
+},
+{
+"key": "Mapped reads R1",
+"value": "29882210.0"
+},
+{
+"key": "Mapped reads R2",
+"value": "29883365.0"
+},
+{
+"key": "Number of unique & mapped reads (excl. duplicate marked reads)",
+"value": "53896588.0"
+},
+{
+"key": "Unmapped reads",
+"value": "70495.0"
+},
+{
+"key": "Unmapped reads minus filtered mapping",
+"value": "5094.0"
+},
+{
+"key": "Unmapped reads adjusted for excluded mapping",
+"value": "70495.0"
+},
+{
+"key": "Unmapped reads adjusted for filtered and excluded mapping",
+"value": "5094.0"
+},
+{
+"key": "Adjustment of reads matching non-reference decoys",
+"value": "65401.0"
+},
+{
+"key": "Adjustment of reads matching filter contigs",
+"value": ""
+},
+{
+"key": "Filtered rRNA reads",
+"value": ""
+},
+{
+"key": "Adjustment of reads matching exclude contigs",
+"value": ""
+},
+{
+"key": "Mitochondrial reads excluded",
+"value": ""
+},
+{
+"key": "Singleton reads (itself mapped; mate unmapped)",
+"value": "2133.0"
+},
+{
+"key": "Paired reads (itself & mate mapped)",
+"value": "59763442.0"
+},
+{
+"key": "Properly paired reads",
+"value": "59752856.0"
+},
+{
+"key": "Not properly paired reads (discordant)",
+"value": "10586.0"
+},
+{
+"key": "Paired reads mapped to different chromosomes",
+"value": "6796.0"
+},
+{
+"key": "Paired reads mapped to different chromosomes (MAPQ>=10)",
+"value": "6038.0"
+},
+{
+"key": "Reads mapping to multiple locations",
+"value": "2223294.0"
+},
+{
+"key": "Reads with MAPQ [40:inf)",
+"value": "56300087.0"
+},
+{
+"key": "Reads with MAPQ [30:40)",
+"value": "116701.0"
+},
+{
+"key": "Reads with MAPQ [20:30)",
+"value": "547424.0"
+},
+{
+"key": "Reads with MAPQ [10:20)",
+"value": "505483.0"
+},
+{
+"key": "Reads with MAPQ [ 0:10)",
+"value": "2295880.0"
+},
+{
+"key": "Reads with MAPQ NA (Unmapped reads)",
+"value": "70495.0"
+},
+{
+"key": "Reads with indel R1",
+"value": "474512.0"
+},
+{
+"key": "Reads with indel R2",
+"value": "462125.0"
+},
+{
+"key": "Reads with splice junction",
+"value": ""
+},
+{
+"key": "Total bases",
+"value": "8856108125.0"
+},
+{
+"key": "Total bases R1",
+"value": "4428044980.0"
+},
+{
+"key": "Total bases R2",
+"value": "4428063145.0"
+},
+{
+"key": "Mapped bases",
+"value": "8845678192.0"
+},
+{
+"key": "Mapped bases R1",
+"value": "4422743475.0"
+},
+{
+"key": "Mapped bases R2",
+"value": "4422934717.0"
+},
+{
+"key": "Soft-clipped bases",
+"value": "6465507.0"
+},
+{
+"key": "Soft-clipped bases R1",
+"value": "3062332.0"
+},
+{
+"key": "Soft-clipped bases R2",
+"value": "3403175.0"
+},
+{
+"key": "Hard-clipped bases",
+"value": "0.0"
+},
+{
+"key": "Hard-clipped bases R1",
+"value": "0.0"
+},
+{
+"key": "Hard-clipped bases R2",
+"value": "0.0"
+},
+{
+"key": "Mismatched bases R1",
+"value": "14718476.0"
+},
+{
+"key": "Mismatched bases R2",
+"value": "11628161.0"
+},
+{
+"key": "Mismatched bases R1 (excl. indels)",
+"value": "13676555.0"
+},
+{
+"key": "Mismatched bases R2 (excl. indels)",
+"value": "10615360.0"
+},
+{
+"key": "Q30 bases",
+"value": "8361323209.0"
+},
+{
+"key": "Q30 bases R1",
+"value": "4157969085.0"
+},
+{
+"key": "Q30 bases R2",
+"value": "4203354124.0"
+},
+{
+"key": "Q30 bases (excl. dups & clipped bases)",
+"value": "7545767841.0"
+},
+{
+"key": "Total alignments",
+"value": "59798330.0"
+},
+{
+"key": "Secondary alignments",
+"value": "0.0"
+},
+{
+"key": "Supplementary (chimeric) alignments",
+"value": "32755.0"
+},
+{
+"key": "Estimated read length",
+"value": "148.01"
+},
+{
+"key": "Insert length: mean",
+"value": "228.5"
+},
+{
+"key": "Insert length: median",
+"value": "215.0"
+},
+{
+"key": "Insert length: standard deviation",
+"value": "91.14"
+}
+],
+"chromosome_coverages": [
+{
+"key": "chr1",
+"value": "102.985"
+},
+{
+"key": "chr2",
+"value": "120.515"
+},
+{
+"key": "chr3",
+"value": "115.726"
+},
+{
+"key": "chr4",
+"value": "128.582"
+},
+{
+"key": "chr5",
+"value": "118.887"
+},
+{
+"key": "chr6",
+"value": "114.588"
+},
+{
+"key": "chr7",
+"value": "106.238"
+},
+{
+"key": "chr8",
+"value": "110.64"
+},
+{
+"key": "chr9",
+"value": "99.0912"
+},
+{
+"key": "chr10",
+"value": "113.587"
+},
+{
+"key": "chr11",
+"value": "100.544"
+},
+{
+"key": "chr12",
+"value": "113.494"
+},
+{
+"key": "chr13",
+"value": "129.205"
+},
+{
+"key": "chr14",
+"value": "109.556"
+},
+{
+"key": "chr15",
+"value": "105.603"
+},
+{
+"key": "chr16",
+"value": "79.6447"
+},
+{
+"key": "chr17",
+"value": "86.3621"
+},
+{
+"key": "chr18",
+"value": "123.288"
+},
+{
+"key": "chr19",
+"value": "69.7101"
+},
+{
+"key": "chr20",
+"value": "90.5753"
+},
+{
+"key": "chr21",
+"value": "101.977"
+},
+{
+"key": "chr22",
+"value": "78.553"
+},
+{
+"key": "chrX",
+"value": "109.455"
+},
+{
+"key": "chrY",
+"value": "0.00298652"
+},
+{
+"key": "chrM",
+"value": "0.0"
+}
+]
+},
+"sample": 64,
+"updated_at": "2026-09-17T07:54:42.195745Z"
+}

@@ -1,0 +1,3 @@
+
+# Olgu surucüleri hasta verisi icerir; yalnizca Drive _sistem/rapor/ altinda tutulur
+ilyome_rutin/rapor/vaka_*.py

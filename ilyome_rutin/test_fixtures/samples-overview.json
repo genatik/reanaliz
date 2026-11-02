@@ -1,0 +1,23 @@
+{
+"cnv_events": 233,
+"deletions": 87,
+"duplication_ratio": 2.9567316461631235,
+"duplications": 146,
+"format_validation": true,
+"hethom_ratio": 1.66,
+"id": 2072,
+"indel_variants": 12470,
+"likely_pathogenic": 1,
+"pathogenic": 0,
+"q30_bases": 11753639832,
+"quality_score": 98.65,
+"quality_score_mean_coverage": 129.01,
+"reportable_candidates": 13,
+"sample": 29445,
+"snv_variants": 85496,
+"titv_ratio": 2.38,
+"top_reportable_gene_fusion": null,
+"total_bases": 12075625589,
+"total_variants": 97966,
+"vus": 12
+}

@@ -1,0 +1,2011 @@
+{
+"total": 13,
+"data": [
+{
+"id": 2016232991,
+"phenotypes": [
+{
+"id": 103301,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030488",
+"hpo_name": "Abnormal central response of multifocal electroretinogram",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 294885,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0003621",
+"hpo_name": "Juvenile onset",
+"frequency": "8/19",
+"disease_id": "OMIM:180100",
+"ncbi_gene": 6010
+},
+{
+"id": 103312,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007675",
+"hpo_name": "Progressive night blindness",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103311,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000662",
+"hpo_name": "Nyctalopia",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103330,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0001105",
+"hpo_name": "Retinal atrophy",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 294883,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0001133",
+"hpo_name": "Constriction of peripheral visual field",
+"frequency": "10/10",
+"disease_id": "OMIM:180100",
+"ncbi_gene": 6010
+},
+{
+"id": 103300,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000580",
+"hpo_name": "Pigmentary retinopathy",
+"frequency": "HP:0040284",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103296,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030329",
+"hpo_name": "Retinal thinning on OCT",
+"frequency": "HP:0040284",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103320,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000563",
+"hpo_name": "Keratoconus",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103323,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000639",
+"hpo_name": "Nystagmus",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103306,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000613",
+"hpo_name": "Photophobia",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103282,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007401",
+"hpo_name": "Macular atrophy",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103281,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0001142",
+"hpo_name": "Lenticonus",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103313,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007663",
+"hpo_name": "Reduced visual acuity",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103316,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0008527",
+"hpo_name": "Congenital sensorineural hearing impairment",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103331,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000543",
+"hpo_name": "Optic disc pallor",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103303,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000602",
+"hpo_name": "Ophthalmoplegia",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 294884,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000575",
+"hpo_name": "Scotoma",
+"frequency": "5/18",
+"disease_id": "OMIM:180100",
+"ncbi_gene": 6010
+},
+{
+"id": 103297,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007703",
+"hpo_name": "Abnormal retinal pigmentation",
+"frequency": "HP:0040284",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 294886,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0011462",
+"hpo_name": "Young adult onset",
+"frequency": "8/19",
+"disease_id": "OMIM:180100",
+"ncbi_gene": 6010
+},
+{
+"id": 103324,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030642",
+"hpo_name": "Fundus albipunctatus",
+"frequency": "-",
+"disease_id": "OMIM:136880",
+"ncbi_gene": 6010
+},
+{
+"id": 103317,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000654",
+"hpo_name": "Decreased light- and dark-adapted electroretinogram amplitude",
+"frequency": "-",
+"disease_id": "OMIM:610445",
+"ncbi_gene": 6010
+},
+{
+"id": 103304,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000603",
+"hpo_name": "Central scotoma",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 294887,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007688",
+"hpo_name": "Undetectable light- and dark-adapted electroretinogram",
+"frequency": "-",
+"disease_id": "OMIM:180100",
+"ncbi_gene": 6010
+},
+{
+"id": 103305,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030466",
+"hpo_name": "Abnormal full-field electroretinogram",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103338,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0012426",
+"hpo_name": "Optic disc drusen",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103339,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000501",
+"hpo_name": "Glaucoma",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103336,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007994",
+"hpo_name": "Peripheral visual field loss",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103319,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007787",
+"hpo_name": "Posterior subcapsular cataract",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103321,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000842",
+"hpo_name": "Hyperinsulinemia",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103302,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030610",
+"hpo_name": "Photoreceptor outer segment loss on macular OCT",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103314,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007642",
+"hpo_name": "Early-onset non-progressive night blindness",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103285,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000512",
+"hpo_name": "Abnormal electroretinogram",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103283,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000407",
+"hpo_name": "Sensorineural hearing impairment",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103295,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000505",
+"hpo_name": "Visual impairment",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103318,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030638",
+"hpo_name": "Congenital stationary night blindness with normal fundus",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103337,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000486",
+"hpo_name": "Strabismus",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103315,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030639",
+"hpo_name": "Congenital stationary night blindness with abnormal fundus",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103289,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0008046",
+"hpo_name": "Abnormal retinal vascular morphology",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103284,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007737",
+"hpo_name": "Spicular pigmentation of the retina",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103280,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000518",
+"hpo_name": "Cataract",
+"frequency": "0/2",
+"disease_id": "OMIM:613731",
+"ncbi_gene": 6010
+},
+{
+"id": 103287,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000546",
+"hpo_name": "Retinal degeneration",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103322,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007814",
+"hpo_name": "Retinal pigment epithelial mottling",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103308,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0012045",
+"hpo_name": "Retinal flecks",
+"frequency": "-",
+"disease_id": "OMIM:136880",
+"ncbi_gene": 6010
+},
+{
+"id": 103329,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007843",
+"hpo_name": "Attenuation of retinal blood vessels",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103307,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000007",
+"hpo_name": "Autosomal recessive inheritance",
+"frequency": "-",
+"disease_id": "OMIM:136880",
+"ncbi_gene": 6010
+},
+{
+"id": 103326,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030786",
+"hpo_name": "Photopsia",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103286,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000006",
+"hpo_name": "Autosomal dominant inheritance",
+"frequency": "-",
+"disease_id": "OMIM:613731",
+"ncbi_gene": 6010
+},
+{
+"id": 103327,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000540",
+"hpo_name": "Hypermetropia",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103278,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0031605",
+"hpo_name": "Abnormal fundus pigmentation",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103277,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0011505",
+"hpo_name": "Cystoid macular edema",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103309,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030483",
+"hpo_name": "Reduced amplitude of dark-adapted bright flash electroretinogram a-wave",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103325,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030469",
+"hpo_name": "Abnormal dark-adapted electroretinogram",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103290,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030825",
+"hpo_name": "Absent foveal reflex",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103335,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0030506",
+"hpo_name": "Yellow/white retinal lesion",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103334,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0008323",
+"hpo_name": "Abnormal light- and dark-adapted electroretinogram",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103294,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0011463",
+"hpo_name": "Childhood onset",
+"frequency": "2/2",
+"disease_id": "OMIM:613731",
+"ncbi_gene": 6010
+},
+{
+"id": 103332,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000648",
+"hpo_name": "Optic atrophy",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103310,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000618",
+"hpo_name": "Blindness",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103299,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000510",
+"hpo_name": "Rod-cone dystrophy",
+"frequency": "2/2",
+"disease_id": "OMIM:613731",
+"ncbi_gene": 6010
+},
+{
+"id": 103293,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000545",
+"hpo_name": "Myopia",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103291,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000405",
+"hpo_name": "Conductive hearing impairment",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:791",
+"ncbi_gene": 6010
+},
+{
+"id": 103292,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0001123",
+"hpo_name": "Visual field defect",
+"frequency": "2/2",
+"disease_id": "OMIM:613731",
+"ncbi_gene": 6010
+},
+{
+"id": 103288,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000529",
+"hpo_name": "Progressive visual loss",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103328,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0031705",
+"hpo_name": "Compensatory head posture",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103333,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007987",
+"hpo_name": "Progressive visual field defects",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:52427",
+"ncbi_gene": 6010
+},
+{
+"id": 103298,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0000551",
+"hpo_name": "Color vision defect",
+"frequency": "HP:0040284",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+},
+{
+"id": 103279,
+"gene_symbol": "RHO",
+"hpo_id": "HP:0007984",
+"hpo_name": "ERG: Reduced dark-adapted b-wave amplitude",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:215",
+"ncbi_gene": 6010
+}
+],
+"disease": [
+{
+"id": 273458,
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+},
+"gene_symbol": "RHO",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:610445",
+"disease_name": "Night blindness, congenital stationary, autosomal dominant 1",
+"ncbi_gene": 6010
+},
+{
+"id": 274234,
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+},
+"gene_symbol": "RHO",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:136880",
+"disease_name": "Fundus albipunctatus",
+"ncbi_gene": 6010
+},
+{
+"id": 289501,
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+},
+"gene_symbol": "RHO",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:180100",
+"disease_name": "Retinitis pigmentosa 1",
+"ncbi_gene": 6010
+},
+{
+"id": 279522,
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+},
+"gene_symbol": "RHO",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:613731",
+"disease_name": "Retinitis pigmentosa 4",
+"ncbi_gene": 6010
+},
+{
+"id": 285292,
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+},
+"gene_symbol": "RHO",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:791",
+"disease_name": "Retinitis pigmentosa",
+"ncbi_gene": 6010
+},
+{
+"id": 282389,
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+},
+"gene_symbol": "RHO",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:215",
+"disease_name": "Congenital stationary night blindness",
+"ncbi_gene": 6010
+},
+{
+"id": 282891,
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+},
+"gene_symbol": "RHO",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:52427",
+"disease_name": "Retinitis punctata albescens",
+"ncbi_gene": 6010
+},
+{
+"id": 30853,
+"ncbi_gene": 6010,
+"gene_symbol": "RHO",
+"disease_id": "MONDO:0007639",
+"disease_name": "fundus albipunctatus",
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+}
+},
+{
+"id": 30858,
+"ncbi_gene": 6010,
+"gene_symbol": "RHO",
+"disease_id": "MONDO:0007639",
+"disease_name": "fundus albipunctatus",
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+}
+},
+{
+"id": 34622,
+"ncbi_gene": 6010,
+"gene_symbol": "RHO",
+"disease_id": "MONDO:0012498",
+"disease_name": "congenital stationary night blindness autosomal dominant 1",
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+}
+},
+{
+"id": 29631,
+"ncbi_gene": 6010,
+"gene_symbol": "RHO",
+"disease_id": "MONDO:0013395",
+"disease_name": "retinitis pigmentosa 4",
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+}
+},
+{
+"id": 29632,
+"ncbi_gene": 6010,
+"gene_symbol": "RHO",
+"disease_id": "MONDO:0013395",
+"disease_name": "retinitis pigmentosa 4",
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+}
+}
+],
+"inheritance": {
+"hpo": [
+"AD",
+"AR"
+],
+"monarch": [
+"AD",
+"AR"
+]
+},
+"ad": "(55 |  41)",
+"is_reported": false,
+"clinvar_clnsig": null,
+"show_sampleid": false,
+"sampleid": "2308-26-ZBS",
+"report_relation_type": null,
+"pseudo_genes": [],
+"variant_classify": [],
+"classification": [
+"Definitive"
+],
+"clingen": [],
+"variant_note": null,
+"chrom": "chr3",
+"pos": 129528965,
+"ref": "A",
+"alt": "C",
+"qual": 34.20000076293945,
+"filter": "PASS",
+"consequence": "missense_variant",
+"impact": "MODERATE",
+"gene": "ENSG00000163914",
+"symbol": "RHO",
+"feature": "ENST00000296271",
+"ensp": "ENSP00000296271",
+"biotype": "protein_coding",
+"exon": "1/5",
+"intron": null,
+"hgvsc": "ENST00000296271.4:c.232A>C",
+"hgvsp": "ENSP00000296271.3:p.Asn78His",
+"amino_acids": "N/H",
+"codons": "Aac/Cac",
+"existing_variation": "rs1248203737",
+"zyg": "HET",
+"strand": "1",
+"variant_class": "SNV",
+"hgnc_id": "HGNC:10012",
+"canonical": "YES",
+"mane_select": "NM_000539.3",
+"gene_pheno": "1",
+"af": null,
+"max_af": 8.993e-07,
+"somatic": null,
+"pheno": "1",
+"genoks_af": null,
+"genoks_ac": null,
+"genoks_an": null,
+"genoks_homo": null,
+"af_exomes": 6.84045e-07,
+"ac_exomes": 1,
+"nhomalt_exomes": 0,
+"an_exomes": 1461892,
+"ac_genomes": 0,
+"an_genomes": 152314,
+"nhomalt_genomes": 0,
+"af_genomes": 0,
+"allelefraction": 42.71,
+"dp": 96,
+"cohort_af": 0.0625,
+"cohort_ac": 1,
+"cohort_an": 16,
+"cohort_het": 1,
+"cohort_homo": 0,
+"af_joint": 6.195e-07,
+"an_joint": 1614206,
+"ac_joint": 1,
+"nhomalt_joint": 0,
+"acmg_class": "Likely pathogenic",
+"distance": null,
+"score": 1,
+"score_raw": 22.90638282852173,
+"color": null,
+"sift_score": 0,
+"polyphen2_hdiv_score": 0.999,
+"mutationtaster_score": 1,
+"cadd_raw": 4.665392,
+"cadd_phred": 26.2,
+"revel_score": 0.567,
+"mpc": null,
+"eve_score": 0.8325523230926064,
+"primate_ai": 0.771734714508,
+"alphamissense_score": 0.9132,
+"dann_score": 0.9970527849180332,
+"splice_ai": null,
+"gerp_rs": 5.52,
+"phylop100way": 7.444,
+"phastcons100way": 1,
+"metasvm_score": 0.345,
+"metalr_score": 0.4784,
+"clinpred_score": 0.997623383998871,
+"loeuf": null,
+"pli": null,
+"spliceai_pred_ds_ag": 0,
+"spliceai_pred_ds_al": 0,
+"spliceai_pred_ds_dg": 0,
+"spliceai_pred_ds_dl": 0.01,
+"spliceai_pred_dp_ag": 7,
+"spliceai_pred_dp_al": 34,
+"spliceai_pred_dp_dg": 8,
+"spliceai_pred_dp_dl": 33,
+"sample": 29445,
+"ncbi_gene": 6010,
+"clinvar": null,
+"variant_key": "3:129528965:A:C",
+"ilyomeid": null
+},
+{
+"id": 2016232997,
+"phenotypes": [
+{
+"id": 293875,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001769",
+"hpo_name": "Broad foot",
+"frequency": "HP:0040283",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 99037,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0010076",
+"hpo_name": "Aplasia/Hypoplasia of the distal phalanx of the hallux",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+},
+{
+"id": 293876,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0033102",
+"hpo_name": "Monkey wrench femoral neck",
+"frequency": "5/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293877,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000520",
+"hpo_name": "Proptosis",
+"frequency": "7/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293878,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0012725",
+"hpo_name": "Cutaneous syndactyly",
+"frequency": "HP:0040284",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293879,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002694",
+"hpo_name": "Sclerosis of skull base",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293880,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001763",
+"hpo_name": "Pes planus",
+"frequency": "1/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293881,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0011461",
+"hpo_name": "Fetal onset",
+"frequency": "7/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293882,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000954",
+"hpo_name": "Single transverse palmar crease",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293883,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002827",
+"hpo_name": "Hip dislocation",
+"frequency": "3/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293884,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001324",
+"hpo_name": "Muscle weakness",
+"frequency": "40/96",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293885,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0009763",
+"hpo_name": "Limb pain",
+"frequency": "63/92",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293886,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000175",
+"hpo_name": "Cleft palate",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293887,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0011001",
+"hpo_name": "Increased bone mineral density",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293888,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0007807",
+"hpo_name": "Optic nerve compression",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293889,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002673",
+"hpo_name": "Coxa valga",
+"frequency": "HP:0040283",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293890,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003034",
+"hpo_name": "Diaphyseal sclerosis",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293891,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001956",
+"hpo_name": "Truncal obesity",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293892,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000750",
+"hpo_name": "Delayed speech and language development",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293893,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000774",
+"hpo_name": "Narrow chest",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293894,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003388",
+"hpo_name": "Easy fatigability",
+"frequency": "36/76",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 99036,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0009882",
+"hpo_name": "Short distal phalanx of finger",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+},
+{
+"id": 293895,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001511",
+"hpo_name": "Intrauterine growth retardation",
+"frequency": "7/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293896,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0008897",
+"hpo_name": "Postnatal growth retardation",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 99045,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0010049",
+"hpo_name": "Short metacarpal",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+},
+{
+"id": 293897,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0004396",
+"hpo_name": "Poor appetite",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293898,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000678",
+"hpo_name": "Dental crowding",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293899,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000651",
+"hpo_name": "Diplopia",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293900,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:6001056",
+"hpo_name": "Out-toeing",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293901,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0005528",
+"hpo_name": "Bone marrow hypocellularity",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293902,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002643",
+"hpo_name": "Neonatal respiratory distress",
+"frequency": "4/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293903,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0011304",
+"hpo_name": "Broad thumb",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293904,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0005280",
+"hpo_name": "Depressed nasal bridge",
+"frequency": "1/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293905,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000343",
+"hpo_name": "Long philtrum",
+"frequency": "1/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293906,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000768",
+"hpo_name": "Pectus carinatum",
+"frequency": "1/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293907,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002938",
+"hpo_name": "Lumbar hyperlordosis",
+"frequency": "1/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293908,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000286",
+"hpo_name": "Epicanthus",
+"frequency": "1/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293909,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000926",
+"hpo_name": "Platyspondyly",
+"frequency": "1/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293910,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000470",
+"hpo_name": "Short neck",
+"frequency": "1/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293911,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001533",
+"hpo_name": "Slender build",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293912,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002857",
+"hpo_name": "Genu valgum",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293913,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002970",
+"hpo_name": "Genu varum",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293914,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000664",
+"hpo_name": "Synophrys",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293915,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000670",
+"hpo_name": "Carious teeth",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293916,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000280",
+"hpo_name": "Coarse facial features",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293917,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001840",
+"hpo_name": "Metatarsus adductus",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293918,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001863",
+"hpo_name": "Toe clinodactyly",
+"frequency": "1/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293919,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002650",
+"hpo_name": "Scoliosis",
+"frequency": "12/14",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293920,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000252",
+"hpo_name": "Microcephaly",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293921,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003202",
+"hpo_name": "Skeletal muscle atrophy",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293922,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000894",
+"hpo_name": "Short clavicles",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293923,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000823",
+"hpo_name": "Delayed puberty",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293924,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0004482",
+"hpo_name": "Relative macrocephaly",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293925,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003180",
+"hpo_name": "Flat acetabular roof",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293926,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002656",
+"hpo_name": "Epiphyseal dysplasia",
+"frequency": "7/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 99046,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0004322",
+"hpo_name": "Short stature",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+},
+{
+"id": 293927,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000311",
+"hpo_name": "Round face",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293928,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003510",
+"hpo_name": "Severe short stature",
+"frequency": "7/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293929,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003026",
+"hpo_name": "Short long bone",
+"frequency": "7/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293930,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003016",
+"hpo_name": "Metaphyseal widening",
+"frequency": "7/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293931,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003621",
+"hpo_name": "Juvenile onset",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293932,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0009803",
+"hpo_name": "Short phalanx of finger",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293933,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0004976",
+"hpo_name": "Knee dislocation",
+"frequency": "6/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 99049,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000006",
+"hpo_name": "Autosomal dominant inheritance",
+"frequency": "-",
+"disease_id": "OMIM:613382",
+"ncbi_gene": 5744
+},
+{
+"id": 293934,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000668",
+"hpo_name": "Hypodontia",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293935,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001249",
+"hpo_name": "Intellectual disability",
+"frequency": "5/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293936,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000007",
+"hpo_name": "Autosomal recessive inheritance",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293937,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000303",
+"hpo_name": "Mandibular prognathia",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293938,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000592",
+"hpo_name": "Blue sclerae",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 99038,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0005863",
+"hpo_name": "Type E brachydactyly",
+"frequency": "HP:0040281",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+},
+{
+"id": 293939,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002315",
+"hpo_name": "Headache",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293940,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0032458",
+"hpo_name": "Narrowing of medullary canal",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293941,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0012514",
+"hpo_name": "Lower limb pain",
+"frequency": "4/4",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293942,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0031936",
+"hpo_name": "Delayed ability to walk",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293943,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000767",
+"hpo_name": "Pectus excavatum",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293944,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:6000816",
+"hpo_name": "Prominent lesser trochanter",
+"frequency": "1/1",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293945,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0004233",
+"hpo_name": "Advanced ossification of carpal bones",
+"frequency": "7/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293946,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002515",
+"hpo_name": "Waddling gait",
+"frequency": "54/102",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293947,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000365",
+"hpo_name": "Hearing impairment",
+"frequency": "10/67",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 99043,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0002007",
+"hpo_name": "Frontal bossing",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+},
+{
+"id": 99039,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0010743",
+"hpo_name": "Short metatarsal",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+},
+{
+"id": 293948,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001263",
+"hpo_name": "Global developmental delay",
+"frequency": "-",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293949,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001293",
+"hpo_name": "Cranial nerve compression",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293950,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003758",
+"hpo_name": "Reduced subcutaneous adipose tissue",
+"frequency": "-",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 99048,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001156",
+"hpo_name": "Brachydactyly",
+"frequency": "-",
+"disease_id": "OMIM:613382",
+"ncbi_gene": 5744
+},
+{
+"id": 293951,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0012368",
+"hpo_name": "Flat face",
+"frequency": "7/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293952,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001252",
+"hpo_name": "Hypotonia",
+"frequency": "2/7",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 99047,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001382",
+"hpo_name": "Joint hypermobility",
+"frequency": "HP:0040282",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+},
+{
+"id": 293953,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0003048",
+"hpo_name": "Radial head subluxation",
+"frequency": "HP:0040284",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 293954,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000193",
+"hpo_name": "Bifid uvula",
+"frequency": "HP:0040284",
+"disease_id": "OMIM:615777",
+"ncbi_gene": 5744
+},
+{
+"id": 99042,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000677",
+"hpo_name": "Oligodontia",
+"frequency": "HP:0040283",
+"disease_id": "OMIM:613382",
+"ncbi_gene": 5744
+},
+{
+"id": 99044,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0100560",
+"hpo_name": "Upper limb asymmetry",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+},
+{
+"id": 99040,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000684",
+"hpo_name": "Delayed eruption of teeth",
+"frequency": "HP:0040283",
+"disease_id": "OMIM:613382",
+"ncbi_gene": 5744
+},
+{
+"id": 293955,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0001903",
+"hpo_name": "Anemia",
+"frequency": "HP:0040283",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 293956,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0005791",
+"hpo_name": "Cortical thickening of long bone diaphyses",
+"frequency": "21/22",
+"disease_id": "OMIM:131300",
+"ncbi_gene": 5744
+},
+{
+"id": 99041,
+"gene_symbol": "PTHLH",
+"hpo_id": "HP:0000256",
+"hpo_name": "Macrocephaly",
+"frequency": "HP:0040283",
+"disease_id": "ORPHA:93387",
+"ncbi_gene": 5744
+}
+],
+"disease": [
+{
+"id": 277700,
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"gene_symbol": "PTHLH",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:613382",
+"disease_name": "Brachydactyly, type E2",
+"ncbi_gene": 5744
+},
+{
+"id": 289994,
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"gene_symbol": "PTHLH",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:615777",
+"disease_name": "Desbuquois dysplasia 2",
+"ncbi_gene": 5744
+},
+{
+"id": 290628,
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"gene_symbol": "PTHLH",
+"association_type": "MENDELIAN",
+"disease_id": "OMIM:131300",
+"disease_name": "Camurati-Engelmann disease",
+"ncbi_gene": 5744
+},
+{
+"id": 286698,
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"gene_symbol": "PTHLH",
+"association_type": "UNKNOWN",
+"disease_id": "ORPHA:93387",
+"disease_name": "Brachydactyly type E",
+"ncbi_gene": 5744
+},
+{
+"id": 31917,
+"ncbi_gene": 5744,
+"gene_symbol": "PTHLH",
+"disease_id": "MONDO:0013244",
+"disease_name": "brachydactyly type E2",
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+}
+}
+],
+"inheritance": {
+"hpo": [
+"AD"
+],
+"monarch": [
+"AD"
+]
+},
+"ad": "(41 |  49)",
+"is_reported": false,
+"clinvar_clnsig": null,
+"show_sampleid": false,
+"sampleid": "2308-26-ZBS",
+"report_relation_type": null,
+"pseudo_genes": [],
+"variant_classify": [],
+"classification": [],
+"clingen": [],
+"variant_note": null,
+"chrom": "chr12",
+"pos": 27963688,
+"ref": "G",
+"alt": "A",
+"qual": 43.20000076293945,
+"filter": "PASS",
+"consequence": "missense_variant",
+"impact": "MODERATE",
+"gene": "ENSG00000087494",
+"symbol": "PTHLH",
+"feature": "ENST00000545234",
+"ensp": "ENSP00000441765",
+"biotype": "protein_coding",
+"exon": "5/6",
+"intron": null,
+"hgvsc": "ENST00000545234.6:c.184C>T",
+"hgvsp": "ENSP00000441765.1:p.His62Tyr",
+"amino_acids": "H/Y",
+"codons": "Cat/Tat",
+"existing_variation": null,
+"zyg": "HET",
+"strand": "-1",
+"variant_class": "SNV",
+"hgnc_id": "HGNC:9607",
+"canonical": "YES",
+"mane_select": "NM_198965.2",
+"gene_pheno": "1",
+"af": null,
+"max_af": null,
+"somatic": null,
+"pheno": null,
+"genoks_af": null,
+"genoks_ac": null,
+"genoks_an": null,
+"genoks_homo": null,
+"af_exomes": null,
+"ac_exomes": null,
+"nhomalt_exomes": null,
+"an_exomes": null,
+"ac_genomes": null,
+"an_genomes": null,
+"nhomalt_genomes": null,
+"af_genomes": null,
+"allelefraction": 54.44,
+"dp": 90,
+"cohort_af": 0.0625,
+"cohort_ac": 1,
+"cohort_an": 16,
+"cohort_het": 1,
+"cohort_homo": 0,
+"af_joint": null,
+"an_joint": null,
+"ac_joint": null,
+"nhomalt_joint": null,
+"acmg_class": "Uncertain significance",
+"distance": null,
+"score": 7,
+"score_raw": 15.945779740810394,
+"color": null,
+"sift_score": 0.013,
+"polyphen2_hdiv_score": 0.77,
+"mutationtaster_score": 0.925616,
+"cadd_raw": 3.950063,
+"cadd_phred": 23.9,
+"revel_score": 0.366,
+"mpc": null,
+"eve_score": 0.10253014637642772,
+"primate_ai": 0.624294042587,
+"alphamissense_score": 0.4353,
+"dann_score": 0.9882066226559717,
+"splice_ai": null,
+"gerp_rs": 2.48,
+"phylop100way": 1.709,
+"phastcons100way": 1,
+"metasvm_score": -0.2653,
+"metalr_score": 0.3423,
+"clinpred_score": 0.872171461582184,
+"loeuf": null,
+"pli": null,
+"spliceai_pred_ds_ag": 0.01,
+"spliceai_pred_ds_al": 0,
+"spliceai_pred_ds_dg": 0,
+"spliceai_pred_ds_dl": 0,
+"spliceai_pred_dp_ag": -13,
+"spliceai_pred_dp_al": 42,
+"spliceai_pred_dp_dg": 2,
+"spliceai_pred_dp_dl": -47,
+"sample": 29445,
+"ncbi_gene": 5744,
+"clinvar": null,
+"variant_key": "12:27963688:G:A",
+"ilyomeid": null
+}
+]
+}
