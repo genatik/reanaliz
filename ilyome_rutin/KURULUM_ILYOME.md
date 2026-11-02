@@ -13,8 +13,12 @@ Ilyome rutini Genomize rutininden **tamamen ayrı** çalışır:
 | Kilit dosyası | `_sistem/CALISIYOR.kilit` (kendi kökünde) | `_sistem/CALISIYOR.kilit` (kendi kökünde) |
 
 İki sistem birbirinin Excel'ini, klasörünü, kilidini görmez. Genomize tarafında **hiçbir dosya değişmez**.
-Rapor adımı (indeks olgu için kapsamlı analiz + sonuç + EÜTF resmi rapor; her ebeveyn için
-1 resmi rapor) aynı kod ve aynı şablonlarla, Ilyome kökünün kendi kopyasından çalışır.
+Rapor adımı (indeks olgu için kapsamlı analiz + sonuç + EÜTF resmi rapor + Genoks/GenoXome
+biçimli taslak = 4 rapor; her ebeveyn için 1 EÜTF resmi + 1 Genoks taslağı) aynı kod ve aynı
+şablonlarla, Ilyome kökünün kendi kopyasından çalışır. Genoks taslağı `_sistem/rapor/genoks.py`
+ile şablonsuz üretilir (`WES_genoks_<kod>_<tarih>.docx`); kimlik alanları (ad, TC, doğum tarihi,
+protokol no, numune tarihleri) olgu klasörüne konan isteğe bağlı `kimlik.json` dosyasından okunur,
+yoksa `[____]` olarak bırakılır ve laboratuvar tamamlar.
 
 > Ilyome parolası hiçbir yere kaydedilmez; BAŞLAT çalışırken gizli sorulur, pencere kapanınca silinir.
 
