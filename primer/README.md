@@ -2,6 +2,8 @@
 
 Gen adı ve varyant girilir. Araç varyantı genomik koordinata çevirir, UCSC'den bölge verisini çeker, alternatifli primer çiftleri tasarlar, her çifti kontrol eder ve sonucu görsel olarak sunar. Sunucu gerektirmez: statik bir sayfadır ve tüm hesaplama tarayıcıda yapılır.
 
+![CFTR c.1521_1523del örnek çıktısı](docs/primer_ornek_CFTR_F508del.png)
+
 ## Kullanım
 
 - GitHub Pages açıksa: `https://<kullanıcı>.github.io/reanaliz/primer/`
