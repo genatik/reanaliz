@@ -36,8 +36,8 @@
     ['design', 'Primer adayları taranıyor ve puanlanıyor'],
     ['check', 'Çiftler kontrol ediliyor (dimer, SNP, tekrar, yerel yanlış bağlanma)']
   ];
-  function initSteps() {
-    $('steps').innerHTML = STEPS.map(function (s) { return '<li class="wait" id="st-' + s[0] + '"><span class="st"></span><span>' + s[1] + ' <span class="det"></span></span></li>'; }).join('');
+  function initSteps(steps) {
+    $('steps').innerHTML = (steps || STEPS).map(function (s) { return '<li class="wait" id="st-' + s[0] + '"><span class="st"></span><span>' + s[1] + ' <span class="det"></span></span></li>'; }).join('');
     $('msgs').innerHTML = '';
   }
   function step(id, cls, det) {
@@ -566,6 +566,8 @@
       '<div class="muted" style="font-size:12px;margin-top:6px">F self-dimer (ΔG ' + fmt(pr.left.selfDimer) + ')</div><pre class="aln">' + esc(sdF || 'anlamlı dimer yok') + '</pre>' +
       '<div class="muted" style="font-size:12px;margin-top:6px">R self-dimer (ΔG ' + fmt(pr.right.selfDimer) + ')</div><pre class="aln">' + esc(sdR || 'anlamlı dimer yok') + '</pre>' +
       '</div></div>' +
+      '<h2 style="margin-top:22px">Önerilen PCR koşulları</h2>' + renderPcr(E.pcrConditions({ kind: 'std', tms: [pr.left.tm, pr.right.tm], sizeMax: pr.size, gc: pr.ampGC, cond: S.p.cond })) +
+      ($('m13').checked ? '<p class="hint">M13 kuyruklu primerlerle: ilk 5 döngüde bu bağlanma sıcaklığını, sonraki döngülerde +3 °C kullanabilirsiniz (kuyruk ürüne eklendikten sonra Tm yükselir).</p>' : '') +
       '<h3 style="margin-top:18px">Amplikon dizisi (' + pr.size + ' bp)</h3><div style="margin-top:8px">' + seqView(pr) + '</div>' +
       (pr.ampliconSnps.length ? '<p class="hint">Amplikon içindeki yaygın SNP\'ler (segregasyonda bilgilendirici olabilir): ' + pr.ampliconSnps.map(function (s) { return esc(s.name) + (s.maf ? ' (MAF ≤ ' + s.maf.toFixed(2) + ')' : ''); }).join(', ') + '</p>' : '');
     $('detail').innerHTML = html;
@@ -581,6 +583,27 @@
     img.src = src;
     $('ucscLinks').innerHTML = '<a target="_blank" rel="noopener" href="' + ucscBrowserUrl(a, b) + '">UCSC\'de aç (primerler özel iz olarak) ↗</a>' +
       '<a target="_blank" rel="noopener" href="' + isPcrUrl(pr) + '">In-Silico PCR ↗</a>';
+  }
+
+  /* ---------------- PCR koşulları ---------------- */
+  function renderPcr(c) {
+    var prog = '<table class="prog"><thead><tr><th>Adım</th><th>Sıcaklık</th><th>Süre</th><th class="num">Döngü</th></tr></thead><tbody>';
+    var groupDone = false;
+    c.program.forEach(function (st) {
+      var cyc = '';
+      if (st.group) { if (!groupDone) { cyc = '<td class="num cyc" rowspan="' + c.program.filter(function (x) { return x.group; }).length + '">' + st.cycles + '×</td>'; groupDone = true; } }
+      else cyc = '<td class="num">' + st.cycles + '</td>';
+      prog += '<tr' + (st.group ? ' class="grp"' : '') + '><td>' + esc(st.step) + '</td><td class="mono">' + esc(st.temp) + '</td><td>' + esc(st.time) + '</td>' + cyc + '</tr>';
+    });
+    prog += '</tbody></table>';
+    var mix = '<table><tbody>' + c.mix.map(function (m) { return '<tr><td>' + esc(m[0]) + '</td><td>' + esc(m[1]) + '</td></tr>'; }).join('') + '</tbody></table>';
+    return '<div class="pcr">' +
+      '<div class="row"><h3>' + esc(c.title) + '</h3><span><span class="badge b-ok">Bağlanma ' + (c.ta != null ? c.ta + ' °C' : '–') + '</span>' + (c.gradient ? ' <span class="badge b-info">Gradyan ' + c.gradient[0] + '–' + c.gradient[1] + ' °C</span>' : '') + '</span></div>' +
+      '<p class="hint" style="margin-top:4px">Polimeraz: ' + esc(c.polymerase) + '</p>' +
+      '<div class="two" style="margin-top:8px"><div><div class="muted small">Reaksiyon karışımı</div>' + mix + '</div><div><div class="muted small">Döngü programı</div>' + prog +
+      (c.touchdown ? '<p class="hint">Alternatif (touchdown): ' + esc(c.touchdown) + '</p>' : '') + '</div></div>' +
+      '<ul class="notes">' + c.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul>' +
+      '<p class="hint">' + esc(c.basis || '') + '</p></div>';
   }
 
   /* ---------------- Bağlantılar ---------------- */
@@ -627,7 +650,11 @@
     });
   }
   function copyText(t) {
-    var done = function () { $('copyMsg').textContent = 'Kopyalandı'; setTimeout(function () { $('copyMsg').textContent = ''; }, 1600); };
+    var done = function () {
+      var els = document.querySelectorAll('.copyok');
+      Array.prototype.forEach.call(els, function (el) { el.textContent = 'Kopyalandı'; });
+      setTimeout(function () { Array.prototype.forEach.call(els, function (el) { el.textContent = ''; }); }, 1600);
+    };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () { fallbackCopy(t); done(); });
     else { fallbackCopy(t); done(); }
   }
@@ -640,6 +667,12 @@
   function loadInputs() {
     try { var d = JSON.parse(localStorage.getItem('sangerPrimer') || 'null'); if (d) { $('gene').value = d.g || ''; $('variant').value = d.v || ''; $('build').value = d.b || 'hg38'; } } catch (e) { /* yok */ }
   }
+
+  window.PrimerUI = {
+    esc: esc, fmt: fmt, comma: comma, getJSON: getJSON, sleep: sleep, ucscTrack: ucscTrack, parseGenePred: parseGenePred,
+    maxMaf: maxMaf, chromName: chromName, initSteps: initSteps, step: step, msg: msg, copyText: copyText, bindCopy: bindCopy,
+    renderPcr: renderPcr, UCSC: UCSC, UCSC_API: UCSC_API, ENS: ENS, M13F: M13F, M13R: M13R
+  };
 
   document.addEventListener('DOMContentLoaded', function () {
     loadInputs();
@@ -664,6 +697,6 @@
       var dark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
     });
-    if (qs.get('variant')) run();
+    if (qs.get('variant') && qs.get('mode') !== 'sv') run();
   });
 })();

@@ -349,6 +349,12 @@
     }
     if (res.repeats.length && p.avoidRepeats) { res.hard = true; res.issues.push('tekrar bölgesi'); return res; }
 
+    res.sds = [];
+    var sds = ctx.sds || [];
+    for (var d = 0; d < sds.length; d++) {
+      if (overlaps(sds[d].start0, sds[d].end0, res.start0, res.end0)) res.sds.push(sds[d]);
+    }
+
     // ikincil yapılar
     var hp = hairpin(seq, p.cond);
     var sd = dimer(seq, seq, p.cond);
@@ -371,6 +377,7 @@
     if (last !== 'G' && last !== 'C') pen += 0.4;
     if (res.snps.length) pen += 3 * res.snps.length;
     if (res.repeats.length) pen += 4;
+    if (res.sds.length) pen += 6;
     res.penalty = pen;
     return res;
   }
@@ -492,7 +499,280 @@
     if (l.repeats && l.repeats.length || r.repeats && r.repeats.length) pr.warnings.push('Primer tekrar bölgesine (RepeatMasker/simple repeat) denk geliyor: genom genelinde özgüllüğü mutlaka kontrol edin.');
   }
 
+
+  /* =====================================================================
+   * Yapısal varyant (CNV / SV) tasarımı
+   * Her kesim noktası i için gerçek birleşme noktası x_i, [a_i, b_i]
+   * aralığındadır (0-tabanlı sınır koordinatı; kesin ise a_i = b_i).
+   * Her kesim noktasında iki primer aranır:
+   *   L_i: kesim noktasının solunda, sağa bakan (ileri) primer
+   *   R_i: kesim noktasının sağında, sola bakan (geri) primer
+   * Testler (junction / normal allel) bu dört primerin kombinasyonlarıdır.
+   * ===================================================================== */
+  function svParamsStd() {
+    return { lenMin: 20, lenOpt: 23, lenMax: 27, tmMin: 58, tmOpt: 60, tmMax: 62.5, gcMin: 35, gcMax: 65 };
+  }
+  function svParamsLong() {
+    return { lenMin: 24, lenOpt: 27, lenMax: 32, tmMin: 62.5, tmOpt: 65, tmMax: 68, gcMin: 38, gcMax: 62, maxEndStability: 9.5 };
+  }
+
+  // Bir pencere içinde belirli yönde en iyi primerler (çeşitlendirilmiş)
+  function pickPrimers(tpl, side, winS, winE, p, n) {
+    var cand = [];
+    if (winE - winS < p.lenMin) return cand;
+    for (var L = p.lenMin; L <= p.lenMax; L++) {
+      for (var s0 = winS; s0 + L <= winE; s0++) {
+        var off = s0 - tpl.start0;
+        if (off < 0 || off + L > tpl.seq.length) continue;
+        var raw = tpl.seq.substr(off, L);
+        var e = evalPrimer(side === 'F' ? raw : revcomp(raw), side, s0, tpl, p);
+        if (e && !e.hard) cand.push(e);
+      }
+    }
+    cand.sort(function (x, y) { return x.penalty - y.penalty; });
+    var out = [];
+    for (var i = 0; i < cand.length && out.length < n; i++) {
+      var c = cand[i];
+      if (out.some(function (o) { return Math.abs(o.start0 - c.start0) < 15; })) continue;
+      if (localMispriming(c.seq, c.start0, tpl.seq, tpl.start0) > 0) continue;
+      out.push(c);
+    }
+    return out;
+  }
+
+  function svWindows(input, p) {
+    var b = input.bps, dMin = p.dMin, dMax = p.dMax;
+    var w = {
+      L1: [b[0].a - dMax, b[0].a - dMin], R1: [b[0].b + dMin, b[0].b + dMax],
+      L2: [b[1].a - dMax, b[1].a - dMin], R2: [b[1].b + dMin, b[1].b + dMax]
+    };
+    if (input.type !== 'TRA') {
+      // R1 ve L2 etkilenen segmentin içinde kalmalı (b1, a2)
+      w.R1[1] = Math.min(w.R1[1], b[1].a);
+      w.L2[0] = Math.max(w.L2[0], b[0].b);
+    }
+    return w;
+  }
+
+  var SV_SIDES = [['L1', 0, 'F', 'tplL'], ['R1', 0, 'R', 'tplR'], ['L2', 1, 'F', 'tplL'], ['R2', 1, 'R', 'tplR']];
+
+  // Bir primer seti için testler ve beklenen ürün boyları
+  function svAssays(type, c, bps) {
+    var a1 = bps[0].a, b1 = bps[0].b, a2 = bps[1].a, b2 = bps[1].b;
+    var L1 = c.L1, R1 = c.R1, L2 = c.L2, R2 = c.R2, out = [];
+    function add(o) { if (o.primers.every(function (k) { return c[k]; })) out.push(o); }
+    function rng(x, y) { return { min: Math.min(x, y), max: Math.max(x, y) }; }
+    if (type === 'DEL') {
+      if (L1 && R2) add({ id: 'J', role: 'junction', title: 'Delesyon kesim noktası (junction) PCR', primers: ['L1', 'R2'],
+        mut: rng((a1 - L1.start0) + (R2.end0 - b2), (b1 - L1.start0) + (R2.end0 - a2)), ref: R2.end0 - L1.start0 });
+      if (L1 && R1) add({ id: 'W1', role: 'wt', title: 'Normal allel kontrolü (kesim noktası 1)', primers: ['L1', 'R1'], mut: null, ref: R1.end0 - L1.start0 });
+      if (L2 && R2) add({ id: 'W2', role: 'wt', title: 'Normal allel kontrolü (kesim noktası 2)', primers: ['L2', 'R2'], mut: null, ref: R2.end0 - L2.start0 });
+    } else if (type === 'DUP') {
+      if (L2 && R1) add({ id: 'J', role: 'junction', title: 'Tandem duplikasyon birleşme (junction) PCR', primers: ['L2', 'R1'],
+        mut: rng((a2 - L2.start0) + (R1.end0 - b1), (b2 - L2.start0) + (R1.end0 - a1)), ref: null });
+      if (L1 && R1) add({ id: 'W1', role: 'wt', title: 'Kesim noktası 1 referans ürünü (pozitif kontrol)', primers: ['L1', 'R1'], mut: null, ref: R1.end0 - L1.start0, both: true });
+      if (L2 && R2) add({ id: 'W2', role: 'wt', title: 'Kesim noktası 2 referans ürünü (pozitif kontrol)', primers: ['L2', 'R2'], mut: null, ref: R2.end0 - L2.start0, both: true });
+    } else if (type === 'INV') {
+      if (L1 && L2) add({ id: 'J1', role: 'junction', title: 'İnversiyon birleşme 1 (sol)', primers: ['L1', 'L2'],
+        mut: rng((a1 - L1.start0) + (a2 - L2.start0), (b1 - L1.start0) + (b2 - L2.start0)), ref: null });
+      if (R1 && R2) add({ id: 'J2', role: 'junction', title: 'İnversiyon birleşme 2 (sağ)', primers: ['R1', 'R2'],
+        mut: rng((R1.end0 - b1) + (R2.end0 - b2), (R1.end0 - a1) + (R2.end0 - a2)), ref: null });
+      if (L1 && R1) add({ id: 'W1', role: 'wt', title: 'Normal allel kontrolü (kesim noktası 1)', primers: ['L1', 'R1'], mut: null, ref: R1.end0 - L1.start0 });
+      if (L2 && R2) add({ id: 'W2', role: 'wt', title: 'Normal allel kontrolü (kesim noktası 2)', primers: ['L2', 'R2'], mut: null, ref: R2.end0 - L2.start0 });
+    } else if (type === 'TRA') {
+      if (L1 && R2) add({ id: 'JA', role: 'junction', title: 'Türev kromozom 1: A-sol + B-sağ', primers: ['L1', 'R2'], orient: 'std',
+        mut: rng((a1 - L1.start0) + (R2.end0 - b2), (b1 - L1.start0) + (R2.end0 - a2)), ref: null });
+      if (L2 && R1) add({ id: 'JB', role: 'junction', title: 'Türev kromozom 2: B-sol + A-sağ', primers: ['L2', 'R1'], orient: 'std',
+        mut: rng((a2 - L2.start0) + (R1.end0 - b1), (b2 - L2.start0) + (R1.end0 - a1)), ref: null });
+      if (L1 && L2) add({ id: 'JC', role: 'junction', title: 'Ters yönelim: A-sol + B-sol', primers: ['L1', 'L2'], orient: 'inv',
+        mut: rng((a1 - L1.start0) + (a2 - L2.start0), (b1 - L1.start0) + (b2 - L2.start0)), ref: null });
+      if (R1 && R2) add({ id: 'JD', role: 'junction', title: 'Ters yönelim: A-sağ + B-sağ', primers: ['R1', 'R2'], orient: 'inv',
+        mut: rng((R1.end0 - b1) + (R2.end0 - b2), (R1.end0 - a1) + (R2.end0 - a2)), ref: null });
+      if (L1 && R1) add({ id: 'W1', role: 'wt', title: 'Normal kromozom A kontrolü', primers: ['L1', 'R1'], mut: null, ref: R1.end0 - L1.start0 });
+      if (L2 && R2) add({ id: 'W2', role: 'wt', title: 'Normal kromozom B kontrolü', primers: ['L2', 'R2'], mut: null, ref: R2.end0 - L2.start0 });
+    }
+    return out;
+  }
+
+  function pcrClass(size, p) {
+    if (size == null) return null;
+    if (size <= p.stdMax) return 'std';
+    if (size <= p.longMax) return 'long';
+    return 'none';
+  }
+
+  /*
+   * input = { type: 'DEL'|'DUP'|'INV'|'TRA',
+   *           bps: [{ a, b, tplL:{seq,start0,snps,repeats,sds}, tplR:{...} }, {...}] }
+   * params: primer parametreleri + dMin, dMax, nAlt, stdMax, longMax
+   */
+  function designSV(input, params) {
+    var p = Object.assign(defaultParams(), { dMin: 60, dMax: 450, nAlt: 3, stdMax: 3000, longMax: 15000, perSide: 6 }, params || {});
+    p.cond = Object.assign(defaultConditions(), (params && params.cond) || {});
+    var tiers = [
+      { label: 'Sıkı kriterler', p: p },
+      { label: "Gevşetilmiş: 3' ucunda olmayan yaygın SNP'ye izin, Tm ±1 °C, GC %30–70", p: Object.assign({}, p, { snpPolicy: 'relaxed', tmMin: p.tmMin - 1, tmMax: p.tmMax + 1, gcMin: Math.min(p.gcMin, 30), gcMax: Math.max(p.gcMax, 70) }) },
+      { label: 'Gevşetilmiş: tekrar bölgesine izin, arama penceresi genişletildi', p: Object.assign({}, p, { snpPolicy: 'relaxed', avoidRepeats: false, tmMin: p.tmMin - 2, tmMax: p.tmMax + 2, gcMin: 30, gcMax: 70, dMax: Math.round(p.dMax * 1.6) }) }
+    ];
+    var lists = {}, sideInfo = {};
+    SV_SIDES.forEach(function (sd) {
+      var name = sd[0], bp = input.bps[sd[1]], side = sd[2], tpl = bp[sd[3]];
+      lists[name] = []; sideInfo[name] = { tier: null };
+      if (!tpl) return;
+      for (var t = 0; t < tiers.length && lists[name].length < 2; t++) {
+        var w = svWindows(input, tiers[t].p)[name];
+        var got = pickPrimers(tpl, side, w[0], w[1], tiers[t].p, p.perSide);
+        got.forEach(function (g) {
+          if (lists[name].some(function (o) { return Math.abs(o.start0 - g.start0) < 15; })) return;
+          g.tier = t; g.tierLabel = tiers[t].label; g.name = name; lists[name].push(g);
+        });
+        if (got.length && sideInfo[name].tier == null) sideInfo[name].tier = t;
+      }
+      lists[name] = lists[name].slice(0, p.perSide);
+    });
+
+    // çapraz dimer önbelleği
+    var names = SV_SIDES.map(function (s) { return s[0]; });
+    var dim = {};
+    function dkey(a, i, b, j) { return a + i + '|' + b + j; }
+    for (var x = 0; x < names.length; x++) for (var y = x + 1; y < names.length; y++) {
+      lists[names[x]].forEach(function (pa, i) {
+        lists[names[y]].forEach(function (pb, j) {
+          dim[dkey(names[x], i, names[y], j)] = { dg: dimer(pa.seq, pb.seq, p.cond).dG, dg3: dimer3(pa.seq, pb.seq, p.cond).dG };
+        });
+      });
+    }
+
+    var combos = [];
+    var idx = {};
+    (function rec(k) {
+      if (k === names.length) {
+        var c = {}, pen = 0, tms = [], worst = { dg: 0, dg3: 0, pair: null }, ok = true;
+        names.forEach(function (n) { c[n] = idx[n] == null ? null : lists[n][idx[n]]; if (c[n]) { pen += c[n].penalty; tms.push(c[n].tm); } });
+        if (tms.length < 2) return;
+        for (var u = 0; u < names.length && ok; u++) for (var v = u + 1; v < names.length; v++) {
+          if (idx[names[u]] == null || idx[names[v]] == null) continue;
+          var d = dim[dkey(names[u], idx[names[u]], names[v], idx[names[v]])];
+          if (d.dg < p.heteroDimerMax || d.dg3 < p.endDimerMax) { ok = false; break; }
+          pen += Math.max(0, -d.dg - 5) * 0.4 + Math.max(0, -d.dg3 - 3) * 0.6;
+          if (d.dg < worst.dg) worst = { dg: d.dg, dg3: d.dg3, pair: [names[u], names[v]] };
+        }
+        if (!ok) return;
+        var spread = Math.max.apply(null, tms) - Math.min.apply(null, tms);
+        pen += spread * 1.0;
+        var assays = svAssays(input.type, c, input.bps);
+        var j = assays.filter(function (z) { return z.role === 'junction'; });
+        j.forEach(function (z) { pen += z.mut.max / 1000 * 0.6; });
+        combos.push({ primers: c, penalty: pen, tmSpread: spread, worstDimer: worst, assays: assays });
+        return;
+      }
+      var n = names[k];
+      if (!lists[n].length) { idx[n] = null; rec(k + 1); return; }
+      for (var i = 0; i < lists[n].length; i++) { idx[n] = i; rec(k + 1); }
+    })(0);
+    combos.sort(function (u, v) { return u.penalty - v.penalty; });
+
+    var sets = [];
+    for (var ci = 0; ci < combos.length && sets.length < p.nAlt; ci++) {
+      var cb = combos[ci];
+      var disjoint = sets.every(function (s) {
+        return names.every(function (n) { return !cb.primers[n] || !s.primers[n] || Math.abs(cb.primers[n].start0 - s.primers[n].start0) >= 15; });
+      });
+      if (!disjoint) continue;
+      cb.assays.forEach(function (z) {
+        var mx = z.mut ? z.mut.max : z.ref;
+        z.pcr = pcrClass(mx, p);
+        z.refPcr = pcrClass(z.ref, p);
+      });
+      cb.idx = sets.length + 1;
+      sets.push(cb);
+    }
+    return { sets: sets, lists: lists, sideInfo: sideInfo, params: p };
+  }
+
+  /* =====================================================================
+   * PCR koşulu önerisi
+   * o = { kind: 'std'|'long'|'qpcr', tms: [..], sizeMax, gc, multiplex, cond }
+   * ===================================================================== */
+  function round05(x) { return Math.round(x * 2) / 2; }
+  function fmtTime(sec) {
+    if (sec < 60) return sec + ' s';
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return m + ' dk' + (s ? ' ' + s + ' s' : '');
+  }
+  function pcrConditions(o) {
+    var cond = o.cond || defaultConditions();
+    var tmMin = Math.min.apply(null, o.tms), tmMax = Math.max.apply(null, o.tms);
+    var gc = o.gc, size = o.sizeMax || 500;
+    var r = { kind: o.kind, notes: [], mix: [], program: [], touchdown: null };
+    var dmso = gc != null && gc > 60;
+    r.basis = 'Tm değerleri ' + cond.mv + ' mM Na⁺/K⁺, ' + cond.dv + ' mM Mg²⁺, ' + cond.dntp + ' mM dNTP ve ' + cond.dna + ' nM primer için SantaLucia yöntemiyle hesaplandı.';
+    if (o.kind === 'qpcr') {
+      var taq = tmMin >= 58 ? 60 : 58;
+      r.title = 'qPCR (SYBR Green / EvaGreen) – doz analizi';
+      r.polymerase = 'Hazır SYBR Green qPCR master mix (hot-start polimeraz içerir)';
+      r.ta = taq; r.gradient = [taq - 3, taq + 2];
+      r.mix = [['2× SYBR master mix', '1×'], ['Her primer', '200–400 nM'], ['Genomik DNA', '5–20 ng (tüm örneklerde eşit)'], ['Toplam hacim', '10–20 µL'], ['Tekrar', 'Her örnek üçlü (triplicate)']];
+      r.program = [
+        { step: 'Polimeraz aktivasyonu', temp: '95 °C', time: '2–10 dk (kite göre)', cycles: 1 },
+        { step: 'Denatürasyon', temp: '95 °C', time: '15 s', cycles: 40, group: true },
+        { step: 'Bağlanma + uzama (okuma)', temp: taq + ' °C', time: '60 s', cycles: 40, group: true },
+        { step: 'Erime eğrisi', temp: '65 → 95 °C', time: '0.5 °C adım', cycles: 1 }
+      ];
+      if (tmMin < 58) r.notes.push('Bazı primerlerin Tm değeri 58 °C\'nin altında (en düşük ' + tmMin.toFixed(1) + ' °C): bağlanma 58 °C önerildi; bu hedefleri gradyanla doğrulayın.');
+      r.notes.push('Her çalışmada bir referans lokus (ör. laboratuvarınızda valide RNase P/RPPH1 veya ALB assay\'i), normal kontrol DNA ve kalıpsız kontrol (NTC) kullanın.');
+      r.notes.push('Primer verimliliğini 5 noktalı seri dilüsyonla doğrulayın (%90–110, R² > 0.98). Erime eğrisinde tek pik olmalı.');
+      r.notes.push('ΔΔCt ile beklenen oranlar: heterozigot delesyon ≈ 0.5, homozigot/hemizigot delesyon 0, heterozigot duplikasyon ≈ 1.5, normal ≈ 1.0.');
+      r.notes.push('ddPCR tercih edilirse aynı primerler EvaGreen ile kullanılabilir; bağlanma sıcaklığını 55–62 °C gradyan ile optimize edin.');
+      return r;
+    }
+    if (o.kind === 'long') {
+      var twoStep = tmMin >= 63.5;
+      var ta = twoStep ? 68 : round05(tmMin - 3);
+      var extMin = Math.max(1, Math.ceil(size / 1000));
+      r.title = 'Long-range PCR';
+      r.polymerase = 'Long-range / yüksek doğruluklu polimeraz (ör. LongAmp Taq, PrimeSTAR GXL, KAPA LongRange, TaKaRa LA Taq)';
+      r.ta = ta; r.gradient = twoStep ? null : [ta - 2, ta + 3];
+      r.mix = [['Tampon (kitle gelen)', '1× (Mg²⁺ kitteki gibi, genellikle 1.5–2.5 mM)'], ['dNTP', '0.3–0.4 mM (her biri)'], ['Her primer', '0.2–0.4 µM' + (o.multiplex ? ' (multipleks: 0.2 µM)' : '')], ['Polimeraz', 'Üretici önerisi'], ['Genomik DNA', '50–200 ng yüksek molekül ağırlıklı DNA'], ['Toplam hacim', '25–50 µL']];
+      r.program = [{ step: 'Başlangıç denatürasyonu', temp: '94 °C', time: '1–2 dk (98 °C\'lik kitlerde 30 s)', cycles: 1 },
+        { step: 'Denatürasyon', temp: '94 °C', time: '10–15 s (98 °C\'de 10 s)', cycles: 30, group: true }];
+      if (!twoStep) r.program.push({ step: 'Bağlanma', temp: ta + ' °C', time: '15–20 s', cycles: 30, group: true });
+      r.program.push({ step: twoStep ? 'Bağlanma + uzama (iki aşamalı)' : 'Uzama', temp: '68 °C', time: extMin + ' dk (≈1 dk/kb)', cycles: 30, group: true });
+      r.program.push({ step: 'Son uzama', temp: '68 °C', time: '10 dk', cycles: 1 });
+      r.program.push({ step: 'Bekleme', temp: '4–10 °C', time: '∞', cycles: 1 });
+      r.notes.push('DNA bütünlüğü kritik: vortekslemeyin, geniş uçlu pipet kullanın; mümkünse DIN ≥ 7 ve A260/280 ≈ 1.8 olmalı.');
+      if (size > 10000) r.notes.push('10 kb üzeri ürünlerde son 15 döngüde her döngü uzama süresine +10–20 s eklemek (auto-extension) verimi artırır.');
+      r.notes.push('Ürünü %0.6–0.8 agaroz jelde, geniş aralıklı (ör. 1 kb extended) merdivenle ve uzun süre koşturun.');
+      r.notes.push('Ürün Sanger için uzunsa, iç primerlerle (primer walking) veya amplikon NGS / uzun okuma ile dizileyin.');
+    } else {
+      var ta2 = round05(tmMin - 3);
+      var ext = Math.max(30, Math.ceil(size / 1000 * 60 / 15) * 15);
+      r.title = 'Standart PCR (Sanger amplikonu)';
+      r.polymerase = 'Hot-start Taq polimeraz (ör. HotStarTaq, AmpliTaq Gold, GoTaq Hot Start)';
+      r.ta = ta2; r.gradient = [ta2 - 3, ta2 + 3];
+      r.mix = [['PCR tamponu', '1×'], ['MgCl₂', cond.dv + ' mM (Tm hesabındaki değer; ürün zayıfsa 2.0–2.5 mM)'], ['dNTP', '0.2 mM (her biri)'], ['Her primer', o.multiplex ? '0.2 µM (multipleks)' : '0.2–0.4 µM'], ['Polimeraz', '0.5–1.25 U'], ['Genomik DNA', '20–50 ng'], ['Toplam hacim', '25 µL']];
+      r.program = [
+        { step: 'Başlangıç denatürasyonu / hot-start aktivasyonu', temp: '95 °C', time: '2–15 dk (polimeraza göre)', cycles: 1 },
+        { step: 'Denatürasyon', temp: '95 °C', time: '30 s', cycles: 35, group: true },
+        { step: 'Bağlanma', temp: (dmso ? round05(ta2 - 2.5) : ta2) + ' °C', time: '30 s', cycles: 35, group: true },
+        { step: 'Uzama', temp: '72 °C', time: fmtTime(ext) + ' (≈1 dk/kb)', cycles: 35, group: true },
+        { step: 'Son uzama', temp: '72 °C', time: '5–7 dk', cycles: 1 },
+        { step: 'Bekleme', temp: '4–10 °C', time: '∞', cycles: 1 }
+      ];
+      r.touchdown = '10 döngü: bağlanma ' + (ta2 + 5) + ' °C\'den başlayıp her döngüde 0.5 °C düşürülür; ardından 25 döngü ' + ta2 + ' °C.';
+      r.notes.push('Ürünü %' + (size < 1000 ? '1.5–2' : '1') + ' agaroz jelde kontrol edin; Sanger öncesi ExoSAP veya kolonla temizleyin ve aynı primerlerle (ya da M13 kuyruklarıyla) dizileyin.');
+    }
+    if (o.title) r.title = o.title;
+    if (dmso) r.notes.push('Amplikon GC oranı yüksek (%' + gc.toFixed(0) + '): %5 DMSO veya 1 M betain ekleyin. %5 DMSO Tm\'yi ~3 °C düşürür; programdaki bağlanma sıcaklığı buna göre ' + (o.kind === 'long' ? 'gerekirse' : '2.5 °C') + ' düşürüldü.' + (gc > 70 ? ' GC > %70 için GC-rich tampon/polimeraz tercih edin.' : ''));
+    if (tmMax - tmMin > 2.5) r.notes.push('Primer Tm farkı ' + (tmMax - tmMin).toFixed(1) + ' °C: touchdown programı veya gradyan ile optimizasyon önerilir.');
+    if (o.multiplex) r.notes.push('Multipleks reaksiyondan önce her primer çiftini tekli reaksiyonda doğrulayın; uzama süresi en uzun ürüne göre ayarlandı.');
+    r.notes.push('Bu bir başlangıç önerisidir. İlk denemede ' + (r.gradient ? r.gradient[0] + '–' + r.gradient[1] + ' °C gradyan ile, ' : '') + 'normal kontrol ve kalıpsız kontrol (NTC) ile doğrulayın.');
+    return r;
+  }
+
   return {
+    designSV: designSV, svAssays: svAssays, svWindows: svWindows, pickPrimers: pickPrimers, pcrConditions: pcrConditions,
+    svParamsStd: svParamsStd, svParamsLong: svParamsLong, pcrClass: pcrClass,
     revcomp: revcomp, thermo: thermo, tm: tm, gcPercent: gcPercent,
     naEquivalent: naEquivalent, endStability: endStability,
     hairpin: hairpin, dimer: dimer, dimer3: dimer3, renderDuplex: renderDuplex,
