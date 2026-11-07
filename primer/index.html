@@ -151,6 +151,14 @@
   ul.notes li { margin: 3px 0; }
   .small { font-size: 12px; }
   .i-ok { color: var(--accent); } .i-warn { color: var(--warn); }
+  .evpanel { border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 16px; background: var(--bg); }
+  .evpanel summary { margin: 0; color: var(--ink); }
+  .g-ev { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); align-items: end; margin-top: 8px; }
+  .imgcanvas { max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--radius); cursor: crosshair; touch-action: none; display: block; }
+  .svgbox svg.evid { min-width: 640px; }
+  .svgbox svg.evid text { font-size: 11px; }
+  .svgbox svg.evid text.bl { fill: var(--var); font-weight: 700; }
+  tr.sub td { border-top: 0; padding-top: 0; }
   footer { margin-top: 28px; font-size: 12px; color: var(--ink-3); }
   footer p { margin: 4px 0; }
   .hidden { display: none !important; }
@@ -229,6 +237,44 @@
   </section>
 
   <section class="card hidden" id="svFormCard">
+    <details class="evpanel noprint" open>
+      <summary><b>Kesim noktasını veriden bul</b> · BAM kesiti veya IGV ekran görüntüsü (isteğe bağlı)</summary>
+      <div class="tabs" style="margin-top:10px">
+        <button type="button" class="small on" id="evTabBam">BAM kesiti (önerilen)</button>
+        <button type="button" class="small" id="evTabImg">IGV ekran görüntüsü</button>
+      </div>
+      <div id="evBam">
+        <p class="hint" style="margin-top:0">BAM dosyası tarayıcıda okunur, hiçbir yere gönderilmez. Küçük bir kesit yükleyebilir ya da büyük BAM'i .bai indeksiyle birlikte seçip bölge girebilirsiniz. Kesit almak için:</p>
+        <pre class="aln">samtools view -b ornek.bam chr7:117540000-117580000 > kesit.bam</pre>
+        <div class="grid g-ev">
+          <label>BAM (+ isteğe bağlı BAI)<input type="file" id="bamFiles" multiple accept=".bam,.bai"></label>
+          <label>Bölge (indeksli büyük dosyada gerekli)<input id="bamRegion" class="mono" placeholder="chr7:117,540,000-117,580,000"></label>
+          <label>Min. MAPQ<input type="number" id="bamMapq" value="20" min="0"></label>
+          <label>Min. destek (okuma)<input type="number" id="bamMin" value="3" min="2"></label>
+          <button type="button" class="primary" id="bamGo">Kanıtı analiz et</button>
+        </div>
+        <div id="bamStatus"></div>
+        <div id="bamOut"></div>
+      </div>
+      <div id="evImg" class="hidden">
+        <div class="alert warn" style="margin-top:0">Görüntü, kendi Anthropic API anahtarınızla doğrudan Anthropic'e gönderilir; bu site hiçbir veri saklamaz. Göndermeden önce hasta adı, protokol numarası ve örnek kimliğini karartın. Kişisel veri içeren görüntüler için kurumunuzun KVKK onayı gerekir.</div>
+        <div class="grid g-ev">
+          <label>IGV ekran görüntüsü (JPG/PNG; yapıştırma da olur)<input type="file" id="imgFile" accept="image/*"></label>
+          <label>Anthropic API anahtarı<input type="password" id="imgKey" class="mono" placeholder="sk-ant-…" autocomplete="off"></label>
+          <label>Model<select id="imgModel"><option value="claude-opus-5-5">Claude Opus 5.5 (önerilen)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (daha ucuz)</option><option value="claude-fable-5-1">Claude Fable 5.1 (en yetenekli)</option></select></label>
+        </div>
+        <label class="check" style="margin-top:8px"><input type="checkbox" id="imgRemember"> Anahtarı bu tarayıcıda hatırla</label>
+        <label style="margin-top:8px">Ek bilgi (isteğe bağlı)<input id="imgNote" placeholder="ör. WGS 30×, okumalar insert boyuna göre renkli, varyant çağırıcı chr7:117,55 Mb civarında delesyon bildirdi"></label>
+        <div id="imgWrap" class="hidden" style="margin-top:10px">
+          <canvas id="imgCanvas" class="imgcanvas"></canvas>
+          <div class="links"><button type="button" class="small" id="imgUndo">Son karartmayı geri al</button><button type="button" class="small" id="imgClear">Karartmaları temizle</button></div>
+        </div>
+        <label class="check" style="margin-top:8px"><input type="checkbox" id="imgConsent"> Görüntüde hasta kimliğini gösteren bilgi kalmadı / kurum onayı var</label>
+        <div style="margin-top:10px"><button type="button" class="primary" id="imgGo">Görüntüyü analiz et</button></div>
+        <div id="imgStatus"></div>
+        <div id="imgOut"></div>
+      </div>
+    </details>
     <form id="svForm" autocomplete="off">
       <div class="grid g-sv">
         <label>Varyant tipi
@@ -379,5 +425,7 @@
 <script src="engine.js"></script>
 <script src="app.js"></script>
 <script src="sv.js"></script>
+<script src="bam.js"></script>
+<script src="evidence.js"></script>
 </body>
 </html>

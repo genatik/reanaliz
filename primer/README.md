@@ -65,6 +65,21 @@ Beklenen ürün boyu kesim noktası belirsizliğine göre aralık olarak verilir
 
 Delesyon ve duplikasyonlarda etkilenen bölge içinde (öncelikle ekzonlarda) qPCR/ddPCR doz primerleri tasarlanır. Junction PCR uygulanamıyorsa ve belirsizlik penceresi ≤ 300 kb ise kesim noktasını daraltmak için qPCR walking noktaları önerilir. Segmental duplikasyon içine düşen noktalar atlanır, çünkü qPCR paralogları ayırt edemez.
 
+### Kesim noktasını veriden bulma
+
+Yapısal varyant bölümünün üstündeki panelde kesim noktası iki yoldan bulunabilir. Bulunan aday "Bu adayı kullan" ile forma aktarılır ve test önerisi ile primer tasarımı başlar.
+
+**BAM kesiti (önerilen).** BAM dosyası tarayıcıda okunur ve hiçbir yere gönderilmez. Küçük bir kesit yüklenebilir ya da büyük BAM, `.bai` indeksiyle birlikte seçilip bölge girilerek yalnızca o bölge okunur. Kanıtlar:
+
+- **Bölünmüş okumalar (SA etiketi):** kesim noktasını baz düzeyinde ve eş kesim noktasını verir.
+- **Yumuşak kırpma kümeleri:** aynı noktada biten kırpılmış okumalar; SA etiketi yazmayan hizalayıcılarda da kesim noktasını verir. Kırpılmış dizinin uzlaşısı BLAT bağlantısıyla gösterilir.
+- **Anormal okuma çiftleri:** insert boyu ve yönelime göre delesyon, tandem duplikasyon, inversiyon ve translokasyon.
+- **Kapsam:** delesyon/duplikasyon içindeki kapsam oranı ve heterozigot/homozigot tahmini. Kesim noktası kanıtı olmayan WGS kesitlerinde kapsam tabanlı aday da üretilir.
+
+Genom sürümü BAM başlığındaki kromozom 1 uzunluğundan belirlenir. CRAM desteklenmez; `samtools view -b` ile BAM'e çevrilmelidir.
+
+**IGV ekran görüntüsü.** Görüntü, kullanıcının kendi Anthropic API anahtarıyla doğrudan Claude'a gönderilir (varsayılan model Claude Opus 5.5). Model konum kutusunu ve cetveli okuyup kapsam, okuma çifti renkleri ve kırpılmış bazlardan aday ve kesim noktası aralıkları çıkarır. Sonuç düzenlenebilir; UCSC'den aralıktaki genler gösterilir. Görüntüden okunan koordinatlar ekran çözünürlüğüyle sınırlı olduğundan aday her zaman belirsizlik aralığıyla aktarılır. Göndermeden önce görüntü üzerinde hasta kimliği karartılabilir ve kimlik bilgisi kalmadığı onaylanmadan gönderim yapılmaz. Bu site anahtarı veya görüntüyü saklamaz; anahtar istenirse yalnızca kullanıcının tarayıcısında tutulur.
+
 ### Test önerisi
 
 Öneri varyant tipine, boyuta, kesim noktası kesinliğine, junction PCR'ın uygulanabilirliğine ve kesim noktalarında segmental duplikasyon olup olmadığına göre oluşturulur. Kapsanan yöntemler: junction PCR + Sanger, gap-PCR, long-range PCR, qPCR/ddPCR, MLPA, CMA, karyotip/FISH, OGM, uzun okuma dizileme, RNA/cDNA analizi ve segregasyon/aile danışmanlığı notları.
@@ -119,6 +134,10 @@ node primer/tests/design.test.js
 node primer/tests/sv.test.js
 ```
 
+```bash
+node primer/tests/bam.test.js
+```
+
 `compare.js` motoru Primer3 (primer3-py 2.4.0) ile 608 oligo üzerinde karşılaştırır. Referans değerler `make_reference.py` ile üretilir.
 
 | Ölçüm | Primer3 ile fark |
@@ -132,6 +151,16 @@ node primer/tests/sv.test.js
 
 `sv.test.js` delesyon, duplikasyon ve inversiyon için primer konumlarını, beklenen ürün boylarını ve PCR koşullarını test eder. Ayrıca mutant alleli bilgisayarda oluşturup sanal PCR yapar. Öngörülen ürün boylarının, primerlerin mutant ve referans dizideki gerçek bağlanma yerleriyle birebir aynı olduğunu doğrular.
 
+`bam.test.js` gerçek hg38 dizisi üzerinde simüle edilmiş BAM dosyalarında (heterozigot ve homozigot delesyon, tandem duplikasyon, inversiyon, translokasyon) kesim noktası bulucuyu test eder. Dosyalar `make_bams.py` ile üretilir; gerçek kesim noktaları `bam/truth.json` içindedir. Beş senaryonun tamamında tip, iki kesim noktası (±1 bp), zigosite ve güven doğru bulunur. SA etiketi olmayan hizalayıcı senaryosu ve varyantsız bölgede yanlış pozitif olmaması da test edilir.
+
+Gerçek veri doğrulaması (ağ ve pysam gerekir): `tests/giab/fetch_giab.py` GIAB HG002 Tier1 v0.6 listesinden 6 delesyonun BAM kesitlerini indirir, `tests/giab/run_giab.js` sonuçları karşılaştırır. SA etiketi yazmayan novoalign hizalamasıyla sonuçlar:
+
+| GIAB delesyonu | Sonuç |
+|---|---|
+| 1.1 kb het, 1.2 kb het, 4.1 kb hom, 3.1 kb hom | Doğru tip ve zigosite; iki kesim noktası 0–15 bp içinde, yüksek güven |
+| 6.1 kb hom (karmaşık bölge) | Homozigot delesyon, orta güven; bir kenar ~850 bp kayık |
+| 1.5 kb tekrar daralması | Delesyon, düşük güven, yaklaşık konum |
+
 ## Sınırlamalar
 
 - **Genom geneli özgüllük tarayıcıdan otomatik yapılamaz.** UCSC BLAT ve In-Silico PCR programatik erişimi engelliyor. Her çift için hazır doldurulmuş UCSC In-Silico PCR, BLAT ve NCBI Primer-BLAST bağlantıları verilir. Sipariş öncesi bu kontrol mutlaka yapılmalıdır. Psödogeni veya paralogu olan genlerde (ör. SMN1/SMN2, PMS2, CYP21A2, GBA1) bu adım özellikle kritiktir.
@@ -141,6 +170,8 @@ node primer/tests/sv.test.js
 - Ekzon düzeyi CNV'de kesim noktası penceresi RefSeq Select ekzonlarına göre hesaplanır. Yakalama kitinizin hedefleri farklıysa elle belirsizlik seçeneğini kullanın.
 - Duplikasyon junction testi tandem ve aynı yönlü duplikasyonu varsayar. Ters yönlü veya başka lokusa eklenmiş duplikasyonlarda ürün vermez.
 - MLPA kitinin varlığı kontrol edilmez; öneri "kit varsa" şeklindedir.
+- BAM analizi kesitteki okumalarla sınırlıdır. WES/panel verisinde kesim noktası yakalanmayan intronda ise bölünmüş okuma ve kırpma görülmez; bu durumda ekzon düzeyi mod kullanılmalıdır. Tekrar dizileri içindeki kesim noktaları kayık veya belirsiz çıkabilir.
+- IGV görüntüsü yorumu bir yapay zekâ modelinin tahminidir ve doğrulanmalıdır. Kullanıcının API anahtarı ve kurumunun KVKK onayı gerekir.
 
 ## Dosyalar
 
@@ -149,5 +180,7 @@ node primer/tests/sv.test.js
 | `index.html` | Arayüz |
 | `app.js` | SNV bölümü: veri toplama (VariantValidator, Ensembl, UCSC) ve görselleştirme |
 | `sv.js` | CNV / yapısal varyant bölümü: test önerisi, şema, junction ve doz primerleri |
+| `bam.js` | BAM/BAI okuyucu ve kesim noktası kanıt analizi (tarayıcı ve Node.js) |
+| `evidence.js` | BAM kesiti ve IGV ekran görüntüsü paneli |
 | `engine.js` | Termodinamik, primer tasarımı, yapısal varyant testleri ve PCR koşulları (tarayıcı ve Node.js) |
-| `tests/` | Primer3 karşılaştırması ve tasarım regresyon testi |
+| `tests/` | Primer3 karşılaştırması, tasarım, yapısal varyant ve BAM testleri; sentetik BAM üretici; GIAB doğrulama betikleri |
