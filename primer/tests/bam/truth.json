@@ -1,0 +1,33 @@
+{
+ "del_het": {
+  "type": "DEL",
+  "bp1": 117555000,
+  "bp2": 117560000,
+  "zyg": "het"
+ },
+ "dup_het": {
+  "type": "DUP",
+  "bp1": 117555000,
+  "bp2": 117558000,
+  "zyg": "het"
+ },
+ "inv_het": {
+  "type": "INV",
+  "bp1": 117555000,
+  "bp2": 117561000,
+  "zyg": "het"
+ },
+ "tra_het": {
+  "type": "TRA",
+  "bp1": 117558000,
+  "chrom2": "chr22",
+  "bp2": 23290000,
+  "zyg": "het"
+ },
+ "del_hom": {
+  "type": "DEL",
+  "bp1": 117552000,
+  "bp2": 117554000,
+  "zyg": "hom"
+ }
+}
