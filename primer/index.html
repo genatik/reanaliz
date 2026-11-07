@@ -13,6 +13,7 @@
     --danger: #991B1B; --danger-bg: #FBE5E5; --info: #1E40AF; --info-bg: #E1E8F5;
     --fwd: #2D5F4E; --fwd-bg: #CFE6DA; --rev: #6D28D9; --rev-bg: #E6DCFA; --var: #C2410C; --var-bg: #FED7AA;
     --snp: #1E40AF; --rep: #A8A29E; --exon: #1C1B17;
+    --seg-a: #8B8983; --seg-c: #3B6EA5; --seg-c2: #8FB0D8; --seg-b2: #C2A8E6;
     --radius: 6px; --radius-lg: 10px;
     --font-display: 'Fraunces', Georgia, serif; --font-body: 'Inter Tight', system-ui, sans-serif; --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   }
@@ -23,6 +24,7 @@
       --danger: #F08A8A; --danger-bg: #3A1C1C; --info: #8FB0F5; --info-bg: #1C2540;
       --fwd: #6FB79A; --fwd-bg: #1F3D31; --rev: #B59AF5; --rev-bg: #33275A; --var: #FB923C; --var-bg: #4A2510;
       --snp: #8FB0F5; --rep: #6B6862; --exon: #EDEAE3;
+      --seg-a: #7A776F; --seg-c: #5B8BC4; --seg-c2: #A9C3E3; --seg-b2: #8E74C2;
     }
   }
   :root[data-theme="dark"] {
@@ -31,6 +33,7 @@
     --danger: #F08A8A; --danger-bg: #3A1C1C; --info: #8FB0F5; --info-bg: #1C2540;
     --fwd: #6FB79A; --fwd-bg: #1F3D31; --rev: #B59AF5; --rev-bg: #33275A; --var: #FB923C; --var-bg: #4A2510;
     --snp: #8FB0F5; --rep: #6B6862; --exon: #EDEAE3;
+    --seg-a: #7A776F; --seg-c: #5B8BC4; --seg-c2: #A9C3E3; --seg-b2: #8E74C2;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.5; }
@@ -125,15 +128,39 @@
   .mono { font-family: var(--font-mono); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
   .copyok { color: var(--accent); font-size: 12px; }
+  .modes { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 999px; margin-top: 16px; flex-wrap: wrap; }
+  header > div { min-width: 0; }
+  .modes button { border: 0; border-radius: 999px; background: transparent; padding: 8px 16px; font-weight: 500; white-space: normal; text-align: left; }
+  .modes button.on { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); color: var(--accent); }
+  .g-sv { grid-template-columns: 170px 130px 1fr 1fr; align-items: end; }
+  .g-sv2 { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); align-items: end; margin-top: 12px; }
+  .recs { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .rec { border-left: 3px solid var(--line); padding: 4px 0 4px 12px; }
+  .rec .rt { color: var(--ink-2); margin-top: 3px; font-size: 13px; }
+  .rec-primary { border-color: var(--accent); } .rec-warn { border-color: var(--warn); } .rec-seg { border-color: var(--accent); } .rec-second, .rec-alt, .rec-info { border-color: var(--info); }
+  .svgbox svg.schema text { font-size: 12px; fill: var(--ink-2); }
+  .svgbox svg.schema text.rl { font-weight: 600; fill: var(--ink); font-size: 12.5px; }
+  .svgbox svg.schema text.pn { font-weight: 700; font-family: var(--font-mono); font-size: 11.5px; }
+  .svgbox svg.schema text.bl { fill: var(--ink); font-weight: 600; }
+  #svSet svg.schema, .svgbox svg.schema { min-width: 640px; }
+  .pcr { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-top: 10px; background: var(--bg); }
+  .pcr table td { padding: 5px 8px; }
+  table.prog tr.grp td { background: var(--accent-bg); }
+  table.prog td.cyc { font-weight: 700; color: var(--accent); vertical-align: middle; text-align: center; }
+  ul.notes { margin: 10px 0 0; padding-left: 18px; font-size: 13px; color: var(--ink-2); }
+  ul.notes li { margin: 3px 0; }
+  .small { font-size: 12px; }
+  .i-ok { color: var(--accent); } .i-warn { color: var(--warn); }
   footer { margin-top: 28px; font-size: 12px; color: var(--ink-3); }
   footer p { margin: 4px 0; }
   .hidden { display: none !important; }
   @media (max-width: 820px) {
     .g-main { grid-template-columns: 1fr 1fr; }
+    .g-sv { grid-template-columns: 1fr 1fr; }
     .two { grid-template-columns: 1fr; }
     h1 { font-size: 24px; }
   }
-  @media (max-width: 480px) { .g-main { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) { .g-main, .g-sv { grid-template-columns: 1fr; } }
   @media print {
     .noprint, details, .chips, #formCard button { display: none !important; }
     .card { break-inside: avoid; border-color: #ccc; }
@@ -147,7 +174,11 @@
     <div>
       <div class="eyebrow">NGS → Sanger</div>
       <h1>Sanger primer tasarımı</h1>
-      <p class="lede">Gen adını ve varyantı girin. Varyant genomik koordinata çevrilir, UCSC'den referans dizi, yaygın SNP'ler ve tekrar bölgeleri alınır. Ardından doğrulama ve segregasyon için alternatifli primer çiftleri tasarlanır ve her biri kontrol edilir.</p>
+      <p class="lede">Gen adını ve varyantı girin. Varyant genomik koordinata çevrilir, UCSC'den referans dizi, yaygın SNP'ler ve tekrar bölgeleri alınır. Ardından doğrulama ve segregasyon için alternatifli primerler tasarlanır, kontrol edilir ve uygun PCR koşulları önerilir.</p>
+      <div class="modes noprint" role="tablist">
+        <button id="modeSnv" class="on" role="tab">SNV / küçük indel · Sanger</button>
+        <button id="modeSv" role="tab">CNV / yapısal varyant · junction, long-range, qPCR</button>
+      </div>
     </div>
     <button class="small noprint" id="themeBtn" title="Açık/koyu tema">◐ Tema</button>
   </header>
@@ -187,10 +218,6 @@
         <label>GC min (%)<input type="number" id="gcMin" value="35"></label>
         <label>GC max (%)<input type="number" id="gcMax" value="65"></label>
         <label>Primer–varyant min. mesafe (bp)<input type="number" id="minDist" value="60"></label>
-        <label>Na⁺ / K⁺ (mM)<input type="number" step="1" id="mv" value="50"></label>
-        <label>Mg²⁺ (mM)<input type="number" step="0.1" id="dv" value="1.5"></label>
-        <label>dNTP (mM)<input type="number" step="0.1" id="dntp" value="0.6"></label>
-        <label>Primer (nM)<input type="number" step="10" id="dna" value="50"></label>
         <label>Alternatif sayısı<input type="number" id="numReturn" value="5" min="1" max="10"></label>
       </div>
       <div class="grid" style="margin-top:12px; gap:8px">
@@ -198,9 +225,58 @@
         <label class="check"><input type="checkbox" id="avoidRepeats" checked> Tekrar bölgelerine (RepeatMasker, simple repeat) primer koyma</label>
         <label class="check"><input type="checkbox" id="m13"> Sipariş listesine M13 kuyruklarını ekle (F: M13F-21, R: M13R)</label>
       </div>
-      <p class="hint">Tm hesabı Primer3 ile aynı yöntemi kullanır: SantaLucia 1998, tuz düzeltmesi SantaLucia, Mg²⁺ dönüşümü von Ahsen. Varsayılan tampon değerleri Primer3 varsayılanlarıdır.</p>
     </details>
   </section>
+
+  <section class="card hidden" id="svFormCard">
+    <form id="svForm" autocomplete="off">
+      <div class="grid g-sv">
+        <label>Varyant tipi
+          <select id="svType"><option value="DEL">Delesyon</option><option value="DUP">Duplikasyon</option><option value="INV">İnversiyon</option><option value="TRA">Translokasyon</option></select>
+        </label>
+        <label>Gen (isteğe bağlı)
+          <input id="svGene" class="mono" placeholder="DMD">
+        </label>
+        <label id="svRegionLabel">Bölge / ekzon aralığı <input id="svRegion" class="mono" required></label>
+        <label id="svRegionBWrap" class="hidden">Kesim noktası B <input id="svRegionB" class="mono" placeholder="chr22:23290000"></label>
+      </div>
+      <div class="grid g-sv2">
+        <label>Kesim noktası çözünürlüğü
+          <select id="svMode"><option value="exact">Kesin (WGS, split-read, uzun okuma)</option><option value="exon">Ekzon düzeyi (WES/CES/panel CNV)</option><option value="manual">Elle belirsizlik (array, MLPA…)</option></select>
+        </label>
+        <label id="svUncWrap" class="hidden">Belirsizlik (± bp)<input type="number" id="svUnc" value="5000" min="0"></label>
+        <label>Zigosite
+          <select id="svZyg"><option value="het">Heterozigot</option><option value="hom">Homozigot / hemizigot</option></select>
+        </label>
+        <label>PCR tipi
+          <select id="svPcr"><option value="auto">Otomatik</option><option value="std">Standart (≤ 3 kb)</option><option value="long">Long-range (≤ 15 kb)</option></select>
+        </label>
+        <label>Genom
+          <select id="svBuild"><option value="hg38">GRCh38 / hg38</option><option value="hg19">GRCh37 / hg19</option></select>
+        </label>
+        <button type="submit" class="primary" id="svGo">Test öner ve primer tasarla</button>
+      </div>
+    </form>
+    <div class="chips"><span>Örnekler:</span>
+      <button class="chip svchip" data-t="DEL" data-g="DMD" data-r="ex45-50" data-m="exon">DMD ekzon 45–50 delesyonu</button>
+      <button class="chip svchip" data-t="DUP" data-g="PMP22" data-r="chr17:14183000-15579000" data-m="manual" data-u="12000">CMT1A (PMP22) duplikasyonu</button>
+      <button class="chip svchip" data-t="DEL" data-g="CFTR" data-r="chr7:117555000-117560000" data-m="exact">Kesin delesyon (gösterim)</button>
+      <button class="chip svchip" data-t="INV" data-g="" data-r="chr7:117530000-117560000" data-m="exact">İnversiyon (gösterim)</button>
+      <button class="chip svchip" data-t="TRA" data-g="" data-r="chr9:130800000" data-rb="chr22:23290000" data-m="exact">Translokasyon (gösterim)</button>
+    </div>
+    <p class="hint">Kesin: kesim noktası baz düzeyinde biliniyor. Ekzon düzeyi: kesim noktası, etkilenen ilk/son ekzon ile komşu etkilenmemiş ekzon arasında bir yerde kabul edilir. Elle belirsizlik: her kesim noktasına ± aralık uygulanır.</p>
+  </section>
+
+  <details class="card noprint" style="margin-top:12px; padding:12px 20px">
+    <summary style="margin:0">Reaksiyon (tampon) koşulları: Tm ve PCR önerileri bu değerlerle hesaplanır</summary>
+    <div class="grid g-adv">
+      <label>Na⁺ / K⁺ (mM)<input type="number" step="1" id="mv" value="50"></label>
+      <label>Mg²⁺ (mM)<input type="number" step="0.1" id="dv" value="1.5"></label>
+      <label>dNTP (mM)<input type="number" step="0.1" id="dntp" value="0.6"></label>
+      <label>Primer (nM)<input type="number" step="10" id="dna" value="50"></label>
+    </div>
+    <p class="hint">Tm hesabı Primer3 ile aynı yöntemi kullanır: SantaLucia 1998, tuz düzeltmesi SantaLucia, Mg²⁺ dönüşümü von Ahsen. Varsayılan değerler Primer3 varsayılanlarıdır.</p>
+  </details>
 
   <section class="card hidden" id="progressCard">
     <h2>İşlem adımları</h2>
@@ -259,12 +335,49 @@
     </section>
   </div>
 
+  <div id="svResults" class="hidden">
+    <section class="card">
+      <div class="row"><h2 style="margin:0">Yapısal varyant</h2>
+        <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="small" id="svCopyAll">Sipariş listesini kopyala</button>
+          <button class="small" id="svTsv">TSV indir</button>
+          <button class="small" id="svPrint">Yazdır / PDF</button>
+          <span class="copyok"></span>
+        </div>
+      </div>
+      <div class="two" style="margin-top:12px">
+        <dl class="kv" id="svKv"></dl>
+        <div id="svGenes" class="tablewrap"></div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Test önerisi</h2>
+      <ul class="recs" id="svRecs"></ul>
+      <div id="svSchemaFallback"></div>
+    </section>
+    <section class="card" id="svDesignCard">
+      <div class="tabs noprint" id="svTabs"></div>
+      <div id="svSet"></div>
+    </section>
+    <section class="card hidden" id="svDosageCard">
+      <h2>Doz analizi ve kesim noktası daraltma (qPCR / ddPCR)</h2>
+      <div id="svDosage"></div>
+    </section>
+    <section class="card">
+      <h2>UCSC Genome Browser görüntüleri</h2>
+      <p class="hint" style="margin-top:-6px">Gen modeli, segmental duplikasyonlar, yaygın SNP'ler ve tekrarlar. Primerleri özel iz olarak görmek için "UCSC'de aç" bağlantısını kullanın.</p>
+      <div id="svImgs"></div>
+    </section>
+  </div>
+
   <footer>
-    <p>Veri kaynakları: VariantValidator (HGVS → genomik koordinat), Ensembl REST (rsID), UCSC Genome Browser REST API (referans dizi, dbSNP155 Common, RepeatMasker, Simple Repeats, NCBI RefSeq Select).</p>
+    <p>Veri kaynakları: VariantValidator (HGVS → genomik koordinat), Ensembl REST (rsID, gen konumu), UCSC Genome Browser REST API (referans dizi, dbSNP155 Common, RepeatMasker, Simple Repeats, Segmental Dups, NCBI RefSeq Select).</p>
+    <p>PCR koşulları başlangıç önerisidir; polimeraz üreticisinin protokolü ve laboratuvarınızın validasyonu esastır.</p>
     <p>Genom geneli özgüllük tarayıcıdan otomatik yapılamaz. Her çift için UCSC In-Silico PCR ve Primer-BLAST bağlantıları verilmiştir; sipariş öncesi mutlaka kontrol edin. Sonuçlar karar desteğidir.</p>
   </footer>
 </div>
 <script src="engine.js"></script>
 <script src="app.js"></script>
+<script src="sv.js"></script>
 </body>
 </html>
